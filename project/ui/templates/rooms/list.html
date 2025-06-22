@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_header_title %}
+    إدارة القاعات
+{% endblock %}
+
+{% block content %}
+{% comment %} <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6 border-b pb-4 border-gray-200 dark:border-gray-700">نظرة عامة على القاعات</h2> {% endcomment %}
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 my-8">
+    <div class="bg-blue-100 dark:bg-blue-900 p-8 rounded-lg shadow-md flex items-center justify-between">
+        <div>
+            <p class="text-sm font-medium text-blue-800 dark:text-blue-200">إجمالي القاعات</p>
+            <p class="text-2xl font-bold text-blue-900 dark:text-blue-100">{{ stats.total_rooms }}</p>
+        </div>
+        <i class="fas fa-building text-blue-600 dark:text-blue-400 text-3xl"></i>
+    </div>
+
+    <div class="bg-green-100 dark:bg-green-900 p-4 rounded-lg shadow-md flex items-center justify-between">
+        <div>
+            <p class="text-sm font-medium text-green-800 dark:text-green-200">قاعات متاحة</p>
+            <p class="text-2xl font-bold text-green-900 dark:text-green-100">{{ stats.available_rooms }}</p>
+        </div>
+        <i class="fas fa-check-circle text-green-600 dark:text-green-400 text-3xl"></i>
+    </div>
+
+    <div class="bg-yellow-100 dark:bg-yellow-900 p-4 rounded-lg shadow-md flex items-center justify-between">
+        <div>
+            <p class="text-sm font-medium text-yellow-800 dark:text-yellow-200">قاعات مشغولة</p>
+            <p class="text-2xl font-bold text-yellow-900 dark:text-yellow-100">{{ stats.occupied_rooms }}</p>
+        </div>
+        <i class="fas fa-users text-yellow-600 dark:text-yellow-400 text-3xl"></i>
+    </div>
+
+    <div class="bg-red-100 dark:bg-red-900 p-4 rounded-lg shadow-md flex items-center justify-between">
+        <div>
+            <p class="text-sm font-medium text-red-800 dark:text-red-200">تحت الصيانة</p>
+            <p class="text-2xl font-bold text-red-900 dark:text-red-100">{{ stats.maintenance_rooms }}</p>
+        </div>
+        <i class="fas fa-tools text-red-600 dark:text-red-400 text-3xl"></i>
+    </div>
+</div>
+<div class="container mx-auto py-6 sm:py-8">
+    <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6">
+
+        <div class="flex justify-between items-center mb-6 border-b pb-4 border-gray-200 dark:border-gray-700">
+            <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100">قائمة القاعات</h2>
+            <a href="{% url 'add_room' %}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                <i class="fas fa-plus ml-2"></i>
+                إضافة قاعة جديدة
+            </a>
+        </div>
+
+        {% if rooms %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            الاسم
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            السعة
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            الحالة
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            الإجراءات
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for room in rooms %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {{ room.name }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                            {{ room.capacity }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                            {{ room.status }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a href="{% url 'edit_room' room.id %}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 ml-4">
+                                <i class="fas fa-edit"></i> تعديل
+                            </a>
+                            <a href="{% url 'confirm_delete_room' room.id %}" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                                <i class="fas fa-trash-alt"></i> حذف
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-center text-gray-500 dark:text-gray-400">لا توجد قاعات لعرضها حالياً.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

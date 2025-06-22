@@ -1,0 +1,109 @@
+<!-- timetable_builder.html -->
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-6 text-gray-800">إعداد الجدول الدراسي</h1>
+
+    <!-- نموذج إدخال حصة دراسية -->
+    <form method="post" action="" class="bg-white p-6 rounded-lg shadow-md">
+        {% csrf_token %}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block mb-1 text-sm font-medium text-gray-700">المدرس</label>
+                <select name="teacher" class="w-full p-2 border rounded">
+                    {% for teacher in teachers %}
+                        <option value="{{ teacher.id }}">{{ teacher.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block mb-1 text-sm font-medium text-gray-700">المقرر</label>
+                <select name="course" class="w-full p-2 border rounded">
+                    {% for course in courses %}
+                        <option value="{{ course.id }}">{{ course.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block mb-1 text-sm font-medium text-gray-700">المستوى الدراسي</label>
+                <select name="level" class="w-full p-2 border rounded">
+                    {% for level in levels %}
+                        <option value="{{ level.id }}">{{ level.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block mb-1 text-sm font-medium text-gray-700">القاعة</label>
+                <select name="room" class="w-full p-2 border rounded">
+                    {% for room in rooms %}
+                        <option value="{{ room.id }}">{{ room.number }} - {{ room.type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block mb-1 text-sm font-medium text-gray-700">اليوم</label>
+                <select name="day" class="w-full p-2 border rounded">
+                    <option value="الأحد">الأحد</option>
+                    <option value="الاثنين">الاثنين</option>
+                    <option value="الثلاثاء">الثلاثاء</option>
+                    <option value="الأربعاء">الأربعاء</option>
+                    <option value="الخميس">الخميس</option>
+                </select>
+            </div>
+            <div>
+                <label class="block mb-1 text-sm font-medium text-gray-700">الفترة</label>
+                <select name="period" class="w-full p-2 border rounded">
+                    <option value="8-10">8-10</option>
+                    <option value="10-12">10-12</option>
+                    <option value="12-2">12-2</option>
+                    <option value="2-4">2-4</option>
+                </select>
+            </div>
+        </div>
+        <div class="mt-6 text-right">
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg">إضافة الحصة</button>
+        </div>
+    </form>
+
+    <!-- جدول الحصص المُدخلَة -->
+    <div class="mt-10">
+        <h2 class="text-xl font-semibold mb-4 text-gray-700">الحصص المجدولة</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full table-auto border border-gray-300">
+                <thead>
+                    <tr class="bg-gray-200 text-gray-700">
+                        <th class="px-4 py-2 border">اليوم</th>
+                        <th class="px-4 py-2 border">الفترة</th>
+                        <th class="px-4 py-2 border">المدرس</th>
+                        <th class="px-4 py-2 border">المقرر</th>
+                        <th class="px-4 py-2 border">المستوى</th>
+                        <th class="px-4 py-2 border">القاعة</th>
+                        <th class="px-4 py-2 border">إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in sessions %}
+                    <tr class="bg-white hover:bg-gray-50">
+                        <td class="px-4 py-2 border">{{ session.day }}</td>
+                        <td class="px-4 py-2 border">{{ session.period }}</td>
+                        <td class="px-4 py-2 border">{{ session.teacher.name }}</td>
+                        <td class="px-4 py-2 border">{{ session.course.name }}</td>
+                        <td class="px-4 py-2 border">{{ session.level.name }}</td>
+                        <td class="px-4 py-2 border">{{ session.room.number }}</td>
+                        <td class="px-4 py-2 border">
+                            <a href="{% url 'edit_session' session.id %}" class="text-blue-600 hover:underline">تعديل</a> |
+                            <a href="{% url 'delete_session' session.id %}" class="text-red-600 hover:underline">حذف</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-gray-500">لا توجد حصص مضافة بعد.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

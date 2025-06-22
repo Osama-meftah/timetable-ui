@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_header_title %}
+    {{ page_title }}
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-6 sm:py-8">
+    <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6 max-w-lg mx-auto">
+        <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6 text-center">{{ page_title }}</h2>
+        
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-6">
+                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">اسم المقرر <span class="text-red-500">*</span></label>
+                <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
+                    class="form-input w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-200" 
+                    placeholder="مثال: الرياضيات للمبتدئين" 
+                    value="{{ course.name|default:'' }}" 
+                    required
+                >
+            </div>
+
+            <div class="flex justify-end gap-3 mt-8">
+                <a href="{% url 'courses_management' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                    إلغاء
+                </a>
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                    حفظ المقرر
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

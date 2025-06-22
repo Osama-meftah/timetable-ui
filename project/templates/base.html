@@ -1,0 +1,268 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="light">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}لوحة التحكم{% endblock %} - ScheduleEase</title>
+
+    {# Tailwind CSS CDN #}
+    <script src="https://cdn.tailwindcss.com"></script>
+    {# Font Awesome 5.15.3 CDN #}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+
+    {# رابط لملف CSS المخصص الخاص بنا #}
+    <link rel="stylesheet" href="{% static '/src/css/style.css' %}" />
+
+    {# إعداد Tailwind لـ Dark Mode #}
+    <script>
+        tailwind.config = {
+            darkMode: 'class', // Enables dark mode based on the 'dark' class on the HTML element
+            theme: {
+                extend: {
+                    colors: {
+                        customBlue: '#288cfa',
+                        customGreen: '#2E865F',
+                        customYellow: '#d4ac0d',
+                        customPurple: '#8e44ad',
+                        customRed: '#e74c3c',
+                    }
+                }
+            }
+        };
+    </script>
+    {% comment %} {% block extra_head %}{% endblock %} {# Placeholder for extra head content specific to child pages #} {% endcomment %}
+</head>
+<body class="flex">
+
+    <aside id="sidebar" class="h-full bg-indigo-900 text-white p-6 shadow-lg flex flex-col">
+        <div class="flex items-center gap-4 border-b border-indigo-800 pb-4 mb-6">
+                <img
+                src="{% static 'images/ScheduleEase1.png' %}"
+                class="w-16 h-16 rounded-full  bg-white dark:bg-gray-200"
+                alt=""
+              />
+            <h2 class="text-[18px] font-bold leading-tight tracking-[-0.015em] text-gray-100 logo-text">ScheduleEase</h2>
+        </div>
+
+        <nav class="flex-grow">
+            <ul>
+                <li class="mb-3">
+                    <a href="{% url 'dashboard' %}" class="flex items-center p-3 rounded-md text-gray-300 hover:bg-indigo-800 hover:text-indigo-200 transition-colors duration-200" data-page-title="لوحة التحكم">
+                        <i class="fas fa-chart-line sidebar-icon"></i>
+                        <span class="nav-text">لوحة التحكم</span>
+                    </a>
+                </li>
+                <li class="mb-3">
+                    <a 
+                    href="{% url 'teachers_management' %}"
+                     class="flex items-center p-3 rounded-md text-gray-300 hover:bg-indigo-800 hover:text-indigo-200 transition-colors duration-200" data-page-title="إدارة المدرسين">
+                        <i class="fas fa-chalkboard-teacher sidebar-icon"></i>
+                        <span class="nav-text">إدارة المدرسين</span>
+                    </a>
+                </li>
+                <li class="mb-3">
+                    <a
+                     href="{% url 'courses_management' %}" 
+                     class="flex items-center p-3 rounded-md text-gray-300 hover:bg-indigo-800 hover:text-indigo-200 transition-colors duration-200" data-page-title="إدارة المقررات">
+                        <i class="fas fa-book-open sidebar-icon"></i>
+                        <span class="nav-text">إدارة المقررات</span>
+                    </a>
+                </li>
+                <li class="mb-3">
+                    <a
+                     href="{% url 'rooms_management' %}" 
+                     class="flex items-center p-3 rounded-md text-gray-300 hover:bg-indigo-800 hover:text-indigo-200 transition-colors duration-200" data-page-title="إدارة القاعات">
+                        <i class="fas fa-door-closed sidebar-icon"></i>
+                        <span class="nav-text">إدارة القاعات</span>
+                    </a>
+                </li>
+                <li class="mb-3">
+                    <a 
+                    href="{% url 'departments_management' %}" 
+                    class="flex items-center p-3 rounded-md text-gray-300 hover:bg-indigo-800 hover:text-indigo-200 transition-colors duration-200" data-page-title="إدارة المستويات">
+                        <i class="fas fa-layer-group sidebar-icon"></i>
+                        <span class="nav-text">إدارة الاقسام والمستويات</span>
+                    </a>
+                </li>
+                <li class="mb-3">
+                    <a 
+                    href="{% url 'schedule_creation' %}" 
+                    class="flex items-center p-3 rounded-md text-gray-300 hover:bg-indigo-800 hover:text-indigo-200 transition-colors duration-200" data-page-title="إعداد الجداول">
+                        <i class="fas fa-calendar-alt sidebar-icon"></i>
+                        <span class="nav-text">إعداد الجداول</span>
+                    </a>
+                </li>
+                <li class="mb-3">
+                    <a 
+                    {% comment %} href="{% url 'schedule_view' %}"  {% endcomment %}
+                    class="flex items-center p-3 rounded-md text-gray-300 hover:bg-indigo-800 hover:text-indigo-200 transition-colors duration-200" data-page-title="عرض الجداول">
+                        <i class="fas fa-calendar-check sidebar-icon"></i>
+                        <span class="nav-text">عرض الجداول</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="mt-auto pt-6 border-t border-indigo-800">
+            <a 
+            {% comment %} href="{% url 'logout' %}"  {% endcomment %}
+            class="flex items-center p-3 rounded-md text-gray-300 hover:bg-red-700 hover:text-white transition-colors duration-200" data-page-title="تسجيل الخروج">
+                <i class="fas fa-sign-out-alt sidebar-icon"></i>
+                <span class="logout-text">تسجيل الخروج</span>
+            </a>
+        </div>
+    </aside>
+
+    <div id="mainContent" class="flex-grow main-content flex flex-col">
+        
+        <header class="top-main-navbar flex items-center justify-between py-3 px-4 sm:py-4 sm:px-6 lg:py-5 lg:px-8">
+            <div class="flex items-center flex-shrink-0">
+                <button id="toggleSidebarBtn" class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2
+                   focus:ring-gray-200 dark:focus:ring-gray-600 text-gray-600 dark:text-gray-300 ml-2 sm:ml-4">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 dark:text-gray-100 mr-2 sm:mr-4" id="pageTitle">
+                    {% block page_header_title %}لوحة التحكم{% endblock %}
+                </h1>
+            </div>
+        
+            <div class="flex items-center gap-2 sm:gap-4 md:gap-6 flex-wrap justify-end">
+                
+                <a 
+                {% comment %} href="{% url 'create_new_schedule' %}" {% endcomment %}
+                class="bg-green-600 hover:bg-green-700 hover:text-white dark:text-white text-white font-bold py-1 px-3 sm:py-2 sm:px-4 rounded-full flex items-center shadow-md transition-colors duration-200 text-sm sm:text-base whitespace-nowrap">
+                    <i class="fas fa-plus-circle ml-1 sm:ml-2"></i>
+                    إنشاء جدول جديد
+                </a>
+                <div class="relative sm:w-auto flex-grow max-w-xs sm:max-w-md order-last sm:order-none">
+                    <input
+                        type="text"
+                        placeholder="ابحث عن طلاب/مدرسين/مقررات..."
+                        class="search-input pr-3 pl-10 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full text-sm sm:text-base"
+                    />
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+
+                <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                    <i class="fas fa-bell text-lg sm:text-xl text-gray-500 dark:text-gray-400 cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 transition-colors"></i>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="darkModeToggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <img src="https://via.placeholder.com/36x36/60A5FA/FFFFFF?text=AD" alt="صورة المستخدم" class="h-8 w-8 sm:h-9 sm:w-9 rounded-full cursor-pointer border-2 border-indigo-400 p-[1px]">
+                </div>
+            </div>
+        </header>
+        <main class="flex-1 p-8 overflow-y-auto mt-4">
+            {% block content %}
+            {# Default content or leave empty #}
+            {% endblock %}
+        </main>
+        {% include "footer.html" %}
+    </div>
+
+    <script >
+        document.addEventListener('DOMContentLoaded', () => {
+            const html = document.documentElement;
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
+            const pageTitle = document.getElementById('pageTitle');
+            const navLinks = document.querySelectorAll('aside nav a');
+            const darkModeToggle = document.getElementById('darkModeToggle');
+        
+            // وظيفة لتحديث عنوان الصفحة (الآن تقرأ من data-page-title)
+            function updatePageTitle(title) {
+                if (pageTitle) { // Check if pageTitle element exists
+                    pageTitle.textContent = title;
+                }
+            }
+        
+            // تعيين الرابط النشط عند التحميل الأولي (افتراضًا "لوحة التحكم")
+            // وتحديث العنوان بناءً على الرابط النشط
+            const currentPath = window.location.pathname; // Get the current URL path
+        
+            navLinks.forEach(link => {
+                const linkHref = link.getAttribute('href');
+                const linkPageTitle = link.dataset.pageTitle; // Read the data-page-title attribute
+        
+                // Logic to highlight the active link based on current URL
+                if (linkHref === currentPath || (currentPath === '/' && linkPageTitle === 'لوحة التحكم')) { // Handle root path for dashboard
+                    link.classList.add('text-indigo-300', 'bg-indigo-800');
+                    link.classList.remove('text-gray-300');
+                    updatePageTitle(linkPageTitle); // Set the header title based on active link
+                } else {
+                    link.classList.remove('text-indigo-300', 'bg-indigo-800');
+                    link.classList.add('text-gray-300');
+                }
+        
+                link.addEventListener('click', function(e) {
+                    // No e.preventDefault() here if you want actual navigation
+                    // If it's a SPA (Single Page Application) with AJAX, then you'd prevent default
+                    // For multi-page Django app, let default navigation happen
+        
+                    // You might still want to update title immediately on click for better UX
+                    // or rely on the server to render the correct title on the new page.
+                    // For now, let's keep the highlighting and title update for consistency.
+        
+                    // Remove active state from all links
+                    navLinks.forEach(item => {
+                        item.classList.remove('text-indigo-300', 'bg-indigo-800');
+                        item.classList.add('text-gray-300');
+                    });
+        
+                    // Add active state to the clicked link
+                    this.classList.add('text-indigo-300', 'bg-indigo-800');
+                    this.classList.remove('text-gray-300');
+        
+                    // Update page header title
+                    updatePageTitle(this.dataset.pageTitle);
+                });
+            });
+        
+            // إضافة المستمع لزر الطي/التوسيع
+            if (toggleSidebarBtn) {
+                toggleSidebarBtn.addEventListener('click', () => {
+                    sidebar.classList.toggle('sidebar-collapsed');
+                    mainContent.classList.toggle('main-content-collapsed');
+                });
+            }
+        
+            // --- Dark Mode Logic ---
+            // Set initial theme based on localStorage or system preference
+            const currentTheme = localStorage.getItem('theme');
+            if (currentTheme === 'dark') {
+                html.classList.add('dark');
+                html.classList.remove('light');
+                darkModeToggle.checked = true;
+            } else if (currentTheme === 'light') {
+                html.classList.add('light');
+                html.classList.remove('dark');
+                darkModeToggle.checked = false;
+            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                // If no preference is set in localStorage, check system preference
+                html.classList.add('dark');
+                darkModeToggle.checked = true;
+            } else {
+                html.classList.add('light');
+                darkModeToggle.checked = false;
+            }
+        
+            // Add event listener for the dark mode toggle
+            darkModeToggle.addEventListener('change', () => {
+                if (darkModeToggle.checked) {
+                    html.classList.remove('light');
+                    html.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    html.classList.remove('dark');
+                    html.classList.add('light');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+        });
+    </script> {# defer added for better performance #}
+    {% block extra_js %}{% endblock %} {# Placeholder for extra JS specific to child pages #}
+</body>
+</html>

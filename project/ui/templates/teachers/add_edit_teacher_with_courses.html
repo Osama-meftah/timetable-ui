@@ -1,0 +1,269 @@
+{% extends 'base.html' %} {% load static %} {% block page_header_title %} {{
+page_title }} {% endblock %} {% block content %}
+<div class="container mx-auto py-6 sm:py-8">
+  <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6">
+    <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6">
+      {{ page_title }}
+    </h2>
+
+    <form method="POST">
+      {% csrf_token %}
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div>
+          <label
+            for="name"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >الاسم الكامل <span class="text-red-500">*</span></label
+          >
+          <input
+            type="text"
+            id="name"
+            name="name"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            placeholder="مثال: محمد سعيد"
+            required
+          />
+        </div>
+        <div>
+          <label
+            for="email"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >البريد الإلكتروني <span class="text-red-500">*</span></label
+          >
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            placeholder="مثال: example@domain.com"
+            required
+          />
+        </div>
+        <div>
+          <label
+            for="phone"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >رقم الهاتف</label
+          >
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            placeholder="مثال: 05XXXXXXXX"
+          />
+        </div>
+        <div>
+          <label
+            for="courses"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >المقررات التي يدرسها (فصل بفاصلة)</label
+          >
+          <input
+            type="text"
+            id="courses"
+            name="courses"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            placeholder="مثال: رياضيات، فيزياء"
+          />
+        </div>
+        <div>
+          <label
+            for="status"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >الحالة</label
+          >
+          <select
+            id="status"
+            name="status"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+          >
+            <option value="نشط">نشط</option>
+            <option value="إجازة">إجازة</option>
+            <option value="معلق">معلق</option>
+          </select>
+        </div>
+        <div>
+          <label
+            for="image"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >صورة شخصية (URL)</label
+          >
+          <input
+            type="file"
+            id="image"
+            name="image"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            placeholder="https://via.placeholder.com/40x40"
+          />
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            ادخل رابط URL للصورة. اترك فارغاً لاستخدام الصورة الافتراضية.
+          </p>
+        </div>
+      </div>
+
+      <div class="mb-8">
+        <h3
+          class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center"
+        >
+          <i class="fas fa-calendar-alt ml-2 text-indigo-600"></i>
+          الأيام والأوقات المتاحة
+        </h3>
+        <div id="availability-container" class="space-y-4">
+          <div
+            class="availability-item flex flex-col sm:flex-row items-center gap-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600"
+          >
+            <div class="w-full sm:w-1/3">
+              <label
+                for="day-1"
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:hidden"
+                >اليوم</label
+              >
+              <select
+                id="day-1"
+                name="availability_day[]"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200"
+              >
+                <option value="">اختر يوم</option>
+                <option value="السبت">السبت</option>
+                <option value="الأحد">الأحد</option>
+                <option value="الإثنين">الإثنين</option>
+                <option value="الثلاثاء">الثلاثاء</option>
+                <option value="الأربعاء">الأربعاء</option>
+                <option value="الخميس">الخميس</option>
+                <option value="الجمعة">الجمعة</option>
+              </select>
+            </div>
+            <div class="w-full sm:w-2/3">
+              <label
+                for="time-1"
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:hidden"
+                >الوقت (مثال: 9:00 ص - 1:00 م)</label
+              >
+              <input
+                type="text"
+                id="time-1"
+                name="availability_time[]"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200"
+                placeholder="مثال: 9:00 ص - 1:00 م"
+              />
+            </div>
+            <button
+              type="button"
+              class="remove-availability-btn text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-lg p-2 rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition-colors duration-200"
+              title="إزالة هذا الوقت"
+            >
+              <i class="fas fa-times-circle"></i>
+            </button>
+          </div>
+        </div>
+        <button
+          type="button"
+          id="add-availability-btn"
+          class="mt-4 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold py-2 px-4 rounded-md flex items-center gap-2 transition-colors duration-200"
+        >
+          <i class="fas fa-plus-circle"></i>
+          إضافة يوم متاح
+        </button>
+      </div>
+
+      <div class="flex justify-end gap-3">
+          <button
+            type="submit"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200"
+          >
+            حفظ
+          </button>
+        <a
+          href="{% url 'teachers_management' %}"
+          class="bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:text-gray-200 font-bold py-2 px-4 rounded-md transition-colors duration-200"
+        >
+          إلغاء
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% comment %} هذا السكربت ضروري لإضافة/إزالة حقول التوفر ديناميكيًا. يفضل وضعه
+في ملف scripts.js أو في
+<script>
+   في نهاية القالب.
+  {% endcomment %}
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+      const availabilityContainer = document.getElementById('availability-container');
+      const addAvailabilityBtn = document.getElementById('add-availability-btn');
+      let availabilityItemCount = availabilityContainer.querySelectorAll('.availability-item').length; // بدء العد من العناصر الموجودة
+
+      // وظيفة لإنشاء عنصر توفر جديد
+      function createAvailabilityItem(day = '', time = '') {
+          availabilityItemCount++;
+          const newItem = document.createElement('div');
+          newItem.className = 'availability-item flex flex-col sm:flex-row items-center gap-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600';
+          newItem.innerHTML = `
+              <div class="w-full sm:w-1/3">
+                  <label for="day-${availabilityItemCount}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:hidden">اليوم</label>
+                  <select id="day-${availabilityItemCount}" name="availability_day[]" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2
+                    focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800
+                     dark:border-gray-600 dark:text-gray-200">
+                      <option value="">اختر يوم</option>
+                      <option value="السبت" ${day === 'السبت' ? 'selected' : ''}>السبت</option>
+                      <option value="الأحد" ${day === 'الأحد' ? 'selected' : ''}>الأحد</option>
+                      <option value="الإثنين" ${day === 'الإثنين' ? 'selected' : ''}>الإثنين</option>
+                      <option value="الثلاثاء" ${day === 'الثلاثاء' ? 'selected' : ''}>الثلاثاء</option>
+                      <option value="الأربعاء" ${day === 'الأربعاء' ? 'selected' : ''}>الأربعاء</option>
+                      <option value="الخميس" ${day === 'الخميس' ? 'selected' : ''}>الخميس</option>
+                      <option value="الجمعة" ${day === 'الجمعة' ? 'selected' : ''}>الجمعة</option>
+                  </select>
+              </div>
+              <div class="w-full sm:w-2/3">
+                  <label for="time-${availabilityItemCount}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:hidden">الوقت (مثال: 9:00 ص - 1:00 م)</label>
+                  <input type="text" id="time-${availabilityItemCount}" name="availability_time[]" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2
+                    focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800
+                     dark:border-gray-600 dark:text-gray-200" placeholder="مثال: 9:00 ص - 1:00 م" value="${time}">
+              </div>
+              <button type="button" class="remove-availability-btn text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-lg p-2 rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition-colors duration-200" title="إزالة هذا الوقت">
+                  <i class="fas fa-times-circle"></i>
+              </button>
+          `;
+          availabilityContainer.appendChild(newItem);
+          attachRemoveListener(newItem.querySelector('.remove-availability-btn'));
+      }
+
+      // وظيفة لإرفاق مستمع حدث لزر الإزالة
+      function attachRemoveListener(button) {
+          button.addEventListener('click', (event) => {
+              event.target.closest('.availability-item').remove();
+          });
+      }
+
+      // إضافة مستمع لزر "إضافة يوم متاح"
+      if (addAvailabilityBtn) {
+          addAvailabilityBtn.addEventListener('click', () => createAvailabilityItem());
+      }
+
+      // إرفاق مستمعات لجميع أزرار الإزالة الموجودة عند تحميل الصفحة (في حال التعديل)
+      availabilityContainer.querySelectorAll('.remove-availability-btn').forEach(button => {
+          attachRemoveListener(button);
+      });
+
+      // تحميل البيانات الموجودة (فقط لأغراض العرض التوضيحي، في Django ستأتي من النموذج)
+      // هذا الجزء يتطلب منطقًا لملء الحقول بناءً على البيانات المحملة من الخادم
+      // على سبيل المثال، إذا كان لديك بيانات مدرس:
+      // let teacherAvailability = [
+      //     {'day': 'الأحد', 'times': '9:00 ص - 1:00 م'},
+      //     {'day': 'الثلاثاء', 'times': '10:00 ص - 2:00 م'},
+      // ];
+      // if (teacherAvailability.length > 0) {
+      //     availabilityContainer.innerHTML = ''; // Clear initial dummy item if dynamic items are loaded
+      //     teacherAvailability.forEach(av => createAvailabilityItem(av.day, av.times));
+      // } else {
+      //     // If no availability data, ensure at least one empty row is present
+      //     if (availabilityItemCount === 0) {
+      //         createAvailabilityItem();
+      //     }
+      // }
+  });
+</script>
+{% endblock %}
