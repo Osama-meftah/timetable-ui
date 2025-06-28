@@ -6,22 +6,24 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     
     
-    path('teachers/', views.teachers_with_courses_list_view, name='teachers_management'),
-    path('teachers/add/', views.add_edit_teacher_view, name='add_teacher'),
-    path('teachers/edit/<int:pk>/', views.add_edit_teacher_view, name='edit_teacher'),
-    path('teachers/delete/<int:pk>/', views.confirm_delete_teacher_view, name='delete_teacher'),  
+    path('teachers/', views.TeachersView.as_view(), name='teachers_management'),
+    path('teachers/add/', views.TeacherFormView.as_view(), name='add_teacher'),
+    path('teachers/edit/<int:id>/', views.TeacherFormView.as_view(), name='edit_teacher'),
+    path('teachers/delete/<int:id>/', views.TeacherDeleteView.as_view(), name='delete_teacher'),  
       
-    path('teacherswithcourses/add/', views.teacher_with_courses_form_view, name='add_teacher_with_courses'),
-    path('teacherswithcourses/edit/<int:pk>/', views.teacher_with_courses_form_view, name='edit_teacher_with_courses'),
+      
+      
+    path('teacherswithcourses/add/', views.TeacherAvailabilityAndCoursesView.as_view(), name='add_edit_teacher_with_courses'),
+    path('teacherswithcourses/edit/<int:id>/', views.TeacherAvailabilityAndCoursesView.as_view(), name='add_edit_teacher_with_courses'),
     path('teacherswithcourses/delete/<int:pk>/', views.delete_teacher_with_courses_view, name='delete_teacher_with_courses'),  
       
     
     
     
-    path('courses/', views.courses_list_view, name='courses_management'),
-    path('courses/add/', views.course_form_view, name='add_course'),
-    path('courses/edit/<int:pk>/', views.course_form_view, name='edit_course'),
-    path('courses/delete/<int:pk>/', views.delete_course_view, name='delete_course'),
+    path('courses/', views.CoursesView.as_view(), name='courses_management'),
+    path('courses/add/', views.CoursesView.as_view(), name='add_course'),
+    path('courses/edit/<int:id>/', views.CoursesView.as_view(), name='edit_course'),
+    path('courses/delete/<int:id>/', views.CoursesView.as_view(), name='delete_course'),
     
     
     

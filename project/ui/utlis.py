@@ -1,4 +1,55 @@
-# my_app/dummy_data.py
+import requests
+from django.contrib import messages
+
+BASE_API_URL = "http://127.0.0.1:8001/api/"
+
+def api_get(endpoint):
+    try:
+        response = requests.get(f"{BASE_API_URL}{endpoint}")
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"GET request failed: {e}")
+
+def api_post(endpoint, data):
+    try:
+        print(f"{BASE_API_URL}{endpoint}", data)
+        response = requests.post(f"{BASE_API_URL}{endpoint}", json=data)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"POST request failed: {e}")
+
+def api_put(endpoint, data):
+    try:
+        response = requests.put(f"{BASE_API_URL}{endpoint}", json=data)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"PUT request failed: {e}")
+
+def api_delete(endpoint):
+    try:
+        response = requests.delete(f"{BASE_API_URL}{endpoint}")
+        response.raise_for_status()
+        return True
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"DELETE request failed: {e}")
+
+def handle_exception(request, message, exception):
+    error_message = f"{message}: {exception}"
+    try:
+        error_details = exception.response.json()
+        error_message += f" التفاصيل: {error_details}"
+    except:
+        pass
+    messages.error(request, error_message)
+    return error_message
+
+
+
+
+
 
 dummy_courses_for_dropdown = [
     {'id': 1, 'name': 'الرياضيات المتقدمة', 'code': 'MATH301'},

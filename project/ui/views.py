@@ -1,157 +1,380 @@
-from django.shortcuts import render,redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views import View
+import requests
+from django.contrib import messages
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from .utlis import api_delete,api_get,api_post,api_put,handle_exception
+from django.middleware.csrf import get_token
 
-# Create your views here.
+
+
+BASE_API_URL = "http://127.0.0.1:8001/api/"
 
 def login(request):
+    """
+    عرض صفحة تسجيل الدخول.
+    """
     return render(request, 'login.html')
 
 def dashboard(request):
+    """
+    عرض لوحة التحكم.
+    """
     return render(request, 'dashboard.html')
 
 
-dummy_teacher_data = {
-    1: {'id': 1, 'name': 'أ. أحمد السيد (وهمي)', 'email': 'ahmed.dummy@example.com', 'phone': '0501111111'},
-    2: {'id': 2, 'name': 'أ. فاطمة الزهراء (وهمي)', 'email': 'fatima.dummy@example.com', 'phone': '0552222222'},
-}
+class TeachersView(View):
+    def get(self, request):
+        try:
+            teachers_data = api_get("teachers/")
+            teacher_times_data = api_get("teacherTimes/")
+            distributions_data = api_get("distributions/")
 
-# --- دوال عرض المدرسين (Views) المبسطة ---
+            teachers_with_data = []
+            for teacher in teachers_data:
+                teacher_id = teacher["id"]
+                courses = [
+                    {
+                        "subject_name": d["fk_subject"]["subject_name"],
+                        "group": d["fk_group"]["group_name"],
+                        "level": d["fk_group"]["fk_level"]["level_name"],
+                        "program": d["fk_group"]["fk_level"]["fk_program"]["program_name"],
+                    }
+                    for d in distributions_data
+                    if d["fk_teacher"]["id"] == teacher_id
+                ]
+                times = [
+                    {
+                        "day": t["fk_today"]["day_name_display"],
+                        "period": t["fk_period"]["period_display"]
+                    }
+                    for t in teacher_times_data
+                    if t["fk_teacher"]["id"] == teacher_id
+                ]
 
-def add_edit_teacher_view(request, pk=None):
-    """
-    تعرض صفحة إضافة مدرس جديد أو تعديل مدرس موجود.
-    لا تقوم بعمليات حفظ أو تحديث فعلية.
-    """
-    teacher = None
-    if pk: # إذا تم توفير pk، فهذا يعني أننا في وضع التعديل
-        # هنا، نستخدم بيانات وهمية فقط للعرض في القالب
-        # في تطبيق حقيقي، ستستجلب بيانات المدرس من قاعدة البيانات
-        teacher = dummy_teacher_data.get(pk)
-        if not teacher:
-            # إذا لم يتم العثور على مدرس بالمعرف، يمكن إعادة التوجيه
-            return redirect('teachers_management')
+                if courses:  # فقط المدرسين الذين لديهم توزيع
+                    teachers_with_data.append({
+                        "teacher": teacher,
+                        "courses": courses,
+                        "availability": times,
+                    })
 
-    if request.method == 'POST':
-        # في هذا السيناريو المبسط، لا نقوم بأي معالجة لبيانات POST
-        # فقط نعيد التوجيه لإظهار أن "العملية تمت"
-        print(f"تم استقبال بيانات POST لـ {'التعديل' if pk else 'الإضافة'}: {request.POST}")
-        return redirect('teachers_management') # إعادة التوجيه بعد "العملية"
+            total_teachers = len(teachers_data)
+            active_teachers = len([t for t in teachers_data if t.get("teacher_status") == "نشط"])
+            on_leave_teachers = len([t for t in teachers_data if t.get("teacher_status") == "إجازة"])
 
-    context = {
-        'page_title': 'إدارة المدرس',
-        'teacher': teacher # تمرير كائن المدرس (إذا كان وضع التعديل) إلى القالب
-    }
-    return render(request, 'teachers/add_edit.html', context)
+            # إعداد Pagination
+            page_teachers = request.GET.get("page", 1)
+            page_teachers_size = request.GET.get("page_size", 10)
+            page_teachers_data_size = request.GET.get("page_data_size", 10)
 
-def confirm_delete_teacher_view(request, pk):
-    """
-    تعرض صفحة تأكيد حذف مدرس.
-    لا تقوم بعملية حذف فعلية.
-    """
-    teacher = dummy_teacher_data.get(pk) # جلب بيانات وهمية للعرض
-    if not teacher:
-        return redirect('teachers_management')
+            paginator_teachers = Paginator(teachers_data, page_teachers_size)
+            paginator_detailed = Paginator(teachers_with_data, page_teachers_data_size)
 
-    if request.method == 'POST':
-        # في هذا السيناريو المبسط، لا نقوم بأي عملية حذف فعلية
-        print(f"تم تأكيد طلب حذف المدرس ID: {pk}")
-        return redirect('teachers_management') # إعادة التوجيه بعد "الحذف"
+            try:
+                teachers_paginated = paginator_teachers.page(page_teachers)
+                teachers_data_paginated = paginator_detailed.page(page_teachers)
+            except PageNotAnInteger:
+                teachers_paginated = paginator_teachers.page(1)
+                teachers_data_paginated = paginator_detailed.page(1)
+            except EmptyPage:
+                teachers_paginated = paginator_teachers.page(paginator_teachers.num_pages)
+                teachers_data_paginated = paginator_detailed.page(paginator_detailed.num_pages)
 
-    context = {
-        'page_title': 'تأكيد حذف المدرس',
-        'teacher': teacher # تمرير كائن المدرس إلى القالب للتأكيد
-    }
-    return render(request, 'teachers/confirm_delete_teacher.html', context)
+            context = {
+                "page_title": "إدارة المدرسين",
+                "teachers": teachers_paginated,
+                "teachers_with_data": teachers_data_paginated,
+                "total_teachers": total_teachers,
+                "active_teachers": active_teachers,
+                "on_leave_teachers": on_leave_teachers,
+            }
+            return render(request, "teachers/list.html", context)
 
+        except Exception as e:
+            handle_exception(request, "فشل في جلب بيانات المدرسين", e)
+            return render(request, "teachers/list.html", {
+                "teachers": [],
+                "teachers_with_data": [],
+                "error": "فشل في جلب بيانات المدرسين."
+            })
 
-def teachers_with_courses_list_view(request):
-    # بيانات المدرسين الأصلية (التي تحافظ على جميع الحقول المطلوبة في الجدول التفصيلي)
-    teachers = [
-        {
-            'id': 1,
-            'name': 'أ. أحمد السيد',
-            'email': 'ahmed@example.com', # البريد الإلكتروني موجود هنا الآن
-            'phone': '0501234567',
-            'image_url': 'https://via.placeholder.com/40x40/4F46E5/FFFFFF?text=AS',
-            'status': 'نشط',
-            'courses': 'رياضيات، فيزياء',
-            'availability': [
-                {'day': 'الأحد', 'times': '08:00 - 12:00'},
-                {'day': 'الثلاثاء', 'times': '10:00 - 14:00'},
-            ],
-        },
-        {
-            'id': 2,
-            'name': 'أ. فاطمة الزهراء',
-            'email': 'fatima@example.com', # البريد الإلكتروني موجود هنا الآن
-            'phone': '0557654321',
-            'image_url': 'https://via.placeholder.com/40x40/EC4899/FFFFFF?text=FZ',
-            'status': 'إجازة',
-            'courses': 'لغة عربية، تربية إسلامية',
-            'availability': [],
-        },
-        {
-            'id': 3,
-            'name': 'أ. خالد العنزي',
-            'email': 'khalid@example.com', # البريد الإلكتروني موجود هنا الآن
-            'phone': '0569876543',
-            'image_url': 'https://via.placeholder.com/40x40/22C55E/FFFFFF?text=KC',
-            'status': 'نشط',
-            'courses': 'علوم، كيمياء',
-            'availability': [
-                {'day': 'الإثنين', 'times': '09:00 - 13:00'},
-                {'day': 'الأربعاء', 'times': '14:00 - 18:00'},
-            ],
-        },
-    ]
+class TeacherFormView(View):
+    def get(self, request, id=None):
+        teacher = None
+        if id:
+            try:
+                teacher = api_get(f"teachers/{id}/")
+            except Exception as e:
+                handle_exception(request, "فشل في جلب بيانات المدرس", e)
+                return redirect("teachers_management")
+        return render(request, "teachers/add_edit.html", {"teacher": teacher})
 
-    # إنشاء قائمة المدرسين المبسطة من قائمة المدرسين الأصلية
-    # هذا يضمن أن البيانات "القديمة" (الكاملة) هي المصدر
-    simplified_teachers = [
-        {'id': t['id'], 'name': t['name'], 'phone': t['phone'], 'email': t['email']}
-        for t in teachers
-    ]
-
-    # بيانات تقارير المدرسين
-    total_teachers = len(teachers)
-    active_teachers = sum(1 for t in teachers if t['status'] == 'نشط')
-    on_leave_teachers = sum(1 for t in teachers if t['status'] == 'إجازة')
-
-    context = {
-        'page_title': 'إدارة المدرسين',
-        'teachers': teachers, # للجدول التفصيلي
-        'simplified_teachers': simplified_teachers, # للجدول المبسط الجديد والمشتق من teachers
-        'total_teachers': total_teachers,
-        'active_teachers': active_teachers,
-        'on_leave_teachers': on_leave_teachers,
-    }
-    return render(request, 'teachers/teacher_management.html', context)
-
-def teacher_with_courses_form_view(request, pk=None):
-    teacher = None
-    if pk:
-        page_title = 'تعديل بيانات المدرس'
-        teacher = {
-            'id': pk,
-            'name': 'أحمد السيد', 'email': 'ahmed@example.com', 'phone': '0501234567',
-            'image_url': 'https://via.placeholder.com/100x100/4F46E5/FFFFFF?text=AS',
-            'status': 'نشط', 'courses': 'رياضيات، فيزياء', 'notes': 'مدرس ممتاز ولديه خبرة 5 سنوات.',
-            'availability': [{'day': 'الأحد', 'times': '08:00 - 12:00'}, {'day': 'الثلاثاء', 'times': '10:00 - 14:00'}],
+    def post(self, request, id=None):
+        teacher_data = {
+            "id": id,
+            "teacher_name": request.POST.get("teacher_name", "").strip(),
+            "teacher_phone": request.POST.get("teacher_phone", "").strip(),
+            "teacher_email": request.POST.get("teacher_email", "").strip(),
+            "teacher_address": request.POST.get("teacher_address", "").strip(),
+            "teacher_status": request.POST.get("teacher_status", "").strip(),
         }
-    else:
-        page_title = 'إضافة مدرس جديد'
-        teacher = {
-            'id': None, 'name': '', 'email': '', 'phone': '', 'image_url': '',
-            'status': 'نشط', 'courses': '', 'notes': '', 'availability': [],
-        }
+
+        if not teacher_data["teacher_name"] or not teacher_data["teacher_email"]:
+            messages.error(request, "الاسم والبريد الإلكتروني مطلوبان.")
+            return redirect("teachers_management")
+
+        try:
+            if id:
+                api_put(f"teachers/{id}/", teacher_data)
+                messages.success(request, "تم تعديل بيانات المدرس بنجاح.")
+            else:
+                api_post("teachers/", teacher_data)
+                messages.success(request, "تم إضافة المدرس بنجاح.")
+        except Exception as e:
+            handle_exception(request, "حدث خطأ أثناء حفظ بيانات المدرس", e)
+
+        return redirect("teachers_management")
     
-    if request.method == 'POST':
-        teacher_name = request.POST.get('name')
-        print(f"تم حفظ {'تعديلات' if pk else 'إضافة'} المدرس (ID: {pk if pk else 'جديد'}): {teacher_name}")
-        return redirect('teachers_list')
-    
-    days_of_week = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']
-    context = {'page_title': page_title, 'teacher': teacher, 'days_of_week': days_of_week}
-    return render(request, 'teachers/add_edit_teacher_with_courses.html', context)
+class TeacherDeleteView(View):
+    def post(self, request, id):
+        try:
+            api_delete(f"teachers/{id}/")
+            messages.success(request, "تم حذف المدرس بنجاح.")
+        except Exception as e:
+            handle_exception(request, "حدث خطأ أثناء حذف المدرس", e)
+        return redirect("teachers_management")
+
+
+class TeacherAvailabilityAndCoursesView(View):
+    endpoints = {
+        "teachers": "teachers/",
+        "teacher_times": "teacherTimes/",
+        "distributions": "distributions/",
+        "todays": "todays/",
+        "periods": "periods/",
+        "subjects": "subjects/",
+        "groups": "groups/",
+        "levels": "levels/",
+        "programs": "programs/",
+    }
+
+    def get(self, request, id=None):
+        try:
+            teachers = requests.get(f"{BASE_API_URL}{self.endpoints['teachers']}").json()
+            days = requests.get(f"{BASE_API_URL}{self.endpoints['todays']}").json()
+            periods = requests.get(f"{BASE_API_URL}{self.endpoints['periods']}").json()
+            subjects = requests.get(f"{BASE_API_URL}{self.endpoints['subjects']}").json()
+            levels = requests.get(f"{BASE_API_URL}{self.endpoints['levels']}").json()
+            programs = requests.get(f"{BASE_API_URL}{self.endpoints['programs']}").json()
+            groups = requests.get(f"{BASE_API_URL}{self.endpoints['groups']}").json()
+
+            # البيانات الخاصة بالمدرس إن وجد
+            teacher = None
+            teacher_times = []
+            teacher_distributions = []
+            if id:
+                teacher = requests.get(f"{BASE_API_URL}{self.endpoints['teachers']}{id}/").json()
+
+                all_times = requests.get(f"{BASE_API_URL}{self.endpoints['teacher_times']}").json()
+                teacher_times = [t for t in all_times if t["fk_teacher"]["id"] == int(id)]
+
+                all_distributions = requests.get(f"{BASE_API_URL}{self.endpoints['distributions']}").json()
+                teacher_distributions = [d for d in all_distributions if d["fk_teacher"]["id"] == int(id)]
+
+            context = {
+                "teacher": teacher,
+                "all_teachers": teachers,
+                "teacher_times": teacher_times,
+                "teacher_distributions": teacher_distributions,
+                "days": days,
+                "periods": periods,
+                "subjects": subjects,
+                "levels": levels,
+                "programs": programs,
+                "groups": groups,
+                "page_title": "تعديل" if id else "إضافة",
+            }
+            return render(request, "teachers/add_edit_teacher_with_courses.html", context)
+
+        except requests.exceptions.RequestException as e:
+            messages.error(request, f"فشل في جلب البيانات: {e}")
+            return redirect("teachers_management")
+    def post(self, request, id=None):
+            form_type = request.POST.get('form_type')
+            teacher_id = request.POST.get('selected_teacher_id')
+
+            if not teacher_id:
+                messages.error(request, "يرجى اختيار المدرس.")
+                return redirect(request.path_info)
+
+            try:
+                if form_type == "courses_form":
+                    for i in range(1, 100):
+                        group_id = request.POST.get(f'dist_group_{i}')
+                        subject_id = request.POST.get(f'dist_subject_{i}')
+                        dist_id = request.POST.get(f'distribution_id_{i}')
+                        dist_id_add = request.POST.get(f'distribution_id_{i}_add')
+
+                        if group_id and subject_id:
+                            dist_data = {
+                                "fk_group_id": group_id,
+                                "fk_teacher_id": teacher_id,
+                                "fk_subject_id": subject_id,
+                            }
+
+                            try:
+                                if dist_id_add:
+                                    api_post(self.endpoints["distributions"], dist_data) 
+                                    print("add")
+                                elif dist_id:
+                                    api_put(f"{self.endpoints['distributions']}{dist_id}/", dist_data)
+                                else:
+                                    print("add+")
+                                    api_post(self.endpoints["distributions"], dist_data)
+                            except Exception as e:
+                                handle_exception(request, f"فشل حفظ توزيع رقم {i}", e)
+                        else:
+                            break
+
+                    messages.success(request, "تم حفظ المقررات بنجاح.")
+
+                elif form_type == "times_form":
+                    for i in range(1, 100):
+                        day_id = request.POST.get(f'time_day_{i}')
+                        period_id = request.POST.get(f'time_period_{i}')
+                        availability_id = request.POST.get(f'availability_id_{i}')
+                        availability_id_add = request.POST.get(f'availability_id_{i}_add')
+
+                        if day_id and period_id:
+                            time_data = {
+                                "fk_today_id": day_id,
+                                "fk_period_id": period_id,
+                                "fk_teacher_id": teacher_id,
+                            }
+                            
+                            try:
+                                if availability_id_add:
+                                    print(availability_id_add)
+                                    print(day_id)
+                                    print("add")
+                                    api_post(self.endpoints["teacher_times"], time_data)
+                                elif availability_id:
+                                    print(availability_id_add)
+                                    print(day_id)
+                                    print("edit")
+                                    api_put(f"{self.endpoints['teacher_times']}{availability_id}/", time_data)
+                                else:
+                                    print("add+")
+                                    api_post(self.endpoints["teacher_times"], time_data)
+                            except Exception as e:
+                                handle_exception(request, f"فشل حفظ وقت رقم {i}", e)
+                        else:
+                            break
+
+                    messages.success(request, "تم حفظ الأوقات المتاحة بنجاح.")
+
+                elif form_type == "delete_distribution":
+                    dist_id = request.POST.get("distribution_id")
+                    if dist_id:
+                        try:
+                            api_delete(f"{self.endpoints['distributions']}{dist_id}/")
+                            messages.success(request, "تم حذف توزيع المقرر بنجاح.")
+                        except Exception as e:
+                            handle_exception(request, "فشل في حذف توزيع المقرر", e)
+
+                elif form_type == "delete_availability":
+                    availability_id = request.POST.get("availability_id")
+                    if availability_id:
+                        try:
+                            api_delete(f"{self.endpoints['teacher_times']}{availability_id}/")
+                            messages.success(request, "تم حذف وقت التوفر بنجاح.")
+                        except Exception as e:
+                            handle_exception(request, "فشل في حذف وقت التوفر", e)
+
+                else:
+                    messages.error(request, "نوع النموذج غير معروف.")
+
+                return redirect("add_edit_teacher_with_courses", id=teacher_id)
+
+            except Exception as e:
+                handle_exception(request, "حدث خطأ أثناء الحفظ", e)
+                return redirect(request.path_info)
+
+    # def post(self, request, id=None):
+    #     form_type = request.POST.get('form_type')
+    #     teacher_id = request.POST.get('selected_teacher_id')
+
+    #     if not teacher_id:
+    #         messages.error(request, "يرجى اختيار المدرس.")
+    #         return redirect(request.path_info)
+
+    #     try:
+    #         if form_type == "courses_form":
+    #             for i in range(1, 100):
+    #                 group_id = request.POST.get(f'dist_group_{i}')
+    #                 subject_id = request.POST.get(f'dist_subject_{i}')
+    #                 dist_id = request.POST.get(f'distribution_id_{i}')
+    #                 dist_id_add = request.POST.get(f'distribution_id_{i}_add')
+                    
+    #                 if group_id and subject_id:
+    #                     dist_data = {
+    #                         "fk_group_id": group_id,
+    #                         "fk_teacher_id": teacher_id,
+    #                         "fk_subject_id": subject_id,
+    #                     }
+
+    #                     try:
+    #                         if dist_id:
+    #                             api_put(f"{self.endpoints['distributions']}{dist_id}/", dist_data)
+    #                         elif dist_id_add:
+    #                             api_post(self.endpoints["distributions"], dist_data)
+    #                         else:
+    #                             api_post(self.endpoints["distributions"], dist_data)
+    #                     except Exception as e:
+    #                         handle_exception(request, f"فشل حفظ توزيع رقم {i}", e)
+    #                 else:
+    #                     break
+
+    #             messages.success(request, "تم حفظ المقررات بنجاح.")
+
+    #         elif form_type == "times_form":
+    #             for i in range(1, 100):
+    #                 day_id = request.POST.get(f'time_day_{i}')
+    #                 period_id = request.POST.get(f'time_period_{i}')
+    #                 availability_id = request.POST.get(f'availability_id_{i}')
+    #                 availability_id_add = request.POST.get(f'availability_id_{i}_add')
+
+    #                 if day_id and period_id:
+    #                     time_data = {
+    #                         "fk_today_id": day_id,
+    #                         "fk_period_id": period_id,
+    #                         "fk_teacher_id": teacher_id,
+    #                     }
+                        
+    #                     try:
+    #                         if availability_id:
+    #                             api_put(f"{self.endpoints['teacher_times']}{availability_id}/", time_data)
+    #                         elif availability_id_add:
+    #                             api_post(self.endpoints["teacher_times"], time_data)
+                                
+    #                         else:
+    #                             api_post(self.endpoints["teacher_times"], time_data)
+    #                     except Exception as e:
+    #                         handle_exception(request, f"فشل حفظ وقت رقم {i}", e)
+    #                 else:
+    #                     break
+
+    #             messages.success(request, "تم حفظ الأوقات المتاحة بنجاح.")
+
+    #         else:
+    #             messages.error(request, "نوع النموذج غير معروف.")
+
+    #         return redirect("add_edit_teacher_with_courses", id=teacher_id)
+
+    #     except Exception as e:
+    #         handle_exception(request, "حدث خطأ أثناء الحفظ", e)
+    #         return redirect(request.path_info)
 
 def delete_teacher_with_courses_view(request, pk):
     if request.method == 'POST':
@@ -164,22 +387,155 @@ def delete_teacher_with_courses_view(request, pk):
     }
     return render(request, 'teachers/confirm_delete_teacher_with_courses.html', context)
 
-
-def courses_list_view(request):
-    # بيانات وهمية معدلة لعرض id و name فقط
-    courses = [
-        {'id': 1, 'name': 'رياضيات متقدمة'},
-        {'id': 2, 'name': 'اللغة العربية: النحو'},
-        {'id': 3, 'name': 'مبادئ البرمجة'},
-        {'id': 4, 'name': 'الكيمياء العضوية'},
-        {'id': 5, 'name': 'التربية الفنية'},
-    ]
-
-    context = {
-        'courses': courses,
-        'page_title': 'إدارة المقررات',
+class CoursesView(View):
+    endpoints = {
+        "levels": "levels/",
+        "subjects": "subjects/",
     }
-    return render(request, 'courses/list.html', context)
+
+    def get(self, request, id=None):
+        try:
+            if id:
+                subject = api_get(f"{self.endpoints['subjects']}{id}/")
+                levels = api_get(self.endpoints["levels"])
+                return render(request, "courses/add_edit.html", context={
+                    "subject": subject,
+                    "levels": levels,
+                    "page_title": "تعديل"
+                })
+
+            elif "add" in request.GET:
+                levels = api_get(self.endpoints["levels"])
+                return render(request, "courses/add_edit.html", context={
+                    "levels": levels,
+                    "page_title": "إضافة مقرر"
+                })
+
+            else:
+                subjects = api_get(self.endpoints["subjects"])
+
+                # احصائيات (يمكن تعديلها حسب بياناتك)
+                total_courses = len(subjects)
+                active_courses = sum(1 for c in subjects if c.get("active", True))
+                full_courses = sum(1 for c in subjects if c.get("is_full", False))
+
+                csrf_token = get_token(request)
+
+                return render(request, "courses/list.html", {
+                    "courses": subjects,
+                    "page_title": "إدارة المقررات",
+                    "total_courses": total_courses,
+                    "active_courses": active_courses,
+                    "full_courses": full_courses,
+                    "csrf_token": csrf_token,
+                })
+
+        except Exception as e:
+            handle_exception(request, "فشل في تحميل البيانات", e)
+            return render(request, "courses/list.html", {"error": str(e)})
+
+    def post(self, request, id=None):
+        form_action = request.POST.get("form_action", "create")
+
+        data = {
+            "subject_name": request.POST.get("subject_name"),
+            "fk_level_id": request.POST.get("fk_level"),
+            "term": request.POST.get("term"),
+        }
+
+        try:
+            if form_action == "delete" and id:
+                api_delete(f"{self.endpoints['subjects']}{id}/")
+                messages.success(request, "تم حذف المقرر بنجاح.")
+
+            elif id:
+                api_put(f"{self.endpoints['subjects']}{id}/", data)
+                messages.success(request, "تم تعديل المقرر بنجاح.")
+
+            else:
+                api_post(self.endpoints["subjects"], data)
+                messages.success(request, "تم إضافة المقرر بنجاح.")
+
+            return redirect("courses_list")
+
+        except Exception as e:
+            handle_exception(request, "حدث خطأ أثناء حفظ البيانات", e)
+            return redirect(request.path_info)
+
+class CoursesView(View):
+    endpoints = {
+        "levels": "levels/",
+        "subjects": "subjects/",
+    }
+
+    def get(self, request, id=None):
+        try:
+            if id:
+                subject = api_get(f"{self.endpoints['subjects']}{id}/")
+                levels = api_get(self.endpoints["levels"])
+                return render(request, "courses/add_edit.html", context={
+                    "subject": subject,
+                    "levels": levels,
+                    "page_title": "تعديل"
+                })
+
+            elif "add" in request.GET:
+                levels = api_get(self.endpoints["levels"])
+                return render(request, "courses/add_edit.html", context={
+                    "levels": levels,
+                    "page_title": "إضافة مقرر"
+                })
+
+            else:
+                subjects = api_get(self.endpoints["subjects"])
+                total_courses = len(subjects)
+                active_courses = sum(1 for c in subjects if c.get("active", True))
+                full_courses = sum(1 for c in subjects if c.get("is_full", False))
+
+                csrf_token = get_token(request)
+
+                return render(request, "courses/list.html", {
+                    "courses": subjects,
+                    "page_title": "إدارة المقررات",
+                    "total_courses": total_courses,
+                    "active_courses": active_courses,
+                    "full_courses": full_courses,
+                    "csrf_token": csrf_token,
+                })
+
+        except Exception as e:
+            handle_exception(request, "فشل في تحميل البيانات", e)
+            return render(request, "courses/list.html", {"error": str(e)})
+
+    def post(self, request, id=None):
+        form_action = request.POST.get("form_action", "create")
+
+        data = {
+            "subject_name": request.POST.get("subject_name"),
+            "fk_level_id": request.POST.get("fk_level"),
+            "term": request.POST.get("term"),
+        }
+
+        try:
+            if form_action == "delete" and id:
+                api_delete(f"{self.endpoints['subjects']}{id}/")
+                messages.success(request, "تم حذف المقرر بنجاح.")
+                return redirect("courses_management")
+
+            elif id:
+                api_put(f"{self.endpoints['subjects']}{id}/", data)
+                messages.success(request, "تم تعديل المقرر بنجاح.")
+
+            else:
+                api_post(self.endpoints["subjects"], data)
+                messages.success(request, "تم إضافة المقرر بنجاح.")
+
+            return redirect("courses_management")
+
+        except Exception as e:
+            handle_exception(request, "حدث خطأ أثناء حفظ البيانات", e)
+            return redirect(request.path_info)
+
 
 def course_form_view(request, pk=None):
     """
@@ -544,10 +900,6 @@ def delete_department_view(request, pk):
 # my_app/views.py
 
 from . import utlis # استيراد البيانات الوهمية من الملف الجديد
-
-# --- دوال العرض (View Functions) ---
-# احتفظ بالدوال الأخرى الموجودة لديك مثل dashboard_view, timetable_settings_view إلخ
-# (لن ندرجها هنا لتجنب التكرار)
 
 def add_edit_session_view(request, session_id=None):
     """

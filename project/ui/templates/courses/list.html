@@ -6,26 +6,48 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mx-auto py-6 sm:py-8">
+{% if messages %}
+  <div class="mb-4 px-4"> {# Added padding here for messages #}
+    {% for message in messages %}
+      <div class="rounded-md px-4 py-3 text-sm font-medium 
+                    {% if message.tags == 'error' %}
+                      bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100
+                    {% elif message.tags == 'success' %}
+                      bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100
+                    {% else %}
+                      bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100
+                    {% endif %}
+                    flex items-center justify-between">
+        <span>{{ message }}</span>
+        {# Optional: Add a close button for messages #}
+        <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-transparent text-current rounded-lg p-1.5 hover:bg-current hover:bg-opacity-20 focus:ring-2 focus:ring-current focus:ring-opacity50 inline-flex h-8 w-8 dark:hover:bg-current dark:hover:bg-opacity-20" onclick="this.parentElement.style.display='none';">
+          <span class="sr-only">Close</span>
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+        </button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <div class="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-700 dark:to-blue-800 rounded-lg shadow-lg p-6 text-white flex items-center justify-between transition-transform transform hover:scale-105 duration-300">
+<div class="container mx-auto py-6 sm:py-8">
+    <!-- احصائيات المقررات -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+        <!-- ... الكود السابق لعرض الإحصائيات ... -->
+        <div class="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-700 dark:to-blue-800 rounded-xl shadow-lg p-6 text-white flex items-center justify-between transition-transform transform hover:scale-105 duration-300">
             <div>
                 <h3 class="text-lg font-medium opacity-90">إجمالي المقررات</h3>
                 <p class="text-4xl font-bold mt-1">{{ total_courses }}</p>
             </div>
             <i class="fas fa-book-open text-5xl opacity-30"></i>
         </div>
-
-        <div class="bg-gradient-to-r from-green-500 to-green-600 dark:from-green-700 dark:to-green-800 rounded-lg shadow-lg p-6 text-white flex items-center justify-between transition-transform transform hover:scale-105 duration-300">
+        <div class="bg-gradient-to-r from-green-500 to-green-600 dark:from-green-700 dark:to-green-800 rounded-xl shadow-lg p-6 text-white flex items-center justify-between transition-transform transform hover:scale-105 duration-300">
             <div>
                 <h3 class="text-lg font-medium opacity-90">مقررات نشطة (افتراضي)</h3>
                 <p class="text-4xl font-bold mt-1">{{ active_courses }}</p>
             </div>
             <i class="fas fa-check-circle text-5xl opacity-30"></i>
         </div>
-
-        <div class="bg-gradient-to-r from-red-500 to-red-600 dark:from-red-700 dark:to-red-800 rounded-lg shadow-lg p-6 text-white flex items-center justify-between transition-transform transform hover:scale-105 duration-300">
+        <div class="bg-gradient-to-r from-red-500 to-red-600 dark:from-red-700 dark:to-red-800 rounded-xl shadow-lg p-6 text-white flex items-center justify-between transition-transform transform hover:scale-105 duration-300">
             <div>
                 <h3 class="text-lg font-medium opacity-90">مقررات ممتلئة (افتراضي)</h3>
                 <p class="text-4xl font-bold mt-1">{{ full_courses }}</p>
@@ -34,78 +56,147 @@
         </div>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6">
-        <div class="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
-            <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 whitespace-nowrap">إدارة المقررات</h2>
-            
+    <!-- قسم إدارة المقررات والبحث والإضافة -->
+    <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6 sm:p-8">
+        <div class="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap">إدارة المقررات الدراسية</h2>
             <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
                 <div class="relative w-full sm:w-64">
                     <input
                       type="text"
-                      placeholder="ابحث عن مدرس..."
-                      class="search-input pr-3 pl-10 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full text-sm sm:text-base dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 transition-colors duration-200"
+                      placeholder="ابحث عن مقرر..."
+                      class="search-input block w-full pr-3 pl-10 py-2.5 rounded-md border border-gray-300 dark:border-gray-600 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:ring-indigo-500 focus:border-indigo-500 text-sm shadow-sm transition-colors duration-200"
                     />
-                    <i
-                      class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                    ></i>
-                  </div>
-
-
-                <a 
-                href="{% url 'add_course' %}" 
-                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md flex items-center shadow-md transition-colors duration-200 w-full sm:w-auto justify-center">
-                    <i class="fas fa-plus-circle ml-2"></i>
-                    إضافة مقرر
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+                <a
+                href="{% url 'add_course' %}?add=1"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-5 rounded-md flex items-center shadow-md transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto justify-center group">
+                    <i class="fas fa-plus-circle ml-2 group-hover:rotate-6 transition-transform duration-200"></i>
+                    إضافة مادة جديدة
                 </a>
             </div>
         </div>
 
-        <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+        <!-- جدول المقررات -->
+        <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-md">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-12">
-                            ID
-                        </th>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            اسم المقرر
-                        </th>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-32">
-                            الإجراءات
-                        </th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider w-16">ID</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">اسم المادة</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">المستوى</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">الفصل الدراسي</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider w-40">الإجراءات</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {% for course in courses %}
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">{{ course.id }}</td>
-                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">{{ course.name }}</td>
-                        
+                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">{{ course.subject_name }}</td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">{{ course.fk_level.level_name }}</td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">{{ course.term }}</td>
                         <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium flex items-center justify-end gap-2">
-                            <a 
-                            href="{% url 'edit_course' course.id %}" 
-                            class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-700 transition-colors duration-150" title="تعديل">
+                            <a href="{% url 'edit_course' course.id %}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-700 transition-colors duration-150" title="تعديل">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <a 
-                            href="{% url 'delete_course' course.id %}" 
-                            class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-2 rounded-full hover:bg-red-100 dark:hover:bg-gray-700 transition-colors duration-150" onclick="return confirm('هل أنت متأكد أنك تريد حذف هذا المقرر؟');" title="حذف">
+                            <button
+                              type="button"
+                              onclick="showDeleteConfirmation({{ course.id }}, '{{ course.subject_name }}')"
+                              class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-2 rounded-full hover:bg-red-100 dark:hover:bg-gray-700 transition-colors duration-150"
+                              title="حذف"
+                            >
                                 <i class="fas fa-trash-alt"></i>
-                            </a>
+                            </button>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">لا يوجد مقررات لعرضها.</td>
+                        <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">لا يوجد مقررات لعرضها.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-
-        </div>
+    </div>
 </div>
 
-<div id="toast-container" class="fixed top-20 right-4 z-[999] space-y-3"></div>
+<!-- نموذج الحذف (مخفي) -->
+<form id="deleteForm" method="post" style="display:none;">
+    {% csrf_token %}
+    <input type="hidden" name="form_action" value="delete">
+</form>
 
+<!-- نافذة تأكيد الحذف -->
+<div id="deleteConfirmationModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-sm transform scale-95 transition-transform duration-300">
+        <div class="text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/20">
+                <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400 text-2xl"></i>
+            </div>
+            <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">تأكيد الحذف</h3>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                هل أنت متأكد أنك تريد حذف المادة <span id="courseNameToDelete" class="font-semibold"></span>؟ لا يمكن التراجع عن هذا الإجراء.
+            </p>
+        </div>
+        <div class="mt-5 sm:mt-6 flex justify-center gap-3">
+            <button type="button" id="cancelDeleteButton" class="inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm transition-colors duration-200">
+                إلغاء
+            </button>
+            <button type="button" id="confirmDeleteButton" class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm transition-colors duration-200">
+                حذف
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const deleteConfirmationModal = document.getElementById('deleteConfirmationModal');
+    const cancelDeleteButton = document.getElementById('cancelDeleteButton');
+    const confirmDeleteButton = document.getElementById('confirmDeleteButton');
+    const courseNameToDelete = document.getElementById('courseNameToDelete');
+    const deleteForm = document.getElementById('deleteForm');
+
+    let courseIdToDelete = null;
+
+    function showDeleteConfirmation(courseId, courseName) {
+        courseIdToDelete = courseId;
+        courseNameToDelete.textContent = `"${courseName}"`;
+        deleteConfirmationModal.classList.remove('hidden');
+        setTimeout(() => {
+            deleteConfirmationModal.classList.add('opacity-100');
+            deleteConfirmationModal.querySelector('div').classList.remove('scale-95');
+            deleteConfirmationModal.querySelector('div').classList.add('scale-100');
+        }, 10);
+    }
+
+    function hideDeleteConfirmation() {
+        deleteConfirmationModal.classList.remove('opacity-100');
+        deleteConfirmationModal.querySelector('div').classList.remove('scale-100');
+        deleteConfirmationModal.querySelector('div').classList.add('scale-95');
+        setTimeout(() => {
+            deleteConfirmationModal.classList.add('hidden');
+            courseIdToDelete = null;
+        }, 300);
+    }
+
+    cancelDeleteButton.addEventListener('click', hideDeleteConfirmation);
+
+    confirmDeleteButton.addEventListener('click', function() {
+        if (courseIdToDelete !== null) {
+            // تحديد رابط الحذف (تأكد أن الرابط مطابق لمسارات urls.py)
+            deleteForm.action = `/courses/delete/${courseIdToDelete}/`;
+            deleteForm.submit();
+        }
+    });
+
+    deleteConfirmationModal.addEventListener('click', function(event) {
+        if (event.target === deleteConfirmationModal) {
+            hideDeleteConfirmation();
+        }
+    });
+</script>
 {% endblock %}

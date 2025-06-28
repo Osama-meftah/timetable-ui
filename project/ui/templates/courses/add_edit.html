@@ -6,32 +6,84 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mx-auto py-6 sm:py-8">
-    <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6 max-w-lg mx-auto">
-        <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6 text-center">{{ page_title }}</h2>
-        
-        <form method="POST">
+<div class="container mx-auto px-4 py-10 sm:px-6 lg:px-8">
+    <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-xl p-8 sm:p-10 max-w-2xl mx-auto border border-gray-100 dark:border-gray-700">
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-gray-100 mb-6 text-center leading-tight">
+            {{ page_title }}
+        </h2>
+        <form method="POST" action="{% if subject %}{% url 'edit_course' subject.id %}{% else %}{% url 'add_course' %}{% endif %}">
+
             {% csrf_token %}
-            <div class="mb-6">
-                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">اسم المقرر <span class="text-red-500">*</span></label>
-                <input 
-                    type="text" 
-                    id="name" 
-                    name="name" 
-                    class="form-input w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-200" 
-                    placeholder="مثال: الرياضيات للمبتدئين" 
-                    value="{{ course.name|default:'' }}" 
-                    required
-                >
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-y-7 gap-x-6">
+                <div>
+                    <label for="subject_name" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        اسم المادة <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="subject_name"
+                        name="subject_name"
+                        class="form-input w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 transition duration-200 ease-in-out transform hover:scale-[1.01]"
+                        placeholder="ادخل اسم المقرر"
+                        value="{{ subject.subject_name|default:'' }}"
+                        required
+                    >
+                </div>
+
+                {# الفصل الدراسي #}
+                <div>
+                    <label for="term" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        الفصل الدراسي <span class="text-red-500">*</span>
+                    </label>
+                    <select
+                        id="term"
+                        name="term"
+                        class="form-select w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-200 transition duration-200 ease-in-out transform hover:scale-[1.01]"
+                        required
+                    >
+                        <option value="" disabled {% if not subject.term %}selected{% endif %}>اختر الفصل الدراسي</option>
+                        <option value="الأول" {% if subject.term == "الأول" %}selected{% endif %}>الأول</option>
+                        <option value="الثاني" {% if subject.term == "الثاني" %}selected{% endif %}>الثاني</option>
+                    </select>
+                </div>
+                <div class="md:col-span-2">
+                    <label for="fk_level" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        المستوى <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <select
+                            id="fk_level"
+                            name="fk_level"
+                            class="form-select w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-200 appearance-none pr-10 transition duration-200 ease-in-out transform hover:scale-[1.01]"
+                            required
+                        >
+                            <option value="" disabled {% if not subject.fk_level %}selected{% endif %}>
+                                اختر مستوى
+                            </option>
+                            {% for level in levels %}
+                                <option value="{{ level.id }}" {% if subject.fk_level.id == level.id %}selected{% endif %}>
+                                    {{ level.level_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400">
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="flex justify-end gap-3 mt-8">
-                <a href="{% url 'courses_management' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+            {# أزرار الإجراءات #}
+            <div class="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 mt-12 border-t border-gray-200 dark:border-gray-700 pt-8">
+                <button type="submit" class="inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 group">
+                    حفظ المادة
+                </button>
+                <a href="{% url 'courses_management' %}" class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-base font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 group">
                     إلغاء
                 </a>
-                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
-                    حفظ المقرر
-                </button>
             </div>
         </form>
     </div>
