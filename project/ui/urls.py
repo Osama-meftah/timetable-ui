@@ -44,7 +44,7 @@ urlpatterns = [
     
     
     path('program/add/', views.AddAndEditProgramView.as_view(), name='add_program'),
-    path('program/edit/<int:id>/', views.AddAndEditProgramView.as_view(), name='edit_program'),
+    path('program/edit/<int:pk>/', views.add_edit_department_view, name='edit_program'),
     path('program/delete/<int:pk>/', views.delete_department_view, name='delete_program'),
     
     
