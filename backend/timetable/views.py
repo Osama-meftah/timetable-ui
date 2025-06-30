@@ -3,6 +3,11 @@ from .serializers import *
 from rest_framework.viewsets import ModelViewSet
 
 
+class DepartmentViewSet(ModelViewSet):
+    queryset=Department.objects.all()
+    serializer_class= DepartmentSerializer
+    
+    
 class ProgramViewSet(ModelViewSet):
     queryset=Program.objects.all()
     serializer_class=ProgramSerializer

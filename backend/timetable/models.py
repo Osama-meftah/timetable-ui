@@ -1,9 +1,27 @@
 from django.db import models
 
 # Create your models here.
-# البرنامج
+
+class Department(models.Model):
+    name = models.CharField(max_length=100, verbose_name="اسم القسم", unique=True)
+    description = models.TextField(verbose_name="وصف القسم", blank=True, null=True)
+
+    class Meta:
+        verbose_name = "قسم"
+        verbose_name_plural = "الأقسام"
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+    
 class Program(models.Model):
     program_name = models.CharField(max_length=50, verbose_name="اسم البرنامج")
+    fk_department = models.ForeignKey(
+        'Department',
+        on_delete=models.CASCADE,
+        related_name='programs',
+        verbose_name="القسم التابع له"
+    )
     class Meta:
         verbose_name = "برنامج"
         verbose_name_plural = "البرامج"
@@ -14,9 +32,13 @@ class Program(models.Model):
 
 # القاعة
 class Hall(models.Model):
+    STATUS_CHOICES = [
+        ('متاحة', 'متاحة'),
+        ('تحت الصيانة', 'تحت الصيانة') # Changed 'اجازة' to 'إجازة' for full word
+    ]
     hall_name = models.CharField(max_length=50, verbose_name="اسم القاعة")
     capacity_hall = models.IntegerField(verbose_name="سعة القاعة")
-
+    hall_status = models.CharField(choices=STATUS_CHOICES,verbose_name="حالة القاعة",default='متاح')
     class Meta:
         verbose_name = "قاعة"
         verbose_name_plural = "القاعات"
@@ -67,7 +89,6 @@ class Group(models.Model):
 class Subject(models.Model):
     subject_name = models.CharField(max_length=100, verbose_name="اسم المادة")
     term = models.CharField(max_length=50, verbose_name="الفصل الدراسي",default="الاول")
-    # تم إضافة علاقة مفتاح أجنبي بالمستوى لأن المادة تتبع مستوى معين
     fk_level = models.ForeignKey(
         Level, 
         on_delete=models.CASCADE, 

@@ -1,18 +1,31 @@
 from rest_framework import serializers
 from .models import (
     Program, Hall, Level, Group, Subject, Teacher,
-    Today, Period, TeacherTime, Distribution, Table, Lecture
+    Today, Period, TeacherTime, Distribution, Table, Lecture,Department
 )
 
+
+class DepartmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Department
+        fields = ['id', 'name', 'description']
+        
+        
 class ProgramSerializer(serializers.ModelSerializer):
+    fk_department = DepartmentSerializer(read_only=True) 
+    department_id = serializers.PrimaryKeyRelatedField(
+        queryset=Department.objects.all(), write_only=True, source='fk_department'
+    )
+
     class Meta:
         model = Program
-        fields = '__all__'
+        fields = ['id', 'program_name', 'fk_department', 'department_id']
 
 class HallSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hall
         fields = '__all__'
+        
 
 # Serializer للنموذج Level
 class LevelSerializer(serializers.ModelSerializer):

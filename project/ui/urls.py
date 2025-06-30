@@ -15,7 +15,7 @@ urlpatterns = [
       
     path('teacherswithcourses/add/', views.TeacherAvailabilityAndCoursesView.as_view(), name='add_edit_teacher_with_courses'),
     path('teacherswithcourses/edit/<int:id>/', views.TeacherAvailabilityAndCoursesView.as_view(), name='add_edit_teacher_with_courses'),
-    path('teacherswithcourses/delete/<int:pk>/', views.delete_teacher_with_courses_view, name='delete_teacher_with_courses'),  
+    # path('teacherswithcourses/delete/<int:pk>/', views.delete_teacher_with_courses_view, name='delete_teacher_with_courses'),  
       
     
     
@@ -27,16 +27,25 @@ urlpatterns = [
     
     
     
-    path('rooms/', views.rooms_management_view, name='rooms_management'),
-    path('rooms/add/', views.add_edit_room_view, name='add_room'),
-    path('rooms/edit/<int:pk>/', views.add_edit_room_view, name='edit_room'),
-    path('rooms/delete/<int:pk>/confirm/', views.confirm_delete_room_view, name='confirm_delete_room'),
+    path('rooms/', views.RoomsView.as_view(), name='rooms_management'),
+    path('rooms/add/', views.RoomsView.as_view(), name='add_room'),
+    path('rooms/edit/<int:id>/', views.RoomsView.as_view(), name='edit_room'),
+    path('rooms/delete/<int:id>/confirm/', views.RoomsView.as_view(), name='delete_room'),
     
     
-    path('departments/', views.departments_management_view, name='departments_management'),
-    path('departments/add/', views.add_edit_department_view, name='add_department'),
-    path('departments/edit/<int:pk>/', views.add_edit_department_view, name='edit_department'),
-    path('departments/delete/<int:pk>/', views.delete_department_view, name='delete_department'),
+    
+    
+    
+    
+    path('departments/', views.DepartmentsManagementView.as_view(), name='departments_management'),
+    path('departments/add/', views.DepartmentsManagementView.as_view(), name='add_department'),
+    path('departments/edit/<int:id>/', views.DepartmentsManagementView.as_view(), name='edit_department'),
+    path('departments/delete/<int:id>/', views.DepartmentsManagementView.as_view(), name='delete_department'),
+    
+    
+    path('program/add/', views.AddAndEditProgramView.as_view(), name='add_program'),
+    path('program/edit/<int:id>/', views.AddAndEditProgramView.as_view(), name='edit_program'),
+    path('program/delete/<int:pk>/', views.delete_department_view, name='delete_program'),
     
     
     

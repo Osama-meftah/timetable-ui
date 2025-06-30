@@ -24,7 +24,7 @@
                         type="text"
                         id="subject_name"
                         name="subject_name"
-                        class="form-input w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 transition duration-200 ease-in-out transform hover:scale-[1.01]"
+                        class="form-input w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-500 transition duration-200 ease-in-out transform hover:scale-[1.01]"
                         placeholder="ادخل اسم المقرر"
                         value="{{ subject.subject_name|default:'' }}"
                         required
@@ -47,6 +47,8 @@
                         <option value="الثاني" {% if subject.term == "الثاني" %}selected{% endif %}>الثاني</option>
                     </select>
                 </div>
+
+                {# حقل المستوى - يعرض جميع المستويات #}
                 <div class="md:col-span-2">
                     <label for="fk_level" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                         المستوى <span class="text-red-500">*</span>
@@ -58,12 +60,13 @@
                             class="form-select w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-200 appearance-none pr-10 transition duration-200 ease-in-out transform hover:scale-[1.01]"
                             required
                         >
-                            <option value="" disabled {% if not subject.fk_level %}selected{% endif %}>
+                            <option value="" disabled selected>
                                 اختر مستوى
                             </option>
                             {% for level in levels %}
-                                <option value="{{ level.id }}" {% if subject.fk_level.id == level.id %}selected{% endif %}>
-                                    {{ level.level_name }}
+                                <option value="{{ level.id }}"
+                                    {% if subject.fk_level.id == level.id %}selected{% endif %}>
+                                    {{ level.level_name }} (برنامج: {{ level.fk_program.program_name }}) {# Show program name for clarity #}
                                 </option>
                             {% endfor %}
                         </select>

@@ -126,10 +126,12 @@
                                         </select>
                                     </div>
                                     <button type="button"
-                                            class="remove-distribution-btn absolute top-2 right-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-lg p-1 rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition-colors duration-200"
+                                            onclick="showDeleteConfirmation('distribution', {{ item.id }}, '{{ item.fk_subject.subject_name }} في {{ item.fk_program.program_name }} - {{ item.fk_level.level_name }} - {{ item.fk_group.group_name }}')"
+                                            class="remove-distribution-btn absolute top-0 left-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-lg p-1 rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition-colors duration-200"
                                             title="إزالة هذا المقرر">
                                         <i class="fas fa-times-circle"></i>
                                     </button>
+
                                 </div>
                             {% endfor %}
                         {% endif %}
@@ -178,7 +180,7 @@
                     <div id="availability-container" class="space-y-4">
                         {% if teacher_times %}
                             {% for item in teacher_times %}
-                                <div class="availability-item flex flex-col sm:flex-row items-center gap-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600">
+                                <div class="availability-item relative flex flex-col sm:flex-row items-center gap-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600">
                                     <input type="hidden" name="availability_id_{{ forloop.counter }}" value="{{ item.id }}">
                                     <div class="w-full sm:w-1/3">
                                         <label for="day-{{ forloop.counter }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">اليوم</label>
@@ -204,16 +206,20 @@
                                     </div>
                                     <button
                                             type="button"
-                                            class="remove-availability-btn text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-lg p-2 rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition-colors duration-200"
+                                            onclick="showDeleteConfirmation('availability', '{{ item.id|default:'' }}', 'وقت المدرس')"
+                                            class="remove-availability-btn text-red-500 hover:text-red-700 dark:text-red-400
+                                            dark:hover:text-red-300 text-lg p-2 absolute top-0 left-0
+                                            rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition-colors duration-200"
                                             title="إزالة هذا الوقت"
-                                    >
+                                            >
                                         <i class="fas fa-times-circle"></i>
                                     </button>
+                                    
                                 </div>
                             {% endfor %}
                         {% else %}
                             {# If no available times, add an empty item for the user to start adding times #}
-                            <div class="availability-item flex flex-col sm:flex-row items-center gap-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600">
+                            <div class="availability-item relative flex flex-col sm:flex-row items-center gap-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600">
                                 <input type="hidden" name="availability_id_1" value="">
                                 
                                 <div class="w-full sm:w-1/3">
@@ -240,9 +246,13 @@
                                 </div>
                                 <button
                                         type="button"
-                                        class="remove-availability-btn text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-lg p-2 rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition-colors duration-200"
+                                        onclick="showDeleteConfirmation('availability', '', 'وقت جديد')"
+                                        
+                                        class="remove-availability-btn text-red-500 hover:text-red-700 dark:text-red-400
+                                        dark:hover:text-red-300 text-lg p-2 absolute top-0 left-0
+                                        rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition-colors duration-200"
                                         title="إزالة هذا الوقت"
-                                >
+                                        >
                                     <i class="fas fa-times-circle"></i>
                                 </button>
                             </div>
@@ -272,21 +282,136 @@
             </form>
         </div>
     </div>
+
+
+
+        {# Custom Confirmation Modal #}
+       <!-- ✅ Modal حذف -->
+    <div id="deleteConfirmationModal"
+        class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-sm transform scale-95 transition-transform duration-300">
+        <div class="text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/20">
+                <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400 text-2xl"></i>
+            </div>
+            <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">تأكيد الحذف</h3>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                هل أنت متأكد أنك تريد حذف <span id="itemNameToDelete" class="font-semibold"></span>؟
+                لا يمكن التراجع عن هذا الإجراء.
+            </p>
+        </div>
+
+        <!-- ✅ Form الحذف المخفي -->
+        <form id="deleteForm" method="POST" 
+            action="{% if teacher.id %}
+                {% url 'add_edit_teacher_with_courses' id=teacher.id %}
+               {% else %}
+                   {% url 'add_edit_teacher_with_courses' %}
+               {% endif %}"
+            class="mt-5 sm:mt-6 flex justify-center gap-3">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" id="deleteFormType">
+            <input type="hidden" name="distribution_id" id="deleteDistributionId">
+            <input type="hidden" name="availability_id" id="deleteAvailabilityId">
+            <input type="hidden" name="selected_teacher_id" id="selectedTeacherId">
+
+            <button type="button"
+                    id="cancelDeleteButton"
+                    class="inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm transition-colors duration-200">
+                إلغاء
+            </button>
+
+            <button type="submit"
+                    class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm transition-colors duration-200">
+                حذف
+            </button>
+        </form>
+        </div>
+        </div>
+
 {% endblock %}
 
 {% block extra_js %}
     <script>
+        const deleteConfirmationModal = document.getElementById('deleteConfirmationModal');
+        const cancelDeleteButton = document.getElementById('cancelDeleteButton');
+        const itemNameToDeleteSpan = document.getElementById('itemNameToDelete');
+
+        let itemTypeToDelete = null;
+        let itemIdToDelete = null;
+        let teacherId = "{{ teacher.id }}"; // من Django
+
+        function showDeleteConfirmation(type, itemId, itemName) {
+            itemTypeToDelete = type;
+            itemIdToDelete = itemId;
+            itemNameToDeleteSpan.textContent = `"${itemName}"`;
+            console.log("نوع العنصر:", type);
+            console.log("المعرف:", itemId);
+            console.log("اسم العنصر:", itemName);
+            console.log("معرف المدرس:", teacherId);
+
+            document.getElementById("deleteFormType").value =
+                type === "distribution" ? "delete_distribution" : "delete_availability";
+
+            document.getElementById("deleteDistributionId").value =
+                type === "distribution" ? itemId : "";
+
+            document.getElementById("deleteAvailabilityId").value =
+                type === "availability" ? itemId : "";
+
+            // ✅ تعيين معرف المدرس
+            document.getElementById("selectedTeacherId").value = teacherId;
+
+            // إظهار النافذة
+            deleteConfirmationModal.classList.remove('hidden');
+            setTimeout(() => {
+                deleteConfirmationModal.classList.add('opacity-100');
+                deleteConfirmationModal.querySelector('div').classList.remove('scale-95');
+                deleteConfirmationModal.querySelector('div').classList.add('scale-100');
+            }, 10);
+        }
+
+        function hideDeleteConfirmation() {
+            deleteConfirmationModal.classList.remove('opacity-100');
+            deleteConfirmationModal.querySelector('div').classList.remove('scale-100');
+            deleteConfirmationModal.querySelector('div').classList.add('scale-95');
+            setTimeout(() => {
+                deleteConfirmationModal.classList.add('hidden');
+                itemTypeToDelete = null;
+                itemIdToDelete = null;
+            }, 300);
+        }
+
+        cancelDeleteButton.addEventListener('click', hideDeleteConfirmation);
+
+        deleteConfirmationModal.addEventListener('click', function (event) {
+            if (event.target === deleteConfirmationModal) {
+                hideDeleteConfirmation();
+            }
+        });
+
+        // --- JavaScript for Dynamic Add/Remove functionality (Existing Code, adjusted for clarity) ---
+
+        // For Distributed Courses
+        let distributionCounter = {{ teacher_distributions|length|default:0 }};
+        if (distributionCounter === 0) {
+            distributionCounter = 1; // Start from 1 if no items exist initially for correct naming
+        } else {
+            // Ensure counter starts AFTER existing items for new additions
+            distributionCounter = {{ teacher_distributions|length }} + 1;
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // --- Utility Function to update indexes and names/IDs ---
             function updateElementIndexes(containerId, itemClass, namePrefix) {
                 const container = document.getElementById(containerId);
                 if (!container) return; // Exit if container doesn't exist
-
+        
                 const items = container.querySelectorAll(`.${itemClass}`);
                 items.forEach((item, index) => {
                     const newIndex = index + 1;
                     item.setAttribute('data-index', newIndex);
-
+        
                     item.querySelectorAll('[name]').forEach(input => {
                         const originalName = input.getAttribute('name');
                         if (originalName) {
@@ -304,7 +429,7 @@
                                 const suffix = parts[0]; // The actual field name like 'program'
                                 newName = `${namePrefix}${suffix}_${newIndex}`;
                             }
-
+        
                             if (newName) {
                                 input.setAttribute('name', newName);
                                 // Update ID if it follows the pattern (e.g., program-1, day-1)
@@ -317,7 +442,7 @@
                             }
                         }
                     });
-
+        
                     // Update 'for' attributes of labels
                     item.querySelectorAll('label[for]').forEach(label => {
                         const originalFor = label.getAttribute('for');
@@ -330,176 +455,170 @@
                     });
                 });
             }
-
-            // --- Distribution Items (Courses) ---
-            const distributionContainer = document.getElementById('distribution-container');
-            const addDistributionBtn = document.getElementById('add-distribution-btn');
-
-            let distributionCounter = distributionContainer.querySelectorAll('.distribution-item').length;
-            // If no items are rendered by Django, add one default empty item.
-            if (distributionCounter === 0) {
-                addDistributionItem(); // This will increment counter to 1 and add the first item
-            } else {
-                // Ensure existing items have correct sequential indexing on load
-                updateElementIndexes('distribution-container', 'distribution-item', 'dist_');
-            }
-
-            function addDistributionItem() {
-                distributionCounter++;
-                const newItemHtml = `
-                    <div class="distribution-item grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600 relative">
-                        <input type="hidden" name="distribution_id_${distributionCounter}" value="">
-                        <div>
-                            <label for="program-${distributionCounter}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">البرنامج</label>
-                            <select id="program-${distributionCounter}" name="dist_program_${distributionCounter}"
-                                    class="select-program mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3
-                                    appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
-                                <option value="">اختر برنامج</option>
-                                {% for program in programs %}
-                                    <option value="{{ program.id }}">{{ program.program_name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div>
-                            <label for="level-${distributionCounter}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">المستوى</label>
-                            <select id="level-${distributionCounter}" name="dist_level_${distributionCounter}" class="select-level mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
-                                <option value="">اختر مستوى</option>
-                                {% for level in levels %}
-                                    <option value="{{ level.id }}">{{ level.level_name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div>
-                            <label for="group-${distributionCounter}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">المجموعة</label>
-                            <select id="group-${distributionCounter}" name="dist_group_${distributionCounter}" class="select-group mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
-                                <option value="">اختر مجموعة</option>
-                                {% for group in groups %}
-                                    <option value="{{ group.id }}">{{ group.group_name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div>
-                            <label for="subject-${distributionCounter}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">المادة</label>
-                            <select id="subject-${distributionCounter}" name="dist_subject_${distributionCounter}" class="select-subject mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
-                                <option value="">اختر مادة</option>
-                                {% for subject in subjects %}
-                                    <option value="{{ subject.id }}">{{ subject.subject_name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <button type="button"
-                                class="remove-distribution-btn absolute top-2 right-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-lg p-1 rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition-colors duration-200"
-                                title="إزالة هذا المقرر">
-                            <i class="fas fa-times-circle"></i>
-                        </button>
-                    </div>
-                `;
-                distributionContainer.insertAdjacentHTML('beforeend', newItemHtml);
-                updateElementIndexes('distribution-container', 'distribution-item', 'dist_');
-            }
-
-            if (addDistributionBtn) {
-                addDistributionBtn.addEventListener('click', function() {
-                    addDistributionItem();
+        
+            // --- Dynamic Item Management Function ---
+            function setupDynamicItems(containerId, itemClass, addButtonId, namePrefix, getItemHtml) {
+                const container = document.getElementById(containerId);
+                const addButton = document.getElementById(addButtonId);
+        
+                // Initialize counter based on existing items, or 0 if none
+                let counter = container.querySelectorAll(`.${itemClass}`).length;
+        
+                // If no items are rendered by the backend (Django), add one default empty item.
+                if (counter === 0) {
+                    addItem(); // This will increment counter to 1 and add the first item
+                } else {
+                    // Ensure existing items have correct sequential indexing on load
+                    updateElementIndexes(containerId, itemClass, namePrefix);
+                }
+        
+                // Function to add a new item
+                function addItem() {
+                    counter++;
+                    const newItemHtml = getItemHtml(counter);
+                    container.insertAdjacentHTML('beforeend', newItemHtml);
+                    updateElementIndexes(containerId, itemClass, namePrefix);
+                }
+        
+                // Event listener for the add button
+                if (addButton) {
+                    addButton.addEventListener('click', addItem);
+                }
+        
+                // Delegate click events for dynamically added remove buttons
+                container.addEventListener('click', function(event) {
+                    const removeButton = event.target.closest(`.remove-${itemClass}-btn`);
+                    if (removeButton) {
+                        const itemToRemove = removeButton.closest(`.${itemClass}`);
+                        if (itemToRemove) {
+                            const hiddenIdInput = itemToRemove.querySelector(`input[name^="${namePrefix.slice(0, -1)}_id_"]`);
+                            const itemId = hiddenIdInput ? hiddenIdInput.value : '';
+        
+                            let itemName = '';
+                            if (itemClass === 'distribution-item') {
+                                const programName = itemToRemove.querySelector('select[name^="dist_program_"] option:checked')?.textContent || 'البرنامج المحدد';
+                                const levelName = itemToRemove.querySelector('select[name^="dist_level_"] option:checked')?.textContent || 'المستوى المحدد';
+                                const groupName = itemToRemove.querySelector('select[name^="dist_group_"] option:checked')?.textContent || 'المجموعة المحددة';
+                                const subjectName = itemToRemove.querySelector('select[name^="dist_subject_"] option:checked')?.textContent || 'المادة المحددة';
+                                itemName = `${subjectName} في ${programName} - ${levelName} - ${groupName}`;
+                            } else if (itemClass === 'availability-item') {
+                                const dayName = itemToRemove.querySelector('select[name^="time_day_"] option:checked')?.textContent || 'اليوم المحدد';
+                                const periodName = itemToRemove.querySelector('select[name^="time_period_"] option:checked')?.textContent || 'الفترة المحددة';
+                                itemName = `${dayName} - ${periodName}`;
+                            }
+        
+                            if (itemId) {
+                                // If it's an existing item (has an ID), show confirmation modal
+                                // Note: showDeleteConfirmation function is assumed to be defined elsewhere globally or within this scope
+                                showDeleteConfirmation(itemClass.replace('-item', ''), itemId, itemName);
+                            } else {
+                                // If it's a newly added item (no ID yet), remove directly
+                                itemToRemove.remove();
+                            }
+        
+                            updateElementIndexes(containerId, itemClass, namePrefix);
+                        }
+                    }
                 });
             }
-
-            distributionContainer.addEventListener('click', function(event) {
-                if (event.target.closest('.remove-distribution-btn')) {
-                    const itemToRemove = event.target.closest('.distribution-item');
-                    if (itemToRemove) {
-                        const hiddenIdInput = itemToRemove.querySelector('input[name^="distribution_id_"]');
-                        if (hiddenIdInput && hiddenIdInput.value) {
-                            const deletedInput = document.createElement('input');
-                            deletedInput.type = 'hidden';
-                            deletedInput.name = `deleted_distribution_ids`;
-                            deletedInput.value = hiddenIdInput.value;
-                            distributionContainer.appendChild(deletedInput);
-                        }
-                        itemToRemove.remove();
-                        updateElementIndexes('distribution-container', 'distribution-item', 'dist_');
-                    }
-                }
-            });
-
-            // --- Availability Items (Times) ---
-            const availabilityContainer = document.getElementById('availability-container');
-            const addAvailabilityBtn = document.getElementById('add-availability-btn');
-
-            let availabilityCounter = availabilityContainer.querySelectorAll('.availability-item').length;
-            // If no items are rendered by Django, add one default empty item.
-            if (availabilityCounter === 0) {
-                addAvailabilityItem(); // This will increment counter to 1 and add the first item
-            } else {
-                // Ensure existing items have correct sequential indexing on load
-                updateElementIndexes('availability-container', 'availability-item', 'time_');
-            }
-
-            function addAvailabilityItem() {
-                availabilityCounter++;
-                const newItemHtml = `
-                    <div class="availability-item flex flex-col sm:flex-row items-center gap-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600">
-                        <input type="hidden" name="availability_id_${availabilityCounter}" value="">
-                        <div class="w-full sm:w-1/3">
-                            <label for="day-${availabilityCounter}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">اليوم</label>
-                            <select id="day-${availabilityCounter}" name="time_day_${availabilityCounter}"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none
-                                    focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
-                                <option value="">اختر يوم</option>
-                                {% for day in days %}
-                                    <option value="{{ day.id }}">{{ day.day_name_display }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="w-full sm:w-2/3">
-                            <label for="period-${availabilityCounter}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">الفترة</label>
-                            <select id="period-${availabilityCounter}" name="time_period_${availabilityCounter}"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none
-                                    focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
-                                <option value="">اختر فترة</option>
-                                {% for period in periods %}
-                                    <option value="{{ period.id }}">{{ period.period_display }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <button
-                                type="button"
-                                class="remove-availability-btn text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-lg p-2 rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition-colors duration-200"
-                                title="إزالة هذا الوقت"
-                        >
-                            <i class="fas fa-times-circle"></i>
-                        </button>
+        
+            // --- HTML Templates for new items ---
+            // Make sure 'programs', 'levels', 'groups', 'subjects', 'days', 'periods' are available globally
+            // or passed into this script. They typically come from Django context.
+        
+            // Distribution Item HTML
+            const getDistributionItemHtml = (counter) => `
+                <div class="distribution-item grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600 relative">
+                    <input type="hidden" name="distribution_id_${counter}" value="">
+                    <div>
+                        <label for="program-${counter}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">البرنامج</label>
+                        <select id="program-${counter}" name="dist_program_${counter}"
+                                class="select-program mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
+                            <option value="">اختر برنامج</option>
+                            {% for program in programs %}
+                                <option value="{{ program.id }}">{{ program.program_name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
-                `;
-                availabilityContainer.insertAdjacentHTML('beforeend', newItemHtml);
-                updateElementIndexes('availability-container', 'availability-item', 'time_');
-            }
-
-            if (addAvailabilityBtn) {
-                addAvailabilityBtn.addEventListener('click', function() {
-                    addAvailabilityItem();
-                });
-            }
-
-            availabilityContainer.addEventListener('click', function(event) {
-                if (event.target.closest('.remove-availability-btn')) {
-                    const itemToRemove = event.target.closest('.availability-item');
-                    if (itemToRemove) {
-                        const hiddenIdInput = itemToRemove.querySelector('input[name^="availability_id_"]');
-                        if (hiddenIdInput && hiddenIdInput.value) {
-                            const deletedInput = document.createElement('input');
-                            deletedInput.type = 'hidden';
-                            deletedInput.name = `deleted_availability_ids`;
-                            deletedInput.value = hiddenIdInput.value;
-                            availabilityContainer.appendChild(deletedInput);
-                        }
-                        itemToRemove.remove();
-                        updateElementIndexes('availability-container', 'availability-item', 'time_');
-                    }
-                }
-            });
+                    <div>
+                        <label for="level-${counter}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">المستوى</label>
+                        <select id="level-${counter}" name="dist_level_${counter}" class="select-level mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
+                            <option value="">اختر مستوى</option>
+                            {% for level in levels %}
+                                <option value="{{ level.id }}">{{ level.level_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="group-${counter}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">المجموعة</label>
+                        <select id="group-${counter}" name="dist_group_${counter}" class="select-group mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
+                            <option value="">اختر مجموعة</option>
+                            {% for group in groups %}
+                                <option value="{{ group.id }}">{{ group.group_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="subject-${counter}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">المادة</label>
+                        <select id="subject-${counter}" name="dist_subject_${counter}" class="select-subject mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
+                            <option value="">اختر مادة</option>
+                            {% for subject in subjects %}
+                                <option value="{{ subject.id }}">{{ subject.subject_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="button"
+                            onclick="showDeleteConfirmation('distribution', '', 'مقرر جديد')"
+                            class="remove-distribution-btn absolute top-0 left-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-lg p-1 rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition-colors duration-200"
+                            title="إزالة هذا المقرر">
+                        <i class="fas fa-times-circle"></i>
+                    </button>
+                </div>
+            `;
+        
+            // Availability Item HTML
+            const getAvailabilityItemHtml = (counter) => `
+                <div class="availability-item relative flex flex-col sm:flex-row items-center gap-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600">
+                    <input type="hidden" name="availability_id_${counter}" value="">
+                    <div class="w-full sm:w-1/3">
+                        <label for="day-${counter}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">اليوم</label>
+                        <select id="day-${counter}" name="time_day_${counter}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none
+                                focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
+                            <option value="">اختر يوم</option>
+                            {% for day in days %}
+                                <option value="{{ day.id }}">{{ day.day_name_display }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="w-full sm:w-2/3">
+                        <label for="period-${counter}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">الفترة</label>
+                        <select id="period-${counter}" name="time_period_${counter}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none
+                                focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
+                            <option value="">اختر فترة</option>
+                            {% for period in periods %}
+                                <option value="{{ period.id }}">{{ period.period_display }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button
+                            type="button"
+                            onclick="showDeleteConfirmation('availability', '', 'وقت جديد')"
+                            class="remove-availability-btn text-red-500 hover:text-red-700 dark:text-red-400
+                            dark:hover:text-red-300 text-lg p-2 absolute top-0 left-0
+                            rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition-colors duration-200"
+                            title="إزالة هذا الوقت"
+                            >
+                        <i class="fas fa-times-circle"></i>
+                    </button>
+                </div>
+            `;
+        
+            // --- Initialize Dynamic Item Sections ---
+            setupDynamicItems('distribution-container', 'distribution-item', 'add-distribution-btn', 'dist_', getDistributionItemHtml);
+            setupDynamicItems('availability-container', 'availability-item', 'add-availability-btn', 'time_', getAvailabilityItemHtml);
         });
+    
     </script>
 {% endblock %}
-
-

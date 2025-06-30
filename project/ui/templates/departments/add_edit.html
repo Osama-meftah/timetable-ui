@@ -2,221 +2,93 @@
 {% load static %}
 
 {% block page_header_title %}
-    {% if department %}تعديل قسم: {{ department.name }}{% else %}إضافة قسم جديد{% endif %}
+    {# Dynamically set page title based on whether 'department' data is available #}
+    {% if department %}تعديل قسم: {{ department.name|default:'' }}{% else %}إضافة قسم جديد{% endif %}
 {% endblock %}
 
 {% block content %}
-<div class="container mx-auto py-6 sm:py-8">
-    <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6">
-        <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6 border-b pb-4 border-gray-200 dark:border-gray-700">
+<div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-xl p-6 sm:p-8 border border-gray-100 dark:border-gray-700">
+        <h2 class="text-3xl font-extrabold text-gray-900 dark:text-gray-100 mb-6 pb-4 border-b-2 border-indigo-500 dark:border-indigo-600 text-center">
+            {# Dynamically set heading based on 'department' data #}
             {% if department %}تعديل بيانات القسم{% else %}إضافة قسم جديد{% endif %}
         </h2>
 
-        <form method="post" action="" class="space-y-6">
-            {% csrf_token %}
+        {# Django Messages - Displays success or error messages from the view #}
+        {% if messages %}
+            <div class="mb-6 space-y-3">
+                {% for message in messages %}
+                    <div class="p-4 rounded-lg animate-fade-in flex items-start gap-3
+                        {% comment %} Apply styles based on message tags (e.g., 'success', 'error', 'warning') {% endcomment %}
+                        {% if message.tags == 'success' %}bg-green-50 dark:bg-green-900/30 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-700
+                        {% elif message.tags == 'error' %}bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-700
+                        {% elif message.tags == 'warning' %}bg-yellow-50 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border border-yellow-200 dark:border-yellow-700
+                        {% else %}bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700{% endif %}" role="alert">
+                        <i class="text-xl leading-none mt-0.5
+                            {# Dynamic icons from FontAwesome based on message type #}
+                            {% if message.tags == 'success' %}fas fa-check-circle text-green-500
+                            {% elif message.tags == 'error' %}fas fa-times-circle text-red-500
+                            {% elif message.tags == 'warning' %}fas fa-exclamation-triangle text-yellow-500
+                            {% else %}fas fa-info-circle text-blue-500{% endif %}
+                        "></i>
+                        <p class="text-sm font-medium flex-1">{{ message }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="POST" class="space-y-7" action="{% if department %}{% url 'edit_department' department.id %}{% else %}{% url 'add_department' %}{% endif %}">
+
+            {% csrf_token %} {# Django's security token for form submissions #}
+            <input type="hidden" name="action" value="{% if department %}edit{% else %}add{% endif %}">
+
+            {# إرسال ID القسم عند التعديل #}
+            {% if department %}
+                <input type="hidden" name="dept_id" value="{{ department.id }}">
+            {% endif %}
 
             <div>
-                <label for="department_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">اسم القسم/التخصص</label>
+                <label for="department_name" class="block text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">اسم القسم/التخصص <span class="text-red-500">*</span></label>
                 <input
                     type="text"
                     name="department_name"
                     id="department_name"
-                    value="{% if department %}{{ department.name }}{% endif %}"
-                    required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                    {# Populates with existing department name (if editing) or previous input (if error), otherwise empty #}
+                    value="{% if department %}{{ department.name|default:'' }}{% else %}{{ request.POST.department_name|default:'' }}{% endif %}"
+                    required {# Marks this field as mandatory #}
+                    class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-base dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-400 transition duration-150 ease-in-out"
+                    placeholder="مثال: قسم علوم الحاسوب"
+                    aria-describedby="department_name_help"
                 />
+                <p id="department_name_help" class="mt-2 text-sm text-gray-500 dark:text-gray-400">اسم فريد يميز هذا القسم عن غيره.</p>
             </div>
 
             <div>
-                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">وصف القسم (اختياري)</label>
+                <label for="description" class="block text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">وصف القسم (اختياري)</label>
                 <textarea
                     name="description"
                     id="description"
-                    rows="3"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                >{% if department %}{{ department.description }}{% endif %}</textarea>
+                    rows="4"
+                    class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-base dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-400 transition duration-150 ease-in-out"
+                    placeholder="اكتب وصفًا موجزًا وشاملاً عن القسم، أهدافه، وتخصصاته الرئيسية هنا."
+                    aria-describedby="description_help"
+                >{% comment %} Populates with existing description (if editing) or previous input, otherwise empty {% endcomment %}
+{% if department %}{{ department.description|default:'' }}{% else %}{{ request.POST.description|default:'' }}{% endif %}</textarea>
+                <p id="description_help" class="mt-2 text-sm text-gray-500 dark:text-gray-400">يمكنك إضافة تفاصيل إضافية حول مهام القسم أو مميزاته(اختياري).</p>
             </div>
 
-            <div class="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
-                <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">تفاصيل المستويات</h3>
-
-                <div>
-                    <label for="num_levels" class="block text-sm font-medium text-gray-700 dark:text-gray-300">عدد المستويات في القسم (للعرض فقط)</label>
-                    <input
-                        type="number"
-                        name="num_levels"
-                        id="num_levels"
-                        value="{% if department %}{{ department.num_levels }}{% else %}0{% endif %}"
-                        min="0"
-                        readonly {# جعله للقراءة فقط مؤقتا لتجنب تعقيدات إضافة/حذف مستويات في البيانات الوهمية #}
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 cursor-not-allowed"
-                    />
-                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">تعديل عدد المستويات يتطلب منطقًا إضافيًا لإنشاء/حذف مستويات فعلية. في هذا المثال، نفترض أنها ثابتة.</p>
-                </div>
-
-                {% if department and department.levels_data %}
-                <div class="mt-8">
-                    <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">تفاصيل الطلاب والمقررات لكل مستوى:</h4>
-                    <div class="space-y-6">
-                        {% for level in department.levels_data %}
-                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600" data-level-id="{{ level.level_id }}">
-                            <h5 class="text-base font-medium text-gray-800 dark:text-gray-100 mb-3 border-b pb-2 border-gray-300 dark:border-gray-600">{{ level.name }}</h5>
-                            <div class="space-y-4">
-                                <div class="flex items-center gap-4">
-                                    <label for="level_{{ level.level_id }}_students" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3">عدد الطلاب:</label>
-                                    <input
-                                        type="number"
-                                        name="level_{{ level.level_id }}_students"
-                                        id="level_{{ level.level_id }}_students"
-                                        value="{{ level.num_students }}"
-                                        min="0"
-                                        class="mt-1 block w-2/3 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-600 dark:border-gray-500 dark:text-gray-200"
-                                    />
-                                </div>
-
-                                <div class="mt-4">
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">المقررات المرتبطة بهذا المستوى:</label>
-                                    <div id="courses-list-{{ level.level_id }}" class="space-y-2">
-                                        {# تعرض المقررات المرتبطة حاليًا بهذا المستوى، وكل منها يملك زر حذف #}
-                                        {% for course in level.current_courses_details %}
-                                        <div class="flex items-center justify-between bg-gray-100 dark:bg-gray-700 p-2 rounded-md border border-gray-200 dark:border-gray-600" data-course-id="{{ course.id }}">
-                                            <span class="text-gray-900 dark:text-gray-100 text-sm">{{ course.name }}</span>
-                                            {# هذا الحقل المخفي مهم جداً لإرسال معرفات المقررات إلى الخادم #}
-                                            <input type="hidden" name="level_{{ level.level_id }}_courses[]" value="{{ course.id }}">
-                                            <button type="button" class="text-red-500 hover:text-red-700 remove-course-button" aria-label="Remove course {{ course.name }}">
-                                                <i class="fas fa-times-circle"></i>
-                                            </button>
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                    <div class="flex items-center mt-3 gap-2 w-1/2">
-                                        {# قائمة منسدلة لاختيار مقرر جديد للإضافة #}
-                                        <select
-                                            id="add-course-select-{{ level.level_id }}"
-                                            class="block py-2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-600 dark:border-gray-800 dark:text-gray-200"
-                                        >
-                                            <option value="">اختر مقرر لإضافته</option>
-                                            {% for course in all_courses %}
-                                                <option value="{{ course.id }}" data-course-name="{{ course.name }} ({{ course.code }})">{{ course.name }} ({{ course.code }})</option>
-                                            {% endfor %}
-                                        </select>
-                                        {# زر الإضافة الذي يقوم بإضافة المقرر ديناميكيًا عبر JavaScript #}
-                                        <button
-                                            type="button"
-                                            class="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 add-course-button"
-                                            data-target-level-id="{{ level.level_id }}"
-                                        >
-                                            <i class="fas fa-plus mx-2"></i> إضافة
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center gap-4 mt-2">
-                                    <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3">عدد المقررات المحسوب:</span>
-                                    {# هذا العنصر يتم تحديثه تلقائيًا بواسطة JavaScript #}
-                                    <span id="level_{{ level.level_id }}_courses_count" class="mt-1 block w-2/3 rounded-md px-3 py-2 text-gray-900 dark:text-gray-100 sm:text-sm bg-gray-100 dark:bg-gray-600 border border-gray-200 dark:border-gray-500">
-                                        {{ level.current_courses_details|length }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% elif department %}
-                <p class="text-center text-gray-500 dark:text-gray-400 mt-8">لا توجد تفاصيل مستويات لهذا القسم حالياً. يرجى تعديل "عدد المستويات في القسم" لإنشاء مستويات افتراضية.</p>
-                {% endif %}
-
-            </div> {# نهاية قسم التفاصيل #}
-
-            <div class="flex justify-end gap-3 mt-8">
-                <a href="{% url 'departments_management' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600 transition-colors duration-200">
+            <div class="flex justify-end gap-4 pt-6 mt-8 border-t border-gray-200 dark:border-gray-700">
+                <a href="{% url 'departments_management' %}" class="inline-flex items-center px-6 py-2.5 border border-gray-300 rounded-md shadow-sm text-base font-medium text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200 transform hover:scale-105">
                     إلغاء
                 </a>
                 <button
                     type="submit"
-                    class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+                    class="inline-flex justify-center items-center px-6 py-2.5 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105"
                 >
-                    حفظ القسم
+                   حفظ القسم
                 </button>
             </div>
         </form>
     </div>
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-
-        // دالة لتحديث عدد المقررات لمستوى معين
-        function updateLevelCourseCount(levelId) {
-            const coursesList = document.getElementById(`courses-list-${levelId}`);
-            const countElement = document.getElementById(`level_${levelId}_courses_count`);
-            if (coursesList && countElement) {
-                // عدد المقررات هو عدد حقول الإدخال المخفية للمقررات
-                const currentCourses = coursesList.querySelectorAll(`input[name="level_${levelId}_courses[]"]`).length;
-                countElement.textContent = currentCourses;
-            }
-        }
-
-        // معالجة إضافة مقرر جديد
-        document.querySelectorAll('.add-course-button').forEach(button => {
-            button.addEventListener('click', function() {
-                const levelId = this.dataset.targetLevelId;
-                const selectElement = document.getElementById(`add-course-select-${levelId}`);
-                const coursesList = document.getElementById(`courses-list-${levelId}`);
-
-                const selectedCourseId = selectElement.value;
-                const selectedCourseName = selectElement.options[selectElement.selectedIndex].dataset.courseName;
-
-                if (selectedCourseId && coursesList) {
-                    // التحقق مما إذا كان المقرر موجودًا بالفعل لتجنب التكرار
-                    const existingCourses = coursesList.querySelectorAll(`[data-course-id="${selectedCourseId}"]`);
-                    if (existingCourses.length === 0) {
-                        const courseItemHtml = `
-                            <div class="flex items-center justify-between bg-gray-100 dark:bg-gray-700 p-2 rounded-md border border-gray-200 dark:border-gray-600" data-course-id="${selectedCourseId}">
-                                <span class="text-gray-900 dark:text-gray-100 text-sm">${selectedCourseName}</span>
-                                <input type="hidden" name="level_${levelId}_courses[]" value="${selectedCourseId}">
-                                <button type="button" class="text-red-500 hover:text-red-700 remove-course-button" aria-label="Remove course ${selectedCourseName}">
-                                    <i class="fas fa-times-circle"></i>
-                                </button>
-                            </div>
-                        `;
-                        coursesList.insertAdjacentHTML('beforeend', courseItemHtml);
-
-                        // ربط مستمع الحدث لزر الحذف الجديد فور إضافته
-                        coursesList.querySelector(`[data-course-id="${selectedCourseId}"] .remove-course-button`).addEventListener('click', function() {
-                            this.closest('[data-course-id]').remove();
-                            updateLevelCourseCount(levelId);
-                        });
-
-                        updateLevelCourseCount(levelId); // تحديث العدد بعد الإضافة
-                        selectElement.value = ""; // إعادة تعيين القائمة المنسدلة
-                    } else {
-                        alert("هذا المقرر مضاف بالفعل لهذا المستوى.");
-                    }
-                } else {
-                    alert("الرجاء اختيار مقرر لإضافته.");
-                }
-            });
-        });
-
-        // معالجة حذف مقرر (للمقررات المحملة في البداية وتلك المضافة حديثًا)
-        // هذا المستمع يربط الأزرار الموجودة حاليًا في DOM عند التحميل.
-        // يتم إعادة ربط الأزرار الجديدة عند إضافتها (انظر الكود أعلاه في .add-course-button)
-        document.querySelectorAll('.remove-course-button').forEach(button => {
-            button.addEventListener('click', function() {
-                const levelContainer = this.closest('[data-level-id]');
-                const levelId = levelContainer.dataset.levelId;
-                this.closest('[data-course-id]').remove(); // إزالة العنصر الأب الذي يحتوي على المقرر وحقله المخفي
-                updateLevelCourseCount(levelId); // تحديث العدد بعد الحذف
-            });
-        });
-
-        // التحديث الأولي لجميع المستويات عند تحميل الصفحة لضمان عرض الأعداد الصحيحة
-        document.querySelectorAll('[data-level-id]').forEach(levelContainer => {
-            const levelId = levelContainer.dataset.levelId;
-            updateLevelCourseCount(levelId);
-        });
-    });
-</script>
 {% endblock %}

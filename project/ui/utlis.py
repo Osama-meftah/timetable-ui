@@ -1,10 +1,27 @@
 import requests
 from django.contrib import messages
+from types import SimpleNamespace
 
 BASE_API_URL = "http://127.0.0.1:8001/api/"
 
+class Endpoints:
+    departments = "departments/"
+    todays = "todays/"
+    periods = "periods/"
+    halls = "halls/"
+    tables = "tables/"
+    programs = "programs/"
+    levels = "levels/"
+    groups = "groups/"
+    teachers = "teachers/"
+    teacher_times = "teacherTimes/"
+    subjects = "subjects/"
+    distributions = "distributions/"
+    lectures = "lectures/"
+
 def api_get(endpoint):
     try:
+        
         response = requests.get(f"{BASE_API_URL}{endpoint}")
         response.raise_for_status()
         return response.json()
@@ -46,23 +63,6 @@ def handle_exception(request, message, exception):
     messages.error(request, error_message)
     return error_message
 
-
-
-
-
-
-dummy_courses_for_dropdown = [
-    {'id': 1, 'name': 'الرياضيات المتقدمة', 'code': 'MATH301'},
-    {'id': 2, 'name': 'اللغة الإنجليزية للمبتدئين', 'code': 'ENG101'},
-    {'id': 3, 'name': 'مقدمة في البرمجة', 'code': 'CS100'},
-    {'id': 4, 'name': 'تاريخ الحضارات', 'code': 'HIST200'},
-    {'id': 5, 'name': 'الخوارزميات وهياكل البيانات', 'code': 'CS201'},
-    {'id': 6, 'name': 'شبكات الحاسوب', 'code': 'NET302'},
-    {'id': 7, 'name': 'قواعد البيانات', 'code': 'DB301'},
-    {'id': 8, 'name': 'الأمن السيبراني', 'code': 'CYB401'},
-    {'id': 9, 'name': 'الفيزياء 101', 'code': 'PHY101'},
-    {'id': 10, 'name': 'مبادئ الاقتصاد', 'code': 'ECON201'},
-]
 
 dummy_departments_data = {
     1: {

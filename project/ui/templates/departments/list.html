@@ -6,181 +6,550 @@
 {% endblock %}
 
 {% block content %}
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 mt-14">
-    <div class="bg-purple-100 dark:bg-purple-900 p-8 rounded-lg shadow-md flex items-center justify-between">
-        <div>
-            <p class="text-sm font-medium text-purple-800 dark:text-purple-200">إجمالي الأقسام</p>
-            <p class="text-2xl font-bold text-purple-900 dark:text-purple-100">{{ stats.total_departments }}</p>
+
+{# --- Hero Section / Overview Stats (Unchanged) --- #}
+<div class="bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-gray-900 dark:to-gray-800 text-white py-16 px-4 sm:px-6 lg:px-8 shadow-lg">
+    <div class="container mx-auto text-center">
+        <h1 class="text-4xl sm:text-5xl font-extrabold mb-4 animate-fade-in-down">نظرة عامة على الإدارة الأكاديمية</h1>
+        <p class="text-lg opacity-90 mb-10 animate-fade-in-up delay-100">تحكم كامل في تخصصاتك وأقسامك الأكاديمية.</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
+            {# Total Departments Card #}
+            <div class="bg-white dark:bg-gray-700 p-8 rounded-xl shadow-xl flex flex-col items-center justify-center transform hover:scale-105 transition-transform duration-300 group">
+                <div class="p-4 bg-purple-200 dark:bg-purple-800 rounded-full mb-4 group-hover:rotate-6 transition-transform">
+                    <i class="fas fa-building text-purple-700 dark:text-purple-300 text-3xl"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">إجمالي الأقسام</p>
+                <p class="text-4xl font-bold text-purple-900 dark:text-purple-100">{{ stats.total_departments }}</p>
+            </div>
+
+            {# Total Students Card #}
+            <div class="bg-white dark:bg-gray-700 p-8 rounded-xl shadow-xl flex flex-col items-center justify-center transform hover:scale-105 transition-transform duration-300 group">
+                <div class="p-4 bg-teal-200 dark:bg-teal-800 rounded-full mb-4 group-hover:rotate-6 transition-transform">
+                    <i class="fas fa-users text-teal-700 dark:text-teal-300 text-3xl"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">إجمالي البرامج</p>
+                <p class="text-4xl font-bold text-teal-900 dark:text-teal-100">{{ stats.overall_total_programs }}</p>
+            </div>
+
+            {# Total Courses Card #}
+            <div class="bg-white dark:bg-gray-700 p-8 rounded-xl shadow-xl flex flex-col items-center justify-center transform hover:scale-105 transition-transform duration-300 group">
+                <div class="p-4 bg-orange-200 dark:bg-orange-800 rounded-full mb-4 group-hover:rotate-6 transition-transform">
+                    <i class="fas fa-book-open text-orange-700 dark:text-orange-300 text-3xl"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">إجمالي المقررات (كل الأقسام)</p>
+                <p class="text-4xl font-bold text-orange-900 dark:text-orange-100">{{ stats.overall_total_courses }}</p>
+            </div>
         </div>
-        <i class="fas fa-building text-purple-600 dark:text-purple-400 text-3xl"></i>
-    </div>
-     <div class="bg-teal-100 dark:bg-teal-900 p-8 rounded-lg shadow-md flex items-center justify-between">
-        <div>
-            <p class="text-sm font-medium text-teal-800 dark:text-teal-200">إجمالي الطلاب (كل الأقسام)</p>
-            <p class="text-2xl font-bold text-teal-900 dark:text-teal-100">{{ stats.overall_total_students }}</p>
-        </div>
-        <i class="fas fa-users text-teal-600 dark:text-teal-400 text-3xl"></i>
-    </div>
-     <div class="bg-orange-100 dark:bg-orange-900 p-8 rounded-lg shadow-md flex items-center justify-between">
-        <div>
-            <p class="text-sm font-medium text-orange-800 dark:text-orange-200">إجمالي المقررات (كل الأقسام)</p>
-            <p class="text-2xl font-bold text-orange-900 dark:text-orange-100">{{ stats.overall_total_courses }}</p>
-        </div>
-        <i class="fas fa-book-open text-orange-600 dark:text-orange-400 text-3xl"></i>
     </div>
 </div>
 
-<div class="container mx-auto py-6 sm:py-8">
-    <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6">
-        <div class="flex justify-between items-center mb-6 border-b pb-4 border-gray-200 dark:border-gray-700">
-            <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100">قائمة التخصصات/الأقسام</h2>
-            <a href="{% url 'add_department' %}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
-                <i class="fas fa-plus ml-2"></i>
-                إضافة قسم جديد
-            </a>
-        </div>
-        {% comment %} <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6 border-b pb-4 border-gray-200 dark:border-gray-700">نظرة عامة على التخصصات</h2> {% endcomment %}
+{% comment %} --- {% endcomment %}
 
+{# --- Departments List Section (First Main Section) --- #}
+<div class="bg-white dark:bg-gray-800 py-12 px-4 sm:px-6 lg:px-8 shadow-xl mt-10">
+    {% if messages %}
+            <div class="mb-6 space-y-3">
+                {% for message in messages %}
+                    <div class="p-4 rounded-lg animate-fade-in flex items-start gap-3
+                        {% comment %} Apply styles based on message tags (e.g., 'success', 'error', 'warning') {% endcomment %}
+                        {% if message.tags == 'success' %}bg-green-50 dark:bg-green-900/30 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-700
+                        {% elif message.tags == 'error' %}bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-700
+                        {% elif message.tags == 'warning' %}bg-yellow-50 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border border-yellow-200 dark:border-yellow-700
+                        {% else %}bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700{% endif %}" role="alert">
+                        <i class="text-xl leading-none mt-0.5
+                            {# Dynamic icons from FontAwesome based on message type #}
+                            {% if message.tags == 'success' %}fas fa-check-circle text-green-500
+                            {% elif message.tags == 'error' %}fas fa-times-circle text-red-500
+                            {% elif message.tags == 'warning' %}fas fa-exclamation-triangle text-yellow-500
+                            {% else %}fas fa-info-circle text-blue-500{% endif %}
+                        "></i>
+                        <p class="text-sm font-medium flex-1">{{ message }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+    <div class="container mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 border-b pb-6 border-gray-200 dark:border-gray-700">
+            <h2 class="text-3xl font-extrabold text-gray-800 dark:text-gray-100 mb-4 md:mb-0">قائمة الأقسام</h2>
+            <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+                <div class="relative w-full sm:w-64">
+                    <input
+                        type="text"
+                        id="departmentSearch"
+                        placeholder="البحث باسم القسم..."
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
+                        aria-label="البحث عن قسم"
+                    >
+                    <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
+                    </div>
+                </div>
+                {# Add New Department Button #}
+                <a 
+                href="{% url 'add_department' %}?add=1" 
+                class="inline-flex items-center dark:text-gray-200 px-6 py-3 hover:text-gray-300 border border-transparent rounded-full shadow-md text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-[1.03] active:scale-[0.97] group w-full sm:w-auto justify-center">
+                    <i class="fas fa-plus ml-3 text-lg group-hover:rotate-90 transition-transform"></i>
+                    إضافة قسم جديد
+                </a>
+            </div>
+        </div>
 
         {% if departments %}
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <div class="overflow-x-auto shadow-lg rounded-lg border border-gray-200 dark:border-gray-700">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700" id="departmentsTable">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                             اسم القسم
                         </th>
-                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            إجمالي الطلاب
+                        <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                            الوصف
                         </th>
-                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            المستويات وتفاصيلها
+                        <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                            عدد البرامج
                         </th>
-                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            عدد المقررات
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                             الإجراءات
                         </th>
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {% for dept in departments %}
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 department-row">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-gray-100 department-name">
                             {{ dept.name }}
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                {% if dept.description %}{{ dept.description }}{% endif %}
-                            </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                            {{ dept.total_students }}
+                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 max-w-xs truncate">
+                            {% if dept.description %}{{ dept.description }}{% else %}لا يوجد وصف{% endif %}
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
-                            {% if dept.levels_data %}
-                                <ul class="list-disc pr-5 space-y-1">
-                                    {% for level in dept.levels_data %}
-                                        <li>
-                                            <span class="font-medium text-gray-800 dark:text-gray-200">{{ level.name }}</span>:
-                                            <span class="text-indigo-600 dark:text-indigo-400 font-bold">{{ level.num_students }}</span> طلاب
-                                            (<span class="text-xs text-gray-500 dark:text-gray-400">{{ level.courses_count }} مقررات</span>)
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            {% else %}
-                                لا توجد مستويات محددة
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                            {{ dept.num_courses }}
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                            {{ dept.programs|length }} <i class="fas fa-sitemap text-indigo-400 ml-1"></i>
+
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{% url 'edit_department' dept.id %}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 ml-4">
-                                <i class="fas fa-edit"></i> تعديل
+                            <a 
+                             href="{% url 'edit_department' dept.id %}" 
+                            class="inline-flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 ml-4 group">
+                                <i class="fas fa-edit ml-2 group-hover:scale-110 transition-transform"></i> 
                             </a>
                             <button
                                 type="button"
-                                class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 delete-button"
+                                class="inline-flex items-center text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 delete-department-btn group"
                                 data-department-id="{{ dept.id }}"
                                 data-department-name="{{ dept.name }}"
                             >
-                                <i class="fas fa-trash-alt"></i> حذف
+                                <i class="fas fa-trash-alt ml-2 group-hover:scale-110 transition-transform"></i>
                             </button>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+            <div id="noResultsMessageDepartments" class="hidden text-center py-8 bg-gray-50 dark:bg-gray-700 rounded-b-lg border-t border-gray-200 dark:border-gray-700">
+                <i class="fas fa-exclamation-triangle text-gray-400 text-3xl mb-3"></i>
+                <p class="text-lg font-medium text-gray-500 dark:text-gray-400">لا توجد أقسام مطابقة لبحثك.</p>
+                <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">حاول البحث بكلمات مختلفة أو تحقق من التهجئة.</p>
+            </div>
         </div>
         {% else %}
-        <p class="text-center text-gray-500 dark:text-gray-400">لا توجد تخصصات/أقسام لعرضها حالياً.</p>
+        <div class="text-center py-12 bg-gray-50 dark:bg-gray-700 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
+            <i class="fas fa-box-open text-gray-400 text-5xl mb-4"></i>
+            <p class="text-xl font-medium text-gray-500 dark:text-gray-400">لا توجد أقسام لعرضها حالياً.</p>
+            <p class="text-md text-gray-400 dark:text-gray-500 mt-2">ابدأ بإضافة قسم جديد لإدارة بياناتك الأكاديمية.</p>
+            <a href="{% url 'add_department' %}?add=1" class="mt-6 inline-flex items-center px-6 py-3 border border-transparent rounded-full shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                <i class="fas fa-plus ml-3"></i> إضافة قسم جديد
+            </a>
+        </div>
         {% endif %}
     </div>
 </div>
 
-<div id="delete-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50 hidden">
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-sm mx-auto">
-        <div class="flex justify-between items-center pb-4 border-b border-gray-200 dark:border-gray-700 mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">تأكيد الحذف</h3>
-            <button type="button" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" id="close-modal">
-                <span class="sr-only">إغلاق</span>
-                <i class="fas fa-times"></i>
-            </button>
+{% comment %} --- {% endcomment %}
+
+{# --- Programs and Levels List Section (Second Main Section) --- #}
+{# This section also uses the same container styling as the Department List for consistency #}
+<div class="bg-white dark:bg-gray-800 py-12 px-4 sm:px-6 lg:px-8 shadow-xl mt-8"> {# Added mt-8 for spacing between sections #}
+    <div class="container mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 border-b pb-6 border-gray-200 dark:border-gray-700">
+            <h2 class="text-3xl font-extrabold text-gray-800 dark:text-gray-100 mb-4 md:mb-0">قائمة البرامج والمستويات</h2>
+            <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+                {# Search Input Field for Programs #}
+                <div class="relative w-full sm:w-64">
+                    <input
+                        type="text"
+                        id="programSearch"
+                        placeholder="البحث باسم البرنامج..."
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
+                        aria-label="البحث عن برنامج"
+                    >
+                    <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
+                    </div>
+                </div>
+                {# Add New Program Button #}
+                <a 
+                href="{% url 'add_program' %}?add=1" 
+                class="inline-flex items-center px-6 py-3 border border-transparent dark:text-gray-200
+                rounded-full shadow-md text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-[1.03] active:scale-[0.97] group w-full sm:w-auto justify-center">
+                    <i class="fas fa-plus ml-3 text-lg group-hover:rotate-90 transition-transform"></i>
+                    إضافة برنامج جديد
+                </a>
+            </div>
         </div>
-        <p class="text-gray-700 dark:text-gray-300 mb-6">
-            هل أنت متأكد أنك تريد حذف القسم: <strong id="department-name-in-modal" class="text-indigo-600 dark:text-indigo-400"></strong>؟
-            هذا سيؤدي إلى حذف جميع البيانات المرتبطة به. لا يمكن التراجع عن هذا الإجراء.
-        </p>
-        <div class="flex justify-end gap-3">
-            <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600 transition-colors duration-200" id="cancel-delete">
-                إلغاء
-            </button>
-            <a href="#" id="confirm-delete-link" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">
-                تأكيد الحذف
+
+        {% if programs %}
+        <div class="overflow-x-auto shadow-lg rounded-lg border border-gray-200 dark:border-gray-700">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700" id="programsTable">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                            اسم البرنامج
+                        </th>
+                        <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                            القسم التابع له
+                        </th>
+                        <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                             المستويات التابعة له
+                        </th>
+                        <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                            الإجراءات
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for program in programs %}
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 program-row">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-gray-100 program-name">
+                            {{ program.program.program_name }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                            {{ program.program.fk_department.name }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                            {% if program.levels %}
+                                <ul class="list-disc pr-5 space-y-1 text-xs">
+                                    {% for level in program.levels %}
+                                        <li>
+                                            <span class="font-medium text-gray-800 dark:text-gray-200">{{ level.level_name }}</span>
+                                            (<span class="text-indigo-600 dark:text-indigo-400">{{ level.number_students }}</span> طلاب)
+                                            {% comment %}
+                                            You might want to add a link here to view level details or add subjects
+                                            <a href="{% url 'edit_level' level.id %}" class="text-blue-500 hover:underline mr-1">تفاصيل</a>
+                                            {% endcomment %}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <span class="text-gray-500 dark:text-gray-400">لا توجد مستويات محددة</span>
+                                <a 
+                                {% comment %} href="{% url 'add_level_to_program' program.id %}"  {% endcomment %}
+                                class="text-green-600 hover:underline text-xs block mt-1">إضافة مستوى</a>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a 
+                            href="{% url 'edit_program' program.program.id %}" 
+                            class="inline-flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 ml-4 group">
+                                <i class="fas fa-edit ml-2 group-hover:scale-110 transition-transform"></i> 
+                            </a>
+                            <button
+                                type="button"
+                                class="inline-flex items-center text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 delete-program-btn group"
+                                data-program-id="{{ program.id }}"
+                                data-program-name="{{ program.program_name }}"
+                            >
+                                <i class="fas fa-trash-alt ml-2 group-hover:scale-110 transition-transform"></i> 
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div id="noResultsMessagePrograms" class="hidden text-center py-8 bg-gray-50 dark:bg-gray-700 rounded-b-lg border-t border-gray-200 dark:border-gray-700">
+                <i class="fas fa-exclamation-triangle text-gray-400 text-3xl mb-3"></i>
+                <p class="text-lg font-medium text-gray-500 dark:text-gray-400">لا توجد برامج مطابقة لبحثك.</p>
+                <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">حاول البحث بكلمات مختلفة أو تحقق من التهجئة.</p>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-12 bg-gray-50 dark:bg-gray-700 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
+            <i class="fas fa-box-open text-gray-400 text-5xl mb-4"></i>
+            <p class="text-xl font-medium text-gray-500 dark:text-gray-400">لا توجد برامج لعرضها حالياً.</p>
+            <p class="text-md text-gray-400 dark:text-gray-500 mt-2">ابدأ بإضافة برنامج جديد لإدارة بياناتك الأكاديمية.</p>
+            <a 
+            {% comment %} href="{% url 'add_program' %}"  {% endcomment %}
+            class="mt-6 inline-flex items-center px-6 py-3 border border-transparent rounded-full shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                <i class="fas fa-plus ml-3"></i> إضافة برنامج جديد
             </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{# --- DELETE CONFIRMATION MODAL for Departments (unchanged from your original) --- #}
+<div id="deleteDepartmentModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 dark:bg-opacity-85 flex items-center justify-center z-50 transition-opacity duration-300 opacity-0 invisible" aria-hidden="true" role="dialog" aria-modal="true" tabindex="-1">
+    <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-8 w-11/12 max-w-lg transform transition-all duration-300 scale-95 opacity-0">
+        <button type="button" class="close-modal-btn absolute top-4 left-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none z-10" aria-label="إغلاق">
+            <i class="fas fa-times text-2xl"></i>
+        </button>
+
+        <div class="text-center mb-6">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 dark:bg-red-900/50 mb-4 animate-bounce-in">
+                <svg class="h-9 w-9 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+            </div>
+            <h3 class="text-2xl font-extrabold text-gray-900 dark:text-gray-100 mb-2" id="modal-title">
+                تأكيد الحذف النهائي
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+                يرجى قراءة التحذير بعناية قبل المتابعة.
+            </p>
+        </div>
+
+        <p class="text-base text-gray-700 dark:text-gray-300 mb-8 leading-relaxed text-center">
+            أنت على وشك حذف القسم: <strong id="modalDepartmentName" class="text-indigo-700 dark:text-indigo-300 font-extrabold"></strong>.
+            <br>
+            <span class="font-bold text-red-600 dark:text-red-400">هذا الإجراء لا يمكن التراجع عنه.</span>
+            ستفقد جميع البيانات المرتبطة بهذا القسم بشكل دائم، بما في ذلك الطلاب، المقررات، والمستويات.
+        </p>
+
+        <div class="flex flex-col sm:flex-row-reverse justify-end gap-4 mt-6">
+            <button type="button" id="confirmDeleteDepartmentBtn" class="w-full sm:w-auto px-6 py-3 border border-transparent rounded-lg shadow-lg text-base font-bold text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 transform hover:scale-105 active:scale-95">
+                <i class="fas fa-check ml-2"></i> تأكيد الحذف
+            </button>
+            <button type="button" class="close-modal-btn w-full sm:w-auto px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-base font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105 active:scale-95">
+                <i class="fas fa-ban ml-2"></i> إلغاء
+            </button>
         </div>
     </div>
 </div>
 
+{# --- DELETE CONFIRMATION MODAL for Programs (NEW) --- #}
+<div id="deleteProgramModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 dark:bg-opacity-85 flex items-center justify-center z-50 transition-opacity duration-300 opacity-0 
+invisible" aria-hidden="true" role="dialog" aria-modal="true" tabindex="-1">
+    <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-8 w-11/12 max-w-lg transform transition-all duration-300 scale-95 opacity-0">
+        <button type="button" class="close-program-modal-btn absolute top-4 left-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none z-10" aria-label="إغلاق">
+            <i class="fas fa-times text-2xl"></i>
+        </button>
+
+        <div class="text-center mb-6">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 dark:bg-red-900/50 mb-4 animate-bounce-in">
+                <svg class="h-9 w-9 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+            </div>
+            <h3 class="text-2xl font-extrabold text-gray-900 dark:text-gray-100 mb-2">
+                تأكيد حذف البرنامج
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+                يرجى قراءة التحذير بعناية قبل المتابعة.
+            </p>
+        </div>
+
+        <p class="text-base text-gray-700 dark:text-gray-300 mb-8 leading-relaxed text-center">
+            أنت على وشك حذف البرنامج: <strong id="modalProgramName" class="text-indigo-700 dark:text-indigo-300 font-extrabold"></strong>.
+            <br>
+            <span class="font-bold text-red-600 dark:text-red-400">هذا الإجراء لا يمكن التراجع عنه.</span>
+            ستفقد جميع البيانات المرتبطة بهذا البرنامج بشكل دائم، بما في ذلك المستويات والطلاب والمقررات التابعة له.
+        </p>
+
+        <div class="flex flex-col sm:flex-row-reverse justify-end gap-4 mt-6">
+            <button type="button" id="confirmDeleteProgramBtn" class="w-full sm:w-auto px-6 py-3 border border-transparent rounded-lg shadow-lg text-base font-bold text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 transform hover:scale-105 active:scale-95">
+                <i class="fas fa-check ml-2"></i> تأكيد الحذف
+            </button>
+            <button type="button" class="close-program-modal-btn w-full sm:w-auto px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-base font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105 active:scale-95">
+                <i class="fas fa-ban ml-2"></i> إلغاء
+            </button>
+        </div>
+    </div>
+</div>
+
+{# --- HIDDEN FORM FOR DELETION (Department) --- #}
+<form id="deleteDepartmentForm" method="post" action="" class="hidden">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="delete">
+    <input type="hidden" name="dept_id" id="deleteDeptIdInput">
+</form>
+
+{# --- HIDDEN FORM FOR DELETION (Program - NEW) --- #}
+<form id="deleteProgramForm" method="post" action="" class="hidden">
+    {% csrf_token %}
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const deleteButtons = document.querySelectorAll('.delete-button');
-        const deleteModal = document.getElementById('delete-modal');
-        const closeModalButton = document.getElementById('close-modal');
-        const cancelDeleteButton = document.getElementById('cancel-delete');
-        const confirmDeleteLink = document.getElementById('confirm-delete-link');
-        const departmentNameInModal = document.getElementById('department-name-in-modal');
+        // --- Department Modal Control Logic ---
+        const deleteDepartmentButtons = document.querySelectorAll('.delete-department-btn');
+        const deleteDepartmentModal = document.getElementById('deleteDepartmentModal');
+        const modalDepartmentContent = deleteDepartmentModal.querySelector('.max-w-lg');
+        const closeDepartmentModalButtons = deleteDepartmentModal.querySelectorAll('.close-modal-btn');
+        const confirmDeleteDepartmentBtn = document.getElementById('confirmDeleteDepartmentBtn');
+        const modalDepartmentName = document.getElementById('modalDepartmentName');
+        const deleteDepartmentForm = document.getElementById('deleteDepartmentForm');
 
-        deleteButtons.forEach(button => {
+        let currentDepartmentId = null;
+
+        function showDepartmentModal() {
+            deleteDepartmentModal.classList.remove('opacity-0', 'invisible');
+            deleteDepartmentModal.classList.add('opacity-100', 'visible');
+            modalDepartmentContent.classList.remove('scale-95', 'opacity-0');
+            modalDepartmentContent.classList.add('scale-100', 'opacity-100');
+        }
+
+        function hideDepartmentModal() {
+            modalDepartmentContent.classList.remove('scale-100', 'opacity-100');
+            modalDepartmentContent.classList.add('scale-95', 'opacity-0');
+            modalDepartmentContent.addEventListener('transitionend', function handler() {
+                deleteDepartmentModal.classList.remove('opacity-100', 'visible');
+                deleteDepartmentModal.classList.add('opacity-0', 'invisible');
+                modalDepartmentContent.removeEventListener('transitionend', handler);
+            }, { once: true });
+            currentDepartmentId = null;
+        }
+
+        deleteDepartmentButtons.forEach(button => {
             button.addEventListener('click', function() {
-                const departmentId = this.dataset.departmentId;
+                currentDepartmentId = this.dataset.departmentId;
                 const departmentName = this.dataset.departmentName;
-
-                departmentNameInModal.textContent = departmentName;
-                confirmDeleteLink.href = `/departments/delete/${departmentId}/`; // تحديث الرابط هنا
-                deleteModal.classList.remove('hidden'); // إظهار المودال
+                modalDepartmentName.textContent = departmentName;
+                showDepartmentModal();
             });
         });
 
-        closeModalButton.addEventListener('click', function() {
-            deleteModal.classList.add('hidden'); // إخفاء المودال
+        closeDepartmentModalButtons.forEach(button => {
+            button.addEventListener('click', hideDepartmentModal);
         });
 
-        cancelDeleteButton.addEventListener('click', function() {
-            deleteModal.classList.add('hidden'); // إخفاء المودال
-        });
-
-        // إغلاق المودال عند النقر خارج محتوى المودال
-        deleteModal.addEventListener('click', function(event) {
-            if (event.target === deleteModal) {
-                deleteModal.classList.add('hidden');
+        deleteDepartmentModal.addEventListener('click', function(event) {
+            if (event.target === deleteDepartmentModal) {
+                hideDepartmentModal();
             }
         });
 
-        // إغلاق المودال عند الضغط على مفتاح ESC
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape' && !deleteModal.classList.contains('hidden')) {
-                deleteModal.classList.add('hidden');
+        confirmDeleteDepartmentBtn.addEventListener('click', function() {
+            if (currentDepartmentId) {
+                deleteDepartmentForm.querySelector('[name="dept_id"]').value = currentDepartmentId;
+                deleteDepartmentForm.action = `{% url 'delete_department' 0 %}`.replace('0', currentDepartmentId);
+                deleteDepartmentForm.submit();
+            }
+            hideDepartmentModal();
+        });
+
+        // --- Program Modal Control Logic (NEW) ---
+        const deleteProgramButtons = document.querySelectorAll('.delete-program-btn');
+        const deleteProgramModal = document.getElementById('deleteProgramModal');
+        const modalProgramContent = deleteProgramModal.querySelector('.max-w-lg');
+        const closeProgramModalButtons = deleteProgramModal.querySelectorAll('.close-program-modal-btn');
+        const confirmDeleteProgramBtn = document.getElementById('confirmDeleteProgramBtn');
+        const modalProgramName = document.getElementById('modalProgramName');
+        const deleteProgramForm = document.getElementById('deleteProgramForm');
+
+        let currentProgramId = null;
+
+        function showProgramModal() {
+            deleteProgramModal.classList.remove('opacity-0', 'invisible');
+            deleteProgramModal.classList.add('opacity-100', 'visible');
+            modalProgramContent.classList.remove('scale-95', 'opacity-0');
+            modalProgramContent.classList.add('scale-100', 'opacity-100');
+        }
+
+        function hideProgramModal() {
+            modalProgramContent.classList.remove('scale-100', 'opacity-100');
+            modalProgramContent.classList.add('scale-95', 'opacity-0');
+            modalProgramContent.addEventListener('transitionend', function handler() {
+                deleteProgramModal.classList.remove('opacity-100', 'visible');
+                deleteProgramModal.classList.add('opacity-0', 'invisible');
+                modalProgramContent.removeEventListener('transitionend', handler);
+            }, { once: true });
+            currentProgramId = null;
+        }
+
+        deleteProgramButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                currentProgramId = this.dataset.programId;
+                const programName = this.dataset.programName;
+                modalProgramName.textContent = programName;
+                showProgramModal();
+            });
+        });
+
+        closeProgramModalButtons.forEach(button => {
+            button.addEventListener('click', hideProgramModal);
+        });
+
+        deleteProgramModal.addEventListener('click', function(event) {
+            if (event.target === deleteProgramModal) {
+                hideProgramModal();
+            }
+        });
+
+        confirmDeleteProgramBtn.addEventListener('click', function() {
+            if (currentProgramId) {
+                
+                deleteProgramForm.action = `{% url 'delete_program' 0 %}`.replace('0', currentProgramId);
+                deleteProgramForm.submit();
+            }
+            hideProgramModal();
+        });
+
+        // --- Search Functionality Logic for Departments ---
+        const departmentSearchInput = document.getElementById('departmentSearch');
+        const departmentRows = document.querySelectorAll('.department-row');
+        const noResultsMessageDepartments = document.getElementById('noResultsMessageDepartments');
+
+        departmentSearchInput.addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            let resultsFound = false;
+
+            departmentRows.forEach(row => {
+                const departmentName = row.querySelector('.department-name').textContent.toLowerCase();
+                if (departmentName.includes(searchTerm)) {
+                    row.style.display = '';
+                    resultsFound = true;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            if (resultsFound) {
+                noResultsMessageDepartments.classList.add('hidden');
+            } else {
+                noResultsMessageDepartments.classList.remove('hidden');
+            }
+        });
+
+        // --- Search Functionality Logic for Programs (NEW) ---
+        const programSearchInput = document.getElementById('programSearch');
+        const programRows = document.querySelectorAll('.program-row');
+        const noResultsMessagePrograms = document.getElementById('noResultsMessagePrograms');
+
+        programSearchInput.addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            let resultsFound = false;
+
+            programRows.forEach(row => {
+                const programName = row.querySelector('.program-name').textContent.toLowerCase();
+                // You could also search by department name here if needed
+                // const departmentName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+
+                if (programName.includes(searchTerm)) { // || departmentName.includes(searchTerm)
+                    row.style.display = '';
+                    resultsFound = true;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            if (resultsFound) {
+                noResultsMessagePrograms.classList.add('hidden');
+            } else {
+                noResultsMessagePrograms.classList.remove('hidden');
             }
         });
     });
