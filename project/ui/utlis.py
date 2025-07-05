@@ -6,16 +6,22 @@ BASE_API_URL = "http://127.0.0.1:8001/api/"
 
 class Endpoints:
     departments = "departments/"
+    departmentsUpload ="uploadDepartments/"
+    programsUpload="uploadPrograms/"
+    levelsUpload="uploadLevels/"
     todays = "todays/"
     periods = "periods/"
     halls = "halls/"
+    uploadHalls = "uploadHalls/"
     tables = "tables/"
     programs = "programs/"
     levels = "levels/"
     groups = "groups/"
     teachers = "teachers/"
+    teachersUpload = "teachersUpload/"
     teacher_times = "teacherTimes/"
     subjects = "subjects/"
+    uploadSubjects = "uploadSubjects/"
     distributions = "distributions/"
     lectures = "lectures/"
 
@@ -62,79 +68,45 @@ def handle_exception(request, message, exception):
         pass
     messages.error(request, error_message)
     return error_message
+def handle_file_upload_generic(request, *, file_field_name, endpoint_url, success_title="✅ تم رفع الملف", error_title="❌ خطأ في رفع الملف"):
+    file = request.FILES.get(file_field_name)
+    if not file:
+        messages.error(request, "يرجى اختيار ملف.")
+        return
 
+    allowed_types = [
+        "text/csv",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ]
+    if file.content_type not in allowed_types:
+        messages.error(request, "صيغة الملف غير مدعومة.")
+        return
 
-dummy_departments_data = {
-    1: {
-        'id': 1,
-        'name': 'علوم الحاسب',
-        'description': 'تخصص يركز على دراسة الحوسبة ونظم المعلومات.',
-        'num_levels': 4,
-        'levels_data': [
-            {'level_id': 101, 'name': 'المستوى الأول (CS)', 'num_students': 80, 'associated_courses_ids': [3, 4, 7]},
-            {'level_id': 102, 'name': 'المستوى الثاني (CS)', 'num_students': 70, 'associated_courses_ids': [1, 5, 6]},
-            {'level_id': 103, 'name': 'المستوى الثالث (CS)', 'num_students': 60, 'associated_courses_ids': [8, 1, 3]},
-            {'level_id': 104, 'name': 'المستوى الرابع (CS)', 'num_students': 40, 'associated_courses_ids': [5, 6, 7, 8]},
-        ]
-    },
-    2: {
-        'id': 2,
-        'name': 'هندسة البرمجيات',
-        'description': 'تخصص يهتم بتصميم وتطوير البرمجيات.',
-        'num_levels': 4,
-        'levels_data': [
-            {'level_id': 201, 'name': 'المستوى الأول (SE)', 'num_students': 60, 'associated_courses_ids': [3, 4]},
-            {'level_id': 202, 'name': 'المستوى الثاني (SE)', 'num_students': 50, 'associated_courses_ids': [1, 5]},
-            {'level_id': 203, 'name': 'المستوى الثالث (SE)', 'num_students': 40, 'associated_courses_ids': [6, 7]},
-            {'level_id': 204, 'name': 'المستوى الرابع (SE)', 'num_students': 30, 'associated_courses_ids': [8]},
-        ]
-    },
-    3: {
-        'id': 3,
-        'name': 'نظم المعلومات',
-        'description': 'الجمع بين الأعمال والتكنولوجيا لإدارة البيانات.',
-        'num_levels': 3,
-        'levels_data': [
-            {'level_id': 301, 'name': 'المستوى الأول (IS)', 'num_students': 50, 'associated_courses_ids': [2, 3]},
-            {'level_id': 302, 'name': 'المستوى الثاني (IS)', 'num_students': 40, 'associated_courses_ids': [6, 7]},
-            {'level_id': 303, 'name': 'المستوى الثالث (IS)', 'num_students': 30, 'associated_courses_ids': [8]},
-        ]
-    },
-}
+    try:
+        files = {
+            'data_file': (file.name, file.read(), file.content_type)
+        }
 
-dummy_teachers = [
-    {'id': 1, 'name': 'أ.د. أحمد علي', 'specialty': 'علوم الحاسب', 'available_days_times': [{'day': 'الأحد', 'start': '08:00', 'end': '12:00'}, {'day': 'الثلاثاء', 'start': '10:00', 'end': '14:00'}]},
-    {'id': 2, 'name': 'د. فاطمة الزهراء', 'specialty': 'الرياضيات', 'available_days_times': [{'day': 'الإثنين', 'start': '09:00', 'end': '13:00'}, {'day': 'الأربعاء', 'start': '11:00', 'end': '15:00'}]},
-    {'id': 3, 'name': 'م. خالد محمود', 'specialty': 'هندسة البرمجيات', 'available_days_times': [{'day': 'الأحد', 'start': '13:00', 'end': '17:00'}, {'day': 'الخميس', 'start': '08:00', 'end': '12:00'}]},
-    {'id': 4, 'name': 'أ. نورا سالم', 'specialty': 'اللغة الإنجليزية', 'available_days_times': [{'day': 'الإثنين', 'start': '08:00', 'end': '12:00'}, {'day': 'الثلاثاء', 'start': '09:00', 'end': '13:00'}]},
-]
+        response = requests.post(endpoint_url, files=files, timeout=20)
+        response.raise_for_status()
 
-dummy_rooms = [
-    {'id': 1, 'name': 'قاعة 101', 'capacity': 50, 'type': 'محاضرة'},
-    {'id': 2, 'name': 'معمل حاسوب 1', 'capacity': 30, 'type': 'معمل'},
-    {'id': 3, 'name': 'قاعة 205', 'capacity': 70, 'type': 'محاضرة'},
-    {'id': 4, 'name': 'قاعة متعددة الأغراض', 'capacity': 100, 'type': 'محاضرة'},
-]
+        try:
+            response_data = response.json()
+            msg = response_data.get("message", success_title)
+            messages.success(request, msg)
 
-# دالة مساعدة لجمع كل المستويات من الأقسام (يمكن أن تكون هنا أو في views.py حسب الحاجة)
-def get_all_levels():
-    all_levels = []
-    for dept_id, dept_data in dummy_departments_data.items():
-        for level in dept_data['levels_data']:
-            all_levels.append({
-                'id': level['level_id'],
-                'name': level['name'],
-                'department_name': dept_data['name']
-            })
-    return all_levels
+            # عرض الأخطاء إن وجدت
+            errors = response_data.get("errors")
+            if errors:
+                for error in errors:
+                    messages.warning(request, f"⚠️ {error}")
 
-# بيانات وهمية لحصة لتعديلها (في وضع التعديل)
-dummy_session_for_edit = {
-    'course_id': 3,  # مقدمة في البرمجة
-    'teacher_id': 1, # أ.د. أحمد علي
-    'room_id': 2,    # معمل حاسوب 1
-    'level_id': 101, # المستوى الأول (CS)
-    'day_of_week': 'الأحد',
-    'start_time': '09:00',
-    'end_time': '10:30',
-}
+        except ValueError:
+            # الرد ليس JSON
+            messages.success(request, f"{success_title}. (الرد: {response.text})")
+
+    except requests.exceptions.Timeout:
+        messages.error(request, "⏳ انتهت مهلة الاتصال بالخادم.")
+    except requests.exceptions.RequestException as e:
+        messages.error(request, f"{error_title}: {e}")

@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator
 
 # Create your models here.
 
@@ -26,6 +27,8 @@ class Program(models.Model):
         verbose_name = "برنامج"
         verbose_name_plural = "البرامج"
         ordering = ['program_name']
+        # إضافة قيد التفرد: لا يمكن أن يتكرر اسم البرنامج ضمن نفس القسم
+        unique_together = ('program_name', 'fk_department')
 
     def __str__(self):
         return self.program_name
@@ -34,11 +37,12 @@ class Program(models.Model):
 class Hall(models.Model):
     STATUS_CHOICES = [
         ('متاحة', 'متاحة'),
-        ('تحت الصيانة', 'تحت الصيانة') # Changed 'اجازة' to 'إجازة' for full word
+        ('تحت الصيانة', 'تحت الصيانة')
     ]
-    hall_name = models.CharField(max_length=50, verbose_name="اسم القاعة")
-    capacity_hall = models.IntegerField(verbose_name="سعة القاعة")
-    hall_status = models.CharField(choices=STATUS_CHOICES,verbose_name="حالة القاعة",default='متاح')
+    hall_name = models.CharField(max_length=50, verbose_name="اسم القاعة", unique=True) # تم إضافة unique=True
+    capacity_hall = models.IntegerField(verbose_name="سعة القاعة", validators=[MinValueValidator(1)]) # إضافة MinValueValidator
+    hall_status = models.CharField(choices=STATUS_CHOICES, verbose_name="حالة القاعة", default='متاحة') # تم تصحيح القيمة الافتراضية
+
     class Meta:
         verbose_name = "قاعة"
         verbose_name_plural = "القاعات"
@@ -50,7 +54,7 @@ class Hall(models.Model):
     
 class Level(models.Model):
     level_name = models.CharField(max_length=50, verbose_name="اسم المستوى")
-    number_students = models.IntegerField(verbose_name="عدد الطلاب")
+    number_students = models.IntegerField(verbose_name="عدد الطلاب", validators=[MinValueValidator(0)]) # إضافة MinValueValidator
     fk_program = models.ForeignKey(
         Program, 
         on_delete=models.CASCADE, 
@@ -62,6 +66,7 @@ class Level(models.Model):
         verbose_name = "مستوى"
         verbose_name_plural = "المستويات"
         ordering = ['fk_program__program_name', 'level_name'] # ترتيب حسب البرنامج ثم المستوى
+        unique_together = ('level_name', 'fk_program')
 
     def __str__(self):
         return f"{self.level_name} ({self.fk_program.program_name})"
@@ -70,7 +75,7 @@ class Level(models.Model):
 # المجموعة (Group)
 class Group(models.Model):
     group_name = models.CharField(max_length=50, verbose_name="اسم المجموعة")
-    number_students = models.IntegerField(verbose_name="عدد الطلاب")
+    number_students = models.IntegerField(verbose_name="عدد الطلاب", validators=[MinValueValidator(0)]) # إضافة MinValueValidator
     fk_level = models.ForeignKey(
         Level, 
         on_delete=models.CASCADE, 
@@ -82,35 +87,36 @@ class Group(models.Model):
         verbose_name = "مجموعة"
         verbose_name_plural = "المجموعات"
         ordering = ['fk_level__level_name', 'group_name'] # ترتيب حسب المستوى ثم اسم المجموعة
+        unique_together = ('group_name', 'fk_level')
 
     def __str__(self):
         return f"{self.group_name} ({self.fk_level.level_name})"
- 
+    
 class Subject(models.Model):
+    STATUS_CHOICES = [
+        ('الأول', 'الأول'),
+        ('الثاني', 'الثاني')
+    ]
     subject_name = models.CharField(max_length=100, verbose_name="اسم المادة")
-    term = models.CharField(max_length=50, verbose_name="الفصل الدراسي",default="الاول")
-    fk_level = models.ForeignKey(
-        Level, 
-        on_delete=models.CASCADE, 
-        related_name='subjects', 
-        verbose_name="المستوى"
-    )
+    term = models.CharField(choices=STATUS_CHOICES, verbose_name="الفصل الدراسي", default='الأول')
+    # إضافة علاقة ForeignKey مع Level
 
     class Meta:
         verbose_name = "مادة"
         verbose_name_plural = "المواد"
-        ordering = ['fk_level__level_name', 'subject_name']
+        ordering = ['subject_name']
+        # إذا كانت المادة يجب أن تكون فريدة ضمن مستوى معين
 
     def __str__(self):
-        # تم تصحيح اسم الحقل من self.name إلى self.subject_name
-        return f"{self.subject_name} ({self.fk_level.level_name})"
+        # تم تصحيح دالة __str__ لاستخدام fk_level
+        return f"{self.subject_name}"
 
     
 # الدكتور (Teacher)
 class Teacher(models.Model):
     STATUS_CHOICES = [
         ('نشط', 'نشط'),
-        ('إجازة', 'إجازة') # Changed 'اجازة' to 'إجازة' for full word
+        ('إجازة', 'إجازة')
     ]
     teacher_name = models.CharField(max_length=50, verbose_name="اسم المدرس")
     teacher_address = models.CharField(max_length=100, verbose_name="عنوان المدرس", blank=True, null=True)
@@ -134,15 +140,14 @@ class Today(models.Model):
         ('4', 'الثلاثاء'),
         ('5', 'الأربعاء'),
         ('6', 'الخميس'),
-        ('7', 'الجمعة'), # تم إضافة الجمعة للكمال
+        ('7', 'الجمعة'),
     ]
-    day_name = models.CharField(max_length=10, choices=DAY_CHOICES, verbose_name="اسم اليوم")
+    day_name = models.CharField(max_length=10, choices=DAY_CHOICES, verbose_name="اسم اليوم", unique=True) # إضافة unique=True
     
     class Meta:
         verbose_name = "يوم"
         verbose_name_plural = "الأيام"
         # يمكن الترتيب حسب ID أو ترتيب مخصص للأيام، لكن مع choices يفضل الترتيب المخصص إذا أردت ترتيب أيام الأسبوع بشكل منطقي
-        # للحفاظ على ترتيب أيام الأسبوع المنطقي، قد تحتاج لترتيب يدوي أو إضافة حقل ترتيب (ordinal)
         ordering = ['id'] 
 
     def __str__(self):
@@ -157,7 +162,7 @@ class Period(models.Model):
         (4, "2:00 - 4:00"),
         (5, "4:00 - 6:00"),
     ]
-    period = models.IntegerField(choices=PERIOD_CHOICES, verbose_name="الفترة الزمنية")
+    period = models.IntegerField(choices=PERIOD_CHOICES, verbose_name="الفترة الزمنية", unique=True) # إضافة unique=True
 
     class Meta:
         verbose_name = "فترة"
@@ -201,9 +206,6 @@ class TeacherTime(models.Model):
     def __str__(self):
         return f"{self.fk_teacher.teacher_name} - {self.fk_today.day_name} - {self.fk_period.get_period_display()}"
 
-
-
-# التوزيع (Distribution)
 class Distribution(models.Model):
     fk_group = models.ForeignKey(
         Group, 
@@ -236,7 +238,9 @@ class Distribution(models.Model):
 # الجدول (Table)
 class Table(models.Model):
     created_at = models.DateField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
-    table = models.FileField(max_length=100,upload_to="tables_file/", verbose_name="ملف الجدول")
+    table = models.FileField(max_length=100, upload_to="tables_file/", verbose_name="ملف الجدول")
+    # إضافة حقل اسم للجدول ليكون أكثر وصفية
+    name = models.CharField(max_length=100, verbose_name="اسم الجدول", blank=True, null=True)
     
     class Meta:
         verbose_name = "جدول"
@@ -244,6 +248,8 @@ class Table(models.Model):
         ordering = ['-created_at'] # ترتيب حسب تاريخ الإنشاء تنازلياً
 
     def __str__(self):
+        if self.name:
+            return f"{self.name} (تاريخ: {self.created_at})"
         return f"جدول بتاريخ: {self.created_at}"
 
 # محاضرة (Lecture)
@@ -276,12 +282,15 @@ class Lecture(models.Model):
     class Meta:
         verbose_name = "محاضرة"
         verbose_name_plural = "المحاضرات"
-        # يمكن إضافة unique_together إذا كانت هناك قيود إضافية
-        # مثلاً: لا يمكن أن يكون في نفس القاعة، في نفس الجدول، في نفس وقت الأستاذ
-        unique_together = ('fk_hall', 'fk_teachertime', 'fk_table')
+        # قيود التفرد لضمان عدم تداخل المحاضرات:
+        # 1. لا يمكن أن تكون نفس القاعة مشغولة في نفس الوقت لنفس الجدول.
+        # 2. لا يمكن أن تكون نفس المجموعة (عبر التوزيع) مجدولة في نفس الوقت لنفس الجدول.
+        unique_together = (
+            ('fk_hall', 'fk_teachertime', 'fk_table'),
+            ('fk_distribution', 'fk_teachertime', 'fk_table')
+        )
         ordering = ['fk_table__created_at', 'fk_teachertime__fk_today__id', 'fk_teachertime__fk_period__period']
 
 
     def __str__(self):
         return f"محاضرة: {self.fk_distribution.fk_subject.subject_name} في {self.fk_hall.hall_name} - {self.fk_teachertime.fk_today.day_name} {self.fk_teachertime.fk_period.get_period_display()}"
-

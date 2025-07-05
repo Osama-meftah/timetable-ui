@@ -18,9 +18,8 @@
             {% csrf_token %}
         
             <!-- تحديد نوع العملية (إضافة أو تعديل) -->
-            <input type="hidden" name="action" value="{% if room %}edit{% else %}add{% endif %}">
+            <input type="hidden" name="form_type" value="{% if room %}edit{% else %}add{% endif %}">
         
-            <!-- تمرير معرف القاعة عند التعديل -->
             {% if room %}
                 <input type="hidden" name="room_id" value="{{ room.id }}">
             {% endif %}

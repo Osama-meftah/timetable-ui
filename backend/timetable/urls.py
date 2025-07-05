@@ -1,6 +1,7 @@
 from django.urls import path,include
 from .views import *
 from rest_framework.routers import DefaultRouter
+from .views_upload_files import  *
 
 
 router = DefaultRouter()
@@ -20,5 +21,13 @@ router.register('tables',TableViewSet )
 
 urlpatterns =[
     path('',include(router.urls)),
+    path('teachersUpload/', TeacherUploadView.as_view(), name='teachers-upload'),
+    path("uploadDepartments/", DepartmentUploadView.as_view(), name="upload_departments"),
+    path('uploadPrograms/', ProgramUploadView.as_view(), name='upload_programs'),
+    path('uploadLevels/', LevelUploadView.as_view(), name='upload_levels'),
+    path('uploadSubjects/', SubjectUploadView.as_view(), name='upload_subjects'),
+    path('uploadHalls/', HallUploadView.as_view(), name='upload_halls'),
+
+
 ]
  

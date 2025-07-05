@@ -25,9 +25,9 @@
         <i class="fas fa-chair text-6xl opacity-15 absolute -bottom-4 -right-4 group-hover:rotate-6 transition-transform duration-300"></i>
         <div class="z-10">
             <p class="text-sm font-light opacity-90 mb-1">أكبر سعة قاعة</p>
-            <p class="text-5xl font-extrabold leading-none">{{ stats.largest_capacity_room.capacity|default:'N/A' }}</p>
+            <p class="text-5xl font-extrabold leading-none">{{ stats.largest_capacity_room.capacity_hall|default:'N/A' }}</p>
             {% if stats.largest_capacity_room %}
-            <p class="text-xs opacity-70 mt-1">({{ stats.largest_capacity_room.name|default:'---' }})</p>
+            <p class="text-xs opacity-70 mt-1">({{ stats.largest_capacity_room.hall_name|default:'---' }})</p>
             {% endif %}
         </div>
     </div>
@@ -86,15 +86,23 @@
 {# قسم إدارة القاعات - العنوان وزر الإضافة #}
 <div class="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
     <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-2xl p-6 sm:p-8 border border-gray-100 dark:border-gray-700">
-
+        {# Button to trigger file upload modal #}
         <div class="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4 border-b pb-6 border-gray-200 dark:border-gray-700">
             <h2 class="text-3xl font-extrabold text-gray-900 dark:text-gray-100 whitespace-nowrap">إدارة القاعات</h2>
-            <a href="{% url 'add_room' %}?add=1" class="inline-flex items-center px-6 py-3 border
-            border-transparent rounded-lg shadow-md text-base font-bold dark:text-gray-200 text-white bg-indigo-600
-            hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto justify-center group">
-                <i class="fas fa-plus ml-2 group-hover:rotate-6 transition-transform duration-200"></i>
-                إضافة قاعة جديدة
-            </a>
+            <div class="flex items-center gap-4">
+                <button type="button" id="openFileUploadModal" class="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-200 font-bold
+                  py-2.5 px-5 rounded-md flex items-center shadow-md transition-all duration-200 transform
+                  hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto justify-center group">
+                    <i class="fas fa-upload ml-2 group-hover:rotate-6 transition-transform duration-200"></i>
+                    رفع ملف بيانات القاعات
+                </button>
+                <a href="{% url 'add_room' %}?add=1" class="inline-flex items-center px-6 py-3 border
+                border-transparent rounded-lg shadow-md block text-base font-bold dark:text-gray-200 text-white bg-indigo-600
+                hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto justify-center group">
+                    <i class="fas fa-plus ml-2 group-hover:rotate-6 transition-transform duration-200"></i>
+                    إضافة قاعة جديدة
+                </a>
+            </div>
         </div>
 
         {# شبكة البطاقات للقاعات #}
@@ -177,16 +185,16 @@
             هذا الإجراء لا يمكن التراجع عنه.
         </p>
 
-        <div class="flex justify-end gap-3">
-            <button type="button"
-                    class="close-modal px-5 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition">
-                إلغاء
-            </button>
+        <div class="flex justify-start gap-3">
             <button type="button"
                     id="confirmDeleteBtn"
                     class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-md transition flex items-center gap-2">
                 <i class="fas fa-trash-alt"></i>
                 <span>تأكيد الحذف</span>
+            </button>
+            <button type="button"
+                    class="close-modal px-5 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition">
+                إلغاء
             </button>
         </div>
     </div>
@@ -197,12 +205,91 @@
 {# This form's action will be updated by JavaScript and then submitted #}
 <form id="deleteRoomForm" method="post" action="" class="hidden">
     {% csrf_token %}
-    <input type="hidden" name="action" value="delete">
+    <input type="hidden" name="form_type" value="delete">
     <input type="hidden" name="room_id" id="hiddenRoomId">
 </form>
 
+{# File Upload Modal - NEW #}
+<div id="fileUploadModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md transform scale-95 transition-transform duration-300">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">رفع ملف بيانات القاعات</h3>
+            <button type="button" id="closeFileUploadModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            يمكنك رفع ملف CSV أو Excel يحتوي على بيانات القاعات لإضافتها أو تحديثها دفعة واحدة.
+            يجب أن يحتوي الملف على أعمدة مطابقة لـ: 
+            </code>, <code class="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded text-xs">hall_name
+
+            </code>, <code class="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded text-xs">capacity_hall</code>,
+             <code class="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded text-xs">hall_status</code>.
+        </p>
+        <form method="post" enctype="multipart/form-data" id="courseFileUploadForm" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="upload_rooms"> {# Differentiate this form submission #}
+            <div>
+                <label for="data_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    اختر ملف البيانات
+                </label>
+                <input
+                    type="file"
+                    name="data_file" {# Changed name to be specific for courses #}
+                    id="data_file"
+                    accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" {# Accept CSV and Excel files #}
+                    required
+                    class="mt-1 block w-full text-sm text-gray-900
+                           bg-gray-200 border border-gray-300 rounded-lg cursor-pointer
+                           dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                           file:mr-4 file:py-2 file:px-4
+                           file:rounded-lg file:border-0 file:text-sm file:font-semibold
+                           file:bg-green-50 file:text-green-700 hover:file:bg-green-100
+                           file:transition-colors file:duration-200 file:ease-in-out
+                           dark:file:bg-green-900 dark:file:text-green-100 dark:hover:file:bg-green-800"
+                />
+            </div>
+            <div class="flex justify-start gap-3 mt-6">
+                <button
+                    type="submit"
+                    class="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+                >
+                    رفع الملف
+                </button>
+                <button type="button" id="cancelFileUploadButton" class="inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm transition-colors duration-200">
+                    إلغاء
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 {% endblock %}
+
 {% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const openBtn = document.getElementById("openFileUploadModal");
+        const closeBtn = document.getElementById("closeFileUploadModal");
+        const cancelBtn = document.getElementById("cancelFileUploadButton");
+        const modal = document.getElementById("fileUploadModal");
+
+        function openModal() {
+            modal.classList.remove("hidden", "opacity-0", "scale-95");
+            modal.classList.add("opacity-100", "scale-100");
+        }
+
+        function closeModal() {
+            modal.classList.add("opacity-0", "scale-95");
+            setTimeout(() => modal.classList.add("hidden"), 300); // match transition duration
+        }
+
+        if (openBtn) openBtn.addEventListener("click", openModal);
+        if (closeBtn) closeBtn.addEventListener("click", closeModal);
+        if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
+    });
+</script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const deleteButtons = document.querySelectorAll('.open-delete-modal');

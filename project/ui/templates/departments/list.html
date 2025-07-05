@@ -7,14 +7,12 @@
 
 {% block content %}
 
-{# --- Hero Section / Overview Stats (Unchanged) --- #}
+
 <div class="bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-gray-900 dark:to-gray-800 text-white py-16 px-4 sm:px-6 lg:px-8 shadow-lg">
     <div class="container mx-auto text-center">
         <h1 class="text-4xl sm:text-5xl font-extrabold mb-4 animate-fade-in-down">نظرة عامة على الإدارة الأكاديمية</h1>
         <p class="text-lg opacity-90 mb-10 animate-fade-in-up delay-100">تحكم كامل في تخصصاتك وأقسامك الأكاديمية.</p>
-
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
-            {# Total Departments Card #}
             <div class="bg-white dark:bg-gray-700 p-8 rounded-xl shadow-xl flex flex-col items-center justify-center transform hover:scale-105 transition-transform duration-300 group">
                 <div class="p-4 bg-purple-200 dark:bg-purple-800 rounded-full mb-4 group-hover:rotate-6 transition-transform">
                     <i class="fas fa-building text-purple-700 dark:text-purple-300 text-3xl"></i>
@@ -68,7 +66,7 @@
                     </div>
                 {% endfor %}
             </div>
-        {% endif %}
+    {% endif %}
 
     <div class="container mx-auto">
         <div class="flex flex-col md:flex-row justify-between items-center mb-8 border-b pb-6 border-gray-200 dark:border-gray-700">
@@ -86,7 +84,15 @@
                         <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
                     </div>
                 </div>
-                {# Add New Department Button #}
+                {# NEW Button to trigger Department file upload modal #}
+                <!-- زر رفع ملف الأقسام -->
+                <button type="button"
+                        class="upload-trigger bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md"
+                        data-type="departments"
+                        data-title="رفع ملف بيانات الأقسام"
+                        data-description="يجب أن يحتوي الملف على الأعمدة: name, description.">
+                    <i class="fas fa-upload ml-2"></i> رفع ملف بيانات الأقسام
+                </button>
                 <a 
                 href="{% url 'add_department' %}?add=1" 
                 class="inline-flex items-center dark:text-gray-200 px-6 py-3 hover:text-gray-300 border border-transparent rounded-full shadow-md text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-[1.03] active:scale-[0.97] group w-full sm:w-auto justify-center">
@@ -130,7 +136,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <a 
-                             href="{% url 'edit_department' dept.id %}" 
+                            href="{% url 'edit_department' dept.id %}" 
                             class="inline-flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 ml-4 group">
                                 <i class="fas fa-edit ml-2 group-hover:scale-110 transition-transform"></i> 
                             </a>
@@ -166,10 +172,6 @@
     </div>
 </div>
 
-{% comment %} --- {% endcomment %}
-
-{# --- Programs and Levels List Section (Second Main Section) --- #}
-{# This section also uses the same container styling as the Department List for consistency #}
 <div class="bg-white dark:bg-gray-800 py-12 px-4 sm:px-6 lg:px-8 shadow-xl mt-8"> {# Added mt-8 for spacing between sections #}
     <div class="container mx-auto">
         <div class="flex flex-col md:flex-row justify-between items-center mb-8 border-b pb-6 border-gray-200 dark:border-gray-700">
@@ -189,12 +191,21 @@
                     </div>
                 </div>
                 {# Add New Program Button #}
+                <!-- زر رفع ملف البرامج -->
+                <button type="button"
+                        class="upload-trigger bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow-md"
+                        data-type="programs"
+                        data-title="رفع ملف بيانات البرامج"
+                        data-description="يجب أن يحتوي الملف على الأعمدة: program_name, department_id.">
+                    <i class="fas fa-upload ml-2"></i> رفع ملف بيانات البرامج
+                </button>
+
                 <a 
                 href="{% url 'add_program' %}?add=1" 
                 class="inline-flex items-center px-6 py-3 border border-transparent dark:text-gray-200
                 rounded-full shadow-md text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-[1.03] active:scale-[0.97] group w-full sm:w-auto justify-center">
-                    <i class="fas fa-plus ml-3 text-lg group-hover:rotate-90 transition-transform"></i>
-                    إضافة برنامج جديد
+                <i class="fas fa-plus ml-3 text-lg group-hover:rotate-90 transition-transform"></i>
+                إضافة برنامج جديد
                 </a>
             </div>
         </div>
@@ -223,6 +234,7 @@
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 program-row">
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-gray-100 program-name">
                             {{ program.program.program_name }}
+                            {{program.program.id}}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
                             {{ program.program.fk_department.name }}
@@ -234,34 +246,28 @@
                                         <li>
                                             <span class="font-medium text-gray-800 dark:text-gray-200">{{ level.level_name }}</span>
                                             (<span class="text-indigo-600 dark:text-indigo-400">{{ level.number_students }}</span> طلاب)
-                                            {% comment %}
-                                            You might want to add a link here to view level details or add subjects
-                                            <a href="{% url 'edit_level' level.id %}" class="text-blue-500 hover:underline mr-1">تفاصيل</a>
-                                            {% endcomment %}
                                         </li>
                                     {% endfor %}
                                 </ul>
                             {% else %}
                                 <span class="text-gray-500 dark:text-gray-400">لا توجد مستويات محددة</span>
                                 <a 
-                                {% comment %} href="{% url 'add_level_to_program' program.id %}"  {% endcomment %}
+                                href="{% url 'add_program' %}?add=1" 
                                 class="text-green-600 hover:underline text-xs block mt-1">إضافة مستوى</a>
                             {% endif %}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a 
-                            href="{% url 'edit_program' program.program.id %}" 
-                            class="inline-flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 ml-4 group">
-                                <i class="fas fa-edit ml-2 group-hover:scale-110 transition-transform"></i> 
+                            <a href="{% url 'edit_program' program.program.id %}"
+                            class="inline-flex items-center justify-center
+                                    w-10 h-10 rounded-full
+                                    bg-blue-600 hover:bg-blue-700 text-white
+                                    shadow-md hover:shadow-lg hover:text-gray-200
+                                    transition-all duration-300 ease-in-out
+                                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75
+                                    dark:bg-blue-700 dark:hover:bg-blue-600 dark:text-gray-100 dark:hover:text-gray-200"
+                                title="تعديل البرنامج">
+                                <i class="fas fa-edit text-lg"></i>
                             </a>
-                            <button
-                                type="button"
-                                class="inline-flex items-center text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 delete-program-btn group"
-                                data-program-id="{{ program.id }}"
-                                data-program-name="{{ program.program_name }}"
-                            >
-                                <i class="fas fa-trash-alt ml-2 group-hover:scale-110 transition-transform"></i> 
-                            </button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -279,7 +285,6 @@
             <p class="text-xl font-medium text-gray-500 dark:text-gray-400">لا توجد برامج لعرضها حالياً.</p>
             <p class="text-md text-gray-400 dark:text-gray-500 mt-2">ابدأ بإضافة برنامج جديد لإدارة بياناتك الأكاديمية.</p>
             <a 
-            {% comment %} href="{% url 'add_program' %}"  {% endcomment %}
             class="mt-6 inline-flex items-center px-6 py-3 border border-transparent rounded-full shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
                 <i class="fas fa-plus ml-3"></i> إضافة برنامج جديد
             </a>
@@ -327,43 +332,40 @@
     </div>
 </div>
 
-{# --- DELETE CONFIRMATION MODAL for Programs (NEW) --- #}
-<div id="deleteProgramModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 dark:bg-opacity-85 flex items-center justify-center z-50 transition-opacity duration-300 opacity-0 
-invisible" aria-hidden="true" role="dialog" aria-modal="true" tabindex="-1">
-    <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-8 w-11/12 max-w-lg transform transition-all duration-300 scale-95 opacity-0">
-        <button type="button" class="close-program-modal-btn absolute top-4 left-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none z-10" aria-label="إغلاق">
-            <i class="fas fa-times text-2xl"></i>
-        </button>
-
-        <div class="text-center mb-6">
-            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 dark:bg-red-900/50 mb-4 animate-bounce-in">
-                <svg class="h-9 w-9 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                </svg>
-            </div>
-            <h3 class="text-2xl font-extrabold text-gray-900 dark:text-gray-100 mb-2">
-                تأكيد حذف البرنامج
-            </h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400">
-                يرجى قراءة التحذير بعناية قبل المتابعة.
-            </p>
+{# NEW File Upload Modal for Departments #}
+<!-- Modal لرفع ملفات الأقسام أو البرامج -->
+<div id="fileUploadModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md transform scale-95 transition-transform duration-300">
+        <div class="flex justify-between items-center mb-4">
+            <h3 id="modalTitle" class="text-xl font-bold text-gray-800 dark:text-gray-100">رفع ملف بيانات</h3>
+            <button type="button" id="closeFileUploadModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
         </div>
-
-        <p class="text-base text-gray-700 dark:text-gray-300 mb-8 leading-relaxed text-center">
-            أنت على وشك حذف البرنامج: <strong id="modalProgramName" class="text-indigo-700 dark:text-indigo-300 font-extrabold"></strong>.
-            <br>
-            <span class="font-bold text-red-600 dark:text-red-400">هذا الإجراء لا يمكن التراجع عنه.</span>
-            ستفقد جميع البيانات المرتبطة بهذا البرنامج بشكل دائم، بما في ذلك المستويات والطلاب والمقررات التابعة له.
+        <p id="modalDescription" class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            يرجى تحديد نوع البيانات قبل الرفع.
         </p>
-
-        <div class="flex flex-col sm:flex-row-reverse justify-end gap-4 mt-6">
-            <button type="button" id="confirmDeleteProgramBtn" class="w-full sm:w-auto px-6 py-3 border border-transparent rounded-lg shadow-lg text-base font-bold text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 transform hover:scale-105 active:scale-95">
-                <i class="fas fa-check ml-2"></i> تأكيد الحذف
-            </button>
-            <button type="button" class="close-program-modal-btn w-full sm:w-auto px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-base font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105 active:scale-95">
-                <i class="fas fa-ban ml-2"></i> إلغاء
-            </button>
-        </div>
+        <form method="post" enctype="multipart/form-data" id="fileUploadForm" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="action" id="uploadAction" value=""> <!-- سيحدد نوع الرفع -->
+            <div>
+                <label for="data_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    اختر ملف البيانات
+                </label>
+                <input
+                    type="file"
+                    name="data_file"
+                    id="data_file"
+                    accept=".csv, .xlsx, .xls"
+                    required
+                    class="mt-1 block w-full text-sm text-gray-900 bg-gray-200 border border-gray-300 rounded-lg cursor-pointer dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 dark:file:bg-green-900 dark:file:text-green-100 dark:hover:file:bg-green-800"
+                />
+            </div>
+            <div class="flex justify-start gap-3 mt-6">
+                <button type="submit" class="py-2 px-6 rounded-md bg-green-600 text-white hover:bg-green-700 transition">رفع الملف</button>
+                <button type="button" id="cancelFileUploadButton" class="px-4 py-2 rounded-md border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">إلغاء</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -373,18 +375,43 @@ invisible" aria-hidden="true" role="dialog" aria-modal="true" tabindex="-1">
     <input type="hidden" name="action" value="delete">
     <input type="hidden" name="dept_id" id="deleteDeptIdInput">
 </form>
-
-{# --- HIDDEN FORM FOR DELETION (Program - NEW) --- #}
-<form id="deleteProgramForm" method="post" action="" class="hidden">
-    {% csrf_token %}
-</form>
-
 {% endblock %}
 
 {% block extra_js %}
-<script>
+    <script>
+        document.querySelectorAll(".upload-trigger").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const type = btn.getAttribute("data-type");
+                const title = btn.getAttribute("data-title");
+                const description = btn.getAttribute("data-description");
+        
+                document.getElementById("modalTitle").textContent = title;
+                document.getElementById("modalDescription").textContent = description;
+                document.getElementById("uploadAction").value = `upload_${type}`;
+        
+                const modal = document.getElementById("fileUploadModal");
+                modal.classList.remove("hidden");
+                modal.classList.add("opacity-100");
+            });
+        });
+        
+        document.getElementById("cancelFileUploadButton").addEventListener("click", () => {
+            const modal = document.getElementById("fileUploadModal");
+            modal.classList.add("hidden");
+            modal.classList.remove("opacity-100");
+        });
+        document.getElementById("closeFileUploadModal").addEventListener("click", () => {
+            const modal = document.getElementById("fileUploadModal");
+            modal.classList.add("hidden");
+            modal.classList.remove("opacity-100");
+        });
+</script>
+    
+    
+
+
+    <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // --- Department Modal Control Logic ---
         const deleteDepartmentButtons = document.querySelectorAll('.delete-department-btn');
         const deleteDepartmentModal = document.getElementById('deleteDepartmentModal');
         const modalDepartmentContent = deleteDepartmentModal.querySelector('.max-w-lg');
@@ -434,69 +461,26 @@ invisible" aria-hidden="true" role="dialog" aria-modal="true" tabindex="-1">
 
         confirmDeleteDepartmentBtn.addEventListener('click', function() {
             if (currentDepartmentId) {
-                deleteDepartmentForm.querySelector('[name="dept_id"]').value = currentDepartmentId;
+                // Ensure the form's hidden input for department ID is set
+                // You might need to add a hidden input with name="dept_id" to your deleteDepartmentForm in HTML
+                const deptIdInput = deleteDepartmentForm.querySelector('[name="dept_id"]');
+                if (deptIdInput) {
+                    deptIdInput.value = currentDepartmentId;
+                } else {
+                    // Create it if it doesn't exist, though it's better to have it in HTML
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'dept_id';
+                    hiddenInput.value = currentDepartmentId;
+                    deleteDepartmentForm.appendChild(hiddenInput);
+                }
+
                 deleteDepartmentForm.action = `{% url 'delete_department' 0 %}`.replace('0', currentDepartmentId);
                 deleteDepartmentForm.submit();
             }
             hideDepartmentModal();
         });
 
-        // --- Program Modal Control Logic (NEW) ---
-        const deleteProgramButtons = document.querySelectorAll('.delete-program-btn');
-        const deleteProgramModal = document.getElementById('deleteProgramModal');
-        const modalProgramContent = deleteProgramModal.querySelector('.max-w-lg');
-        const closeProgramModalButtons = deleteProgramModal.querySelectorAll('.close-program-modal-btn');
-        const confirmDeleteProgramBtn = document.getElementById('confirmDeleteProgramBtn');
-        const modalProgramName = document.getElementById('modalProgramName');
-        const deleteProgramForm = document.getElementById('deleteProgramForm');
-
-        let currentProgramId = null;
-
-        function showProgramModal() {
-            deleteProgramModal.classList.remove('opacity-0', 'invisible');
-            deleteProgramModal.classList.add('opacity-100', 'visible');
-            modalProgramContent.classList.remove('scale-95', 'opacity-0');
-            modalProgramContent.classList.add('scale-100', 'opacity-100');
-        }
-
-        function hideProgramModal() {
-            modalProgramContent.classList.remove('scale-100', 'opacity-100');
-            modalProgramContent.classList.add('scale-95', 'opacity-0');
-            modalProgramContent.addEventListener('transitionend', function handler() {
-                deleteProgramModal.classList.remove('opacity-100', 'visible');
-                deleteProgramModal.classList.add('opacity-0', 'invisible');
-                modalProgramContent.removeEventListener('transitionend', handler);
-            }, { once: true });
-            currentProgramId = null;
-        }
-
-        deleteProgramButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                currentProgramId = this.dataset.programId;
-                const programName = this.dataset.programName;
-                modalProgramName.textContent = programName;
-                showProgramModal();
-            });
-        });
-
-        closeProgramModalButtons.forEach(button => {
-            button.addEventListener('click', hideProgramModal);
-        });
-
-        deleteProgramModal.addEventListener('click', function(event) {
-            if (event.target === deleteProgramModal) {
-                hideProgramModal();
-            }
-        });
-
-        confirmDeleteProgramBtn.addEventListener('click', function() {
-            if (currentProgramId) {
-                
-                deleteProgramForm.action = `{% url 'delete_program' 0 %}`.replace('0', currentProgramId);
-                deleteProgramForm.submit();
-            }
-            hideProgramModal();
-        });
 
         // --- Search Functionality Logic for Departments ---
         const departmentSearchInput = document.getElementById('departmentSearch');
@@ -524,7 +508,7 @@ invisible" aria-hidden="true" role="dialog" aria-modal="true" tabindex="-1">
             }
         });
 
-        // --- Search Functionality Logic for Programs (NEW) ---
+        // --- Search Functionality Logic for Programs ---
         const programSearchInput = document.getElementById('programSearch');
         const programRows = document.querySelectorAll('.program-row');
         const noResultsMessagePrograms = document.getElementById('noResultsMessagePrograms');
@@ -555,3 +539,4 @@ invisible" aria-hidden="true" role="dialog" aria-modal="true" tabindex="-1">
     });
 </script>
 {% endblock %}
+

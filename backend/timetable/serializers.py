@@ -29,7 +29,10 @@ class HallSerializer(serializers.ModelSerializer):
 
 # Serializer للنموذج Level
 class LevelSerializer(serializers.ModelSerializer):
-    fk_program = ProgramSerializer(read_only=True) # عرض بيانات البرنامج بدلاً من ID فقط
+    fk_program = ProgramSerializer(read_only=True)  # للعرض
+    fk_program_id = serializers.PrimaryKeyRelatedField(
+        queryset=Program.objects.all(), write_only=True, source='fk_program'
+    )
 
     class Meta:
         model = Level
@@ -44,14 +47,14 @@ class GroupSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class SubjectSerializer(serializers.ModelSerializer):
-    fk_level = LevelSerializer(read_only=True)
-    fk_level_id = serializers.PrimaryKeyRelatedField(
-        queryset=Level.objects.all(), source='fk_level', write_only=True
-    )
+    # fk_level = LevelSerializer(read_only=True)
+    # fk_level_id = serializers.PrimaryKeyRelatedField(
+    #     queryset=Level.objects.all(), source='fk_level', write_only=True
+    # )
 
     class Meta:
         model = Subject
-        fields = ['id', 'subject_name', 'term', 'fk_level', 'fk_level_id']
+        fields = ['id', 'subject_name', 'term']
 
 
 class TeacherSerializer(serializers.ModelSerializer):
