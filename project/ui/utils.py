@@ -1,6 +1,7 @@
 import requests
 from django.contrib import messages
 from types import SimpleNamespace
+from django.core.paginator import Paginator
 
 BASE_API_URL = "http://127.0.0.1:8001/api/"
 
@@ -68,6 +69,7 @@ def handle_exception(request, message, exception):
         pass
     messages.error(request, error_message)
     return error_message
+
 def handle_file_upload_generic(request, *, file_field_name, endpoint_url, success_title="✅ تم رفع الملف", error_title="❌ خطأ في رفع الملف"):
     file = request.FILES.get(file_field_name)
     if not file:
@@ -110,3 +112,9 @@ def handle_file_upload_generic(request, *, file_field_name, endpoint_url, succes
         messages.error(request, "⏳ انتهت مهلة الاتصال بالخادم.")
     except requests.exceptions.RequestException as e:
         messages.error(request, f"{error_title}: {e}")
+
+def paginate_queryset(queryset, request, page_key="page", page_size_key="page_size",size=5):
+    page_number = request.GET.get(page_key, 1)
+    page_size = request.GET.get(page_size_key, size)
+    paginator = Paginator(queryset, page_size)
+    return paginator.get_page(page_number)

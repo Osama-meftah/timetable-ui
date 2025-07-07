@@ -20,8 +20,6 @@ class DepartmentUploadView(APIView):
             },
             success_message_singular="قسم"
         )
-
-
 class ProgramUploadView(APIView):
     parser_classes = [MultiPartParser]
 
@@ -32,7 +30,8 @@ class ProgramUploadView(APIView):
             serializer_class=ProgramSerializer,
             required_fields=["program_name", "department_id"],
             get_existing=lambda data: Program.objects.filter(
-                program_name=data["program_name"], fk_department=data["fk_department"]
+                program_name=data["program_name"],
+                fk_department_id=data["department_id"]  # ✅ التصحيح هنا
             ).first(),
             prepare_data=lambda row: prepare_data_with_fk(
                 row=row,
@@ -43,6 +42,8 @@ class ProgramUploadView(APIView):
             ),
             success_message_singular="برنامج"
         )
+
+
 class LevelUploadView(APIView):
     parser_classes = [MultiPartParser]
 

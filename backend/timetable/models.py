@@ -46,7 +46,7 @@ class Hall(models.Model):
     class Meta:
         verbose_name = "قاعة"
         verbose_name_plural = "القاعات"
-        ordering = ['hall_name']
+        ordering = ['-capacity_hall']
 
     def __str__(self):
         return self.hall_name

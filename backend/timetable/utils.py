@@ -19,6 +19,10 @@ def validate_file(file):
     if not file.name.endswith(('.csv', '.xls', '.xlsx')):
         return False, "صيغة الملف غير مدعومة. يرجى رفع ملف CSV أو Excel."
     return True, None
+def is_field_valid(value):
+        # print(value)
+        # القيمة صالحة إذا كانت غير None وغير فارغة أو هي صفر (0 أو "0")
+    return value is not None and (str(value).strip() != "" or str(value).strip() == "0")
 
 def process_rows(df, required_fields, model_class, get_existing, prepare_data, serializer_class):
     success_count, fail_count, errors = 0, 0, []
@@ -28,16 +32,13 @@ def process_rows(df, required_fields, model_class, get_existing, prepare_data, s
         return None, None, None, f"الملف ناقص الأعمدة التالية: {', '.join(missing_columns)}"
 
     df = df.fillna("").astype(str).apply(lambda x: x.str.strip())
-
-    def is_field_valid(value):
-        # القيمة صالحة إذا كانت غير None وغير فارغة أو هي صفر (0 أو "0")
-        return value is not None and (str(value).strip() != "" or str(value).strip() == "0")
+    print(df)
 
     for index, row in df.iterrows():
         try:
+            print(row)
             data = prepare_data(row)
-
-            # تحقق من الحقول المطلوبة مع قبول الصفر كقيمة صحيحة
+            print(data)
             if not all(is_field_valid(data.get(field)) for field in required_fields):
                 errors.append(f"الصف {index + 2}: البيانات ناقصة.")
                 fail_count += 1
@@ -73,6 +74,7 @@ def handle_upload(request, model, serializer_class, required_fields, get_existin
         success_count, fail_count, errors, missing = process_rows(
             df, required_fields, model, get_existing, prepare_data, serializer_class
         )
+        
         if missing:
             return Response({"error": missing}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -87,18 +89,7 @@ def handle_upload(request, model, serializer_class, required_fields, get_existin
     except Exception as e:
         return Response({"error": f"❌ حدث خطأ أثناء معالجة الملف: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
 def prepare_data_with_fk(row, fk_field, lookup_field, model, display_name=None, extra_fields=None):
-    """
-    دالة لإعداد البيانات مع مفتاح أجنبي (FK) ديناميكي.
-    
-    - row: الصف من DataFrame.
-    - fk_field: اسم الحقل الذي يستقبل المفتاح الأجنبي (مثلاً: 'fk_program' أو 'fk_program_id').
-    - lookup_field: اسم العمود في الملف الذي يحتوي على قيمة البحث (مثلاً: 'program_id' أو 'fk_program').
-    - model: الموديل الذي نبحث فيه (مثلاً: Program).
-    - display_name: اسم حقل إضافي لإضافته في البيانات (مثلاً: level_name).
-    - extra_fields: قائمة الحقول الإضافية المطلوب جلبها من الصف.
-    """
     extra_fields = extra_fields or []
 
     # جلب قيمة المفتاح الأجنبي من الصف
@@ -117,12 +108,6 @@ def prepare_data_with_fk(row, fk_field, lookup_field, model, display_name=None, 
 
     data = {}
 
-    # إذا كان fk_field ينتهي بـ _id، نحول المفتاح ليكون بدون _id لأنه غالبًا الاسم في serializer
-    # if fk_field.endswith('_id'):
-    #     data[fk_field[:-3]] = related_instance.pk
-    # else:
-    #     data[fk_field] = related_instance.pk
-
     # جلب باقي الحقول الإضافية
     for field in extra_fields:
         data[field] = row.get(field)
@@ -130,5 +115,11 @@ def prepare_data_with_fk(row, fk_field, lookup_field, model, display_name=None, 
     # إضافة display_name لو معرف
     if display_name:
         data[display_name] = row.get(display_name)
+
+    # ✅ إضافة المفتاح الأصلي للتأكد من اكتمال البيانات
+    data[lookup_field] = lookup_value
+
+    # ✅ إضافة المفتاح الأجنبي الفعلي
+    data[fk_field] = related_instance.pk
 
     return data

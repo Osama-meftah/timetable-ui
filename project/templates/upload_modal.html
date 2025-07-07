@@ -1,0 +1,35 @@
+<div id="fileUploadModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md transform scale-95 transition-transform duration-300">
+        <div class="flex justify-between items-center mb-4">
+            <h3 id="modalTitle" class="text-xl font-bold text-gray-800 dark:text-gray-100">رفع ملف بيانات</h3>
+            <button type="button" id="closeFileUploadModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+        <p id="modalDescription" class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            يرجى تحديد نوع البيانات قبل الرفع.
+        </p>
+        <form method="post" enctype="multipart/form-data" id="fileUploadForm" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" id="uploadAction" value=""> 
+
+            <div>
+                <label for="data_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    اختر ملف البيانات
+                </label>
+                <input
+                    type="file"
+                    name="data_file"
+                    id="data_file"
+                    accept=".csv, .xlsx, .xls"
+                    required
+                    class="mt-1 block w-full text-sm text-gray-900 bg-gray-200 border border-gray-300 rounded-lg cursor-pointer dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 dark:file:bg-green-900 dark:file:text-green-100 dark:hover:file:bg-green-800"
+                />
+            </div>
+            <div class="flex justify-start gap-3 mt-6">
+                <button type="submit" class="py-2 px-6 rounded-md bg-green-600 text-white hover:bg-green-700 transition">رفع الملف</button>
+                <button type="button" id="cancelFileUploadButton" class="px-4 py-2 rounded-md border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">إلغاء</button>
+            </div>
+        </form>
+    </div>
+</div>

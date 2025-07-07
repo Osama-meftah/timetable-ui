@@ -2,8 +2,7 @@ from django.shortcuts import render, redirect
 from django.views import View
 import requests
 from django.contrib import messages
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from .utlis import api_delete,api_get,api_post,api_put,handle_exception,Endpoints,handle_file_upload_generic
+from .utils import *
 from django.middleware.csrf import get_token
 from collections import Counter
 
@@ -21,11 +20,16 @@ def dashboard(request):
     عرض لوحة التحكم.
     """
     return render(request, 'dashboard.html')
-
-
-class TeachersView(View):
-    def get(self, request):
+class TeacherManagementView(View):
+    def get(self, request, id=None):
         try:
+            if id:
+                teacher = api_get(f"{Endpoints.teachers}{id}/")
+                return render(request, "teachers/add_edit.html", {"teacher": teacher})
+            elif "add" in request.GET:
+                return render(request, "teachers/add_edit.html", {"page_title": "إضافة مدرس"})
+
+            # جلب البيانات
             teachers_data = api_get(Endpoints.teachers)
             teacher_times_data = api_get(Endpoints.teacher_times)
             distributions_data = api_get(Endpoints.distributions)
@@ -52,34 +56,20 @@ class TeachersView(View):
                     if t["fk_teacher"]["id"] == teacher_id
                 ]
 
-                if courses:  # فقط المدرسين الذين لديهم توزيع
+                if courses:
                     teachers_with_data.append({
                         "teacher": teacher,
                         "courses": courses,
                         "availability": times,
                     })
 
+            # إحصائيات
             total_teachers = len(teachers_data)
             active_teachers = len([t for t in teachers_data if t.get("teacher_status") == "نشط"])
             on_leave_teachers = len([t for t in teachers_data if t.get("teacher_status") == "إجازة"])
-
-            # إعداد Pagination
-            page_teachers = request.GET.get("page", 1)
-            page_teachers_size = request.GET.get("page_size", 10)
-            page_teachers_data_size = request.GET.get("page_data_size", 10)
-
-            paginator_teachers = Paginator(teachers_data, page_teachers_size)
-            paginator_detailed = Paginator(teachers_with_data, page_teachers_data_size)
-
-            try:
-                teachers_paginated = paginator_teachers.page(page_teachers)
-                teachers_data_paginated = paginator_detailed.page(page_teachers)
-            except PageNotAnInteger:
-                teachers_paginated = paginator_teachers.page(1)
-                teachers_data_paginated = paginator_detailed.page(1)
-            except EmptyPage:
-                teachers_paginated = paginator_teachers.page(paginator_teachers.num_pages)
-                teachers_data_paginated = paginator_detailed.page(paginator_detailed.num_pages)
+            
+            teachers_paginated = paginate_queryset(teachers_data, request, "page", "page_size",5)
+            teachers_data_paginated = paginate_queryset(teachers_with_data, request, "page_detailed", "page_data_size")
 
             context = {
                 "page_title": "إدارة المدرسين",
@@ -99,59 +89,8 @@ class TeachersView(View):
                 "error": "فشل في جلب بيانات المدرسين."
             })
 
-class TeacherFormView(View):
-    def get(self, request, id=None):
-        teacher = None
-        if id:
-            try:
-                teacher = api_get(f"{Endpoints.teachers}{id}/")
-            except Exception as e:
-                handle_exception(request, "فشل في جلب بيانات المدرس", e)
-                return redirect("teachers_management")
-        return render(request, "teachers/add_edit.html", {"teacher": teacher})
-    
     def post(self, request, id=None):
         form_type = request.POST.get("form_type")
-
-        # ✅ تحقق من نوع النموذج: رفع ملف
-        if form_type == "file_upload":
-            file = request.FILES.get("data_file")
-            # print(file,"files")
-            if not file:
-                messages.error(request, "الرجاء اختيار ملف.")
-                return redirect(request.path_info)
-            allowed_content_types = [
-                "text/csv",
-                "application/vnd.ms-excel",  # .xls
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",  # .xlsx
-            ]
-            if file.content_type not in allowed_content_types:
-                messages.error(request, "صيغة الملف غير مدعومة. الرجاء رفع ملف بصيغة CSV أو Excel.")
-                return redirect(request.path_info)
-
-            try:
-                files = {
-                    'data_file': (file.name, file.read(), file.content_type)
-                }
-                # print(files)
-                response = requests.post(
-                    f"{BASE_API_URL}{Endpoints.teachersUpload}",
-                    files=files,
-                    timeout=20  
-                )
-                # print(Endpoints.teachersUpload,files.items)
-                response.raise_for_status()
-
-                messages.success(request, "✅ تم رفع الملف وإرساله إلى الخادم بنجاح.")
-                messages.success(request,response)
-            except requests.exceptions.Timeout:
-                messages.error(request, "⏳ انتهت مهلة الاتصال بالخادم.")
-            except requests.exceptions.RequestException as e:
-                messages.error(request, f"⚠️ حدث خطأ أثناء إرسال الملف: {str(e)}")
-            except Exception as e:
-                messages.error(request, "❌ حدث خطأ غير متوقع.")
-            return redirect(request.path_info)
-        
         teacher_data = {
             "id": id,
             "teacher_name": request.POST.get("teacher_name", "").strip(),
@@ -169,17 +108,27 @@ class TeacherFormView(View):
             if id:
                 api_put(f"{Endpoints.teachers}{id}/", teacher_data)
                 messages.success(request, "✅ تم تعديل بيانات المدرس.")
-                return render(request,"teachers/add_edit.html",context={"teacher": teacher_data})
+                return render(request, "teachers/add_edit.html", context={"teacher": teacher_data})
+            elif form_type == "upload_teachers":
+                return handle_file_upload_generic(
+                request,
+                file_field_name='data_file',
+                endpoint_url=f"{BASE_API_URL}{Endpoints.teachersUpload}",
+                success_title="✅ تم رفع ملف المدرسين بنجاح.",
+                error_title="❌ فشل رفع ملف المدرسين"
+                )
             else:
                 api_post(Endpoints.teachers, teacher_data)
                 messages.success(request, "✅ تم إضافة المدرس.")
-                redirect("teachers/add_edit.html")
+                return redirect("teachers_management")
+            
         except Exception as e:
             messages.error(request, f"❌ حدث خطأ أثناء حفظ بيانات المدرس: {str(e)}")
+            return redirect("teachers_management")
 
+        # ✅ حل نهائي في حال لم يتحقق أي شرط:
         return redirect("teachers_management")
 
-    
 class TeacherDeleteView(View):
     def post(self, request, id):
         try:
@@ -349,9 +298,10 @@ class CoursesView(View):
                 full_courses = sum(1 for c in subjects if c.get("is_full", False))
 
                 csrf_token = get_token(request)
+                subjects_paginated = paginate_queryset(subjects, request, "page", "page_size",5)
 
                 return render(request, "courses/list.html", {
-                    "courses": subjects,
+                    "courses": subjects_paginated,
                     "page_title": "إدارة المقررات",
                     "total_courses": total_courses,
                     "active_courses": active_courses,
@@ -371,7 +321,9 @@ class CoursesView(View):
             "term": request.POST.get("term"),
         }
         try:
+            # print(form_type)
             if form_type == "delete" and id:
+                print(id)
                 api_delete(f"{Endpoints.subjects}{id}/")
                 messages.success(request, "تم حذف المقرر بنجاح.")
             elif form_type == 'upload_subjects':
@@ -421,10 +373,11 @@ class RoomsView(View):
                 'largest_capacity_room': largest_capacity_room,
                 'capacity_counts': capacity_counts,
             }
+            room_paginated = paginate_queryset(rooms, request, "page", "page_size",5)
 
             context = {
                 'page_title': 'إدارة القاعات',
-                'rooms': rooms,
+                'rooms': room_paginated,
                 'stats': stats,
             }
 
@@ -466,9 +419,9 @@ class RoomsView(View):
                 messages.error(request, f"خطأ في تحديث القاعة: {e}")
 
         elif form_type == 'delete':
-            room_id = request.POST.get("room_id")
+            room_id = request.POST.get("item_id")
             try:
-                api_delete(f"{Endpoints.halls}{room_id}/")
+                api_delete(f"{Endpoints.halls}{id}/")
                 messages.success(request, "تم حذف القاعة بنجاح.")
             except RuntimeError as e:
                 messages.error(request, f"خطأ في حذف القاعة: {e}")
@@ -517,14 +470,24 @@ class DepartmentsManagementView(View):
             }
 
             return render(request, 'departments/list.html', context)
+        except Exception as e:
+            context = {
+                'page_title': 'إدارة التخصصات والأقسام',
+                'departments': dept,
+                'programs': programs_with_levels,
+                'stats': stats,
+            }
+            handle_exception(request, "فشل في جلب البيانات", e)
+            return render(request, 'departments/list.html', context)
+
 
         except Exception as e:
             messages.error(request, f"حدث خطأ أثناء تحميل الصفحة: {e}")
-            return redirect('home')  # أو صفحة خطأ مناسبة
+            return redirect('departments_management')  # أو صفحة خطأ مناسبة
 
     def post(self, request, id=None):
         try:
-            action = request.POST.get('action')
+            action = request.POST.get('form_type')
 
             if action == 'add':
                 name = request.POST.get("department_name", "").strip()
@@ -571,12 +534,11 @@ class DepartmentsManagementView(View):
 
 
             elif action == 'delete':
-                dept_id = request.POST.get("dept_id")
-                if not dept_id:
+                if not id:
                     messages.error(request, "رقم القسم غير موجود.")
                     return redirect('departments_management')
 
-                api_delete(f"{Endpoints.departments}{dept_id}/")
+                api_delete(f"{Endpoints.departments}{id}/")
                 messages.success(request, "تم حذف القسم بنجاح.")
 
             else:

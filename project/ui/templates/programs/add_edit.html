@@ -107,11 +107,12 @@
                     <i class="fas fa-edit ml-2"></i> تعديل مستوى موجود
                 </button>
                 {# Button to trigger file upload modal #}
-                <button type="button" id="openFileUploadModal" class="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-200 font-bold
-                  py-2.5 px-5 rounded-md flex items-center shadow-md transition-all duration-200 transform
-                  hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto justify-center group">
-                    <i class="fas fa-upload ml-2 group-hover:rotate-6 transition-transform duration-200"></i>
-                    رفع ملف بيانات المستويات
+                <button type="button"
+                        class="upload-trigger bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md"
+                        data-type="levels"
+                        data-title="رفع ملف بيانات المستويات"
+                        data-description="يجب أن يحتوي الملف على الأعمدة: level_name, fk_program_id,number_students.">
+                    <i class="fas fa-upload ml-2"></i> رفع ملف بيانات الأقسام
                 </button>
             </div>
 
@@ -127,12 +128,10 @@
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 
                                 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none">
                             <option value="">اختر مستوى...</option>
-                            {% comment %} {% for program_in_levels_list in levels %} {% endcomment %}
                                 {% for level_option in levels %}
                                     <option value="{{ level_option.id }}">
                                         {{ level_option.level_name }} ({{ level_option.fk_program.program_name }})
                                     </option>
-                                {% comment %} {% endfor %} {% endcomment %}
                             {% endfor %}
                         </select>
                     </div>
@@ -346,83 +345,7 @@
             </div>
         </div>
     </div>
-
-    
-    {# File Upload Modal - NEW #}
-    <div id="fileUploadModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden opacity-0 transition-opacity duration-300">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md transform scale-95 transition-transform duration-300">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">رفع ملف بيانات المستويات</h3>
-                <button type="button" id="closeFileUploadModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200">
-                    <i class="fas fa-times text-2xl"></i>
-                </button>
-            </div>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                يمكنك رفع ملف CSV أو Excel يحتوي على بيانات المستويات لإضافتها أو تحديثها دفعة واحدة.
-                يجب أن يحتوي الملف على أعمدة مطابقة لـ: <code class="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded text-xs">level_name</code>, 
-                <code class="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded text-xs">number_students</code>,
-                 <code class="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded text-xs">fk_program_id</code>, 
-            </p>
-            <form method="post" enctype="multipart/form-data" id="levelsFileUploadForm" class="space-y-4">
-                {% csrf_token %}
-                <input type="hidden" name="form_type" value="upload_levels"> {# Differentiate this form submission #}
-                <div>
-                    <label for="data_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        اختر ملف البيانات
-                    </label>
-                    <input
-                        type="file"
-                        name="data_file" {# Changed name to be specific for levels #}
-                        id="data_file"
-                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" {# Accept CSV and Excel files #}
-                        required
-                        class="mt-1 block w-full text-sm text-gray-900
-                            bg-gray-200 border border-gray-300 rounded-lg cursor-pointer
-                            dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                            file:mr-4 file:py-2 file:px-4
-                            file:rounded-lg file:border-0 file:text-sm file:font-semibold
-                            file:bg-green-50 file:text-green-700 hover:file:bg-green-100
-                            file:transition-colors file:duration-200 file:ease-in-out
-                            dark:file:bg-green-900 dark:file:text-green-100 dark:hover:file:bg-green-800"
-                    />
-                </div>
-                <div class="flex justify-start gap-3 mt-6">
-                    <button
-                        type="submit"
-                        class="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
-                    >
-                        رفع الملف
-                    </button>
-                    <button type="button" id="cancelFileUploadButton" class="inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm transition-colors duration-200">
-                        إلغاء
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const openBtn = document.getElementById("openFileUploadModal");
-            const closeBtn = document.getElementById("closeFileUploadModal");
-            const cancelBtn = document.getElementById("cancelFileUploadButton");
-            const modal = document.getElementById("fileUploadModal");
-    
-            function openModal() {
-                modal.classList.remove("hidden", "opacity-0", "scale-95");
-                modal.classList.add("opacity-100", "scale-100");
-            }
-    
-            function closeModal() {
-                modal.classList.add("opacity-0", "scale-95");
-                setTimeout(() => modal.classList.add("hidden"), 300); // match transition duration
-            }
-    
-            if (openBtn) openBtn.addEventListener("click", openModal);
-            if (closeBtn) closeBtn.addEventListener("click", closeModal);
-            if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
-        });
-    </script>
+    {% include "upload_modal.html" %}
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
