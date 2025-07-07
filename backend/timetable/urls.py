@@ -2,6 +2,7 @@ from django.urls import path,include
 from .views import *
 from rest_framework.routers import DefaultRouter
 from .views_upload_files import  *
+from .views_algorithms import run_scheduler_view
 
 
 router = DefaultRouter()
@@ -27,6 +28,7 @@ urlpatterns =[
     path('uploadLevels/', LevelUploadView.as_view(), name='upload_levels'),
     path('uploadSubjects/', SubjectUploadView.as_view(), name='upload_subjects'),
     path('uploadHalls/', HallUploadView.as_view(), name='upload_halls'),
+    path('run-scheduler/', run_scheduler_view, name='run_scheduler'),
 
 
 ]
