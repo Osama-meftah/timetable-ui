@@ -4,6 +4,8 @@ import io
 from rest_framework.response import Response
 from .models import *
 from .serializers import *
+import re
+import random
 
 
 def read_file_to_dataframe(file):
@@ -123,3 +125,36 @@ def prepare_data_with_fk(row, fk_field, lookup_field, model, display_name=None, 
     data[fk_field] = related_instance.pk
 
     return data
+
+# def generate_email(name):
+#     normalized = re.sub(r'[^a-zA-Z0-9]+', '', name.lower())
+#     normalized = normalized or "teacher"
+#     suffix = random.randint(100, 999)
+#     return f"{normalized}{suffix}@example.com"
+
+# from django.core.validators import validate_email
+# from django.core.exceptions import ValidationError
+
+# def clean_email_or_generate(raw_email, fallback_name):
+#     email = raw_email.strip()
+#     try:
+#         validate_email(email)
+#         return email
+#     except ValidationError:
+#         return generate_email(fallback_name)
+
+# def prepare_teacher_data(row):
+#     name = row.get("teacher_name", "").strip()
+#     if not name:
+#         return {}
+
+#     raw_email = row.get("teacher_email", "").strip()
+#     email = clean_email_or_generate(raw_email, name)
+
+#     return {
+#         "teacher_name": name,
+#         "teacher_email": email,
+#         "teacher_phone": row.get("teacher_phone", "").strip(),
+#         "teacher_address": row.get("teacher_address", "").strip(),
+#         "teacher_status": row.get("teacher_status", "نشط").strip()
+#     }

@@ -64,7 +64,19 @@ class LevelUploadView(APIView):
             success_message_singular="مستوى"
         )
 
+# class TeacherUploadView(APIView):
+#     parser_classes = [MultiPartParser]
 
+#     def post(self, request):
+#         return handle_upload(
+#             request=request,
+#             model=Teacher,
+#             serializer_class=TeacherSerializer,
+#             required_fields=["teacher_name"],  # فقط الاسم هنا
+#             get_existing=lambda data: Teacher.objects.filter(teacher_email=data["teacher_email"]).first(),
+#             prepare_data=lambda row: prepare_teacher_data(row),
+#             success_message_singular="مدرس"
+#         )
 class TeacherUploadView(APIView):
     parser_classes = [MultiPartParser]
 

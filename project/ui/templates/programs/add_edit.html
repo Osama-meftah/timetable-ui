@@ -7,29 +7,9 @@
 
 {% block content %}
     {# System messages: Displays success or error alerts from Django's messages framework #}
-    {% if messages %}
-        <div class="mb-4 px-4">
-            {% for message in messages %}
-                <div class="rounded-md px-4 py-3 text-sm font-medium
-                    {% if message.tags == 'error' %}
-                        bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100
-                    {% elif message.tags == 'success' %}
-                        bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100
-                    {% else %}
-                        bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100
-                    {% endif %}
-                    flex items-center justify-between" role="alert">
-                    <span>{{ message }}</span>
-                    <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-transparent text-current rounded-lg p-1.5 hover:bg-current hover:bg-opacity-20 focus:ring-2 focus:ring-current focus:ring-opacity50 inline-flex h-8 w-8 dark:hover:bg-current dark:hover:bg-opacity-20" onclick="this.parentElement.style.display='none';" aria-label="Close alert">
-                        <span class="sr-only">Close</span>
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                    </button>
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
+    
     <div class="container mx-auto py-6 sm:py-8">
+
         <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6">
             <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6 text-center">
                 {{ page_title }}
@@ -39,10 +19,12 @@
 
             {# --- PROGRAM MANAGEMENT SECTION --- #}
             <div class="mb-10 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700 shadow-sm">
+                {% include "message.html" %}
                 <h3 class="text-xl font-semibold text-blue-800 dark:text-blue-200 mb-5 flex items-center">
                     <i class="fas fa-graduation-cap ml-2 text-blue-600"></i>
                     إدارة البرامج
                 </h3>
+
                 <form method="POST" action="." id="program-form">
                     {% csrf_token %}
                     <input type="hidden" name="form_type" value="program_form_submit">
@@ -112,7 +94,7 @@
                         data-type="levels"
                         data-title="رفع ملف بيانات المستويات"
                         data-description="يجب أن يحتوي الملف على الأعمدة: level_name, fk_program_id,number_students.">
-                    <i class="fas fa-upload ml-2"></i> رفع ملف بيانات الأقسام
+                    <i class="fas fa-upload ml-2"></i> رفع ملف بيانات المستويات
                 </button>
             </div>
 

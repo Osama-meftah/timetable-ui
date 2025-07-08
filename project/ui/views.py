@@ -20,6 +20,7 @@ def dashboard(request):
     عرض لوحة التحكم.
     """
     return render(request, 'dashboard.html')
+
 class TeacherManagementView(View):
     def get(self, request, id=None):
         try:
@@ -100,9 +101,9 @@ class TeacherManagementView(View):
             "teacher_status": request.POST.get("teacher_status", "").strip(),
         }
 
-        if not teacher_data["teacher_name"] or not teacher_data["teacher_email"]:
-            messages.error(request, "الاسم والبريد الإلكتروني مطلوبان.")
-            return redirect("teachers_management")
+        # if not teacher_data["teacher_name"] or not teacher_data["teacher_email"]:
+        #     messages.error(request, "الاسم والبريد الإلكتروني مطلوبان.")
+        #     return redirect(request.path_info)
 
         try:
             if id:
@@ -110,13 +111,14 @@ class TeacherManagementView(View):
                 messages.success(request, "✅ تم تعديل بيانات المدرس.")
                 return render(request, "teachers/add_edit.html", context={"teacher": teacher_data})
             elif form_type == "upload_teachers":
-                return handle_file_upload_generic(
+                handle_file_upload_generic(
                 request,
                 file_field_name='data_file',
                 endpoint_url=f"{BASE_API_URL}{Endpoints.teachersUpload}",
                 success_title="✅ تم رفع ملف المدرسين بنجاح.",
                 error_title="❌ فشل رفع ملف المدرسين"
                 )
+                return redirect(request.path_info)
             else:
                 api_post(Endpoints.teachers, teacher_data)
                 messages.success(request, "✅ تم إضافة المدرس.")
@@ -126,8 +128,6 @@ class TeacherManagementView(View):
             messages.error(request, f"❌ حدث خطأ أثناء حفظ بيانات المدرس: {str(e)}")
             return redirect("teachers_management")
 
-        # ✅ حل نهائي في حال لم يتحقق أي شرط:
-        return redirect("teachers_management")
 
 class TeacherDeleteView(View):
     def post(self, request, id):
@@ -149,7 +149,8 @@ class TeacherAvailabilityAndCoursesView(View):
             levels = api_get(Endpoints.levels)
             programs =api_get(Endpoints.programs)
             groups = api_get(Endpoints.groups)
-
+            # print(groups)
+            # print(teachers)
             # البيانات الخاصة بالمدرس إن وجد
             teacher = None
             teacher_times = []
@@ -163,7 +164,7 @@ class TeacherAvailabilityAndCoursesView(View):
                 all_distributions = api_get(f"{Endpoints.distributions}")
                 # requests.get(f"{BASE_API_URL}{self.endpoints['distributions']}").json()
                 teacher_distributions = [d for d in all_distributions if d["fk_teacher"]["id"] == int(id)]
-
+                # print(teacher_distributions)
             context = {
                 "teacher": teacher,
                 "all_teachers": teachers,
@@ -185,10 +186,9 @@ class TeacherAvailabilityAndCoursesView(View):
     def post(self, request, id=None):
             form_type = request.POST.get('form_type')
             teacher_id = request.POST.get('selected_teacher_id')
-
-            if not teacher_id:
-                messages.error(request, "يرجى اختيار المدرس.")
-                return redirect(request.path_info)
+            # if not teacher_id:
+            #     messages.error(request, "يرجى اختيار المدرس.")
+            #     return redirect(request.path_info)
 
             try:
                 if form_type == "courses_form":
@@ -196,8 +196,8 @@ class TeacherAvailabilityAndCoursesView(View):
                         group_id = request.POST.get(f'dist_group_{i}')
                         subject_id = request.POST.get(f'dist_subject_{i}')
                         dist_id = request.POST.get(f'distribution_id_{i}')
-                        dist_id_add = request.POST.get(f'distribution_id_{i}_add')
-
+                        print(f"Group ID: {group_id}, Subject ID: {subject_id}, Distribution ID: {dist_id}")
+                        
                         if group_id and subject_id:
                             dist_data = {
                                 "fk_group_id": group_id,
@@ -206,19 +206,15 @@ class TeacherAvailabilityAndCoursesView(View):
                             }
 
                             try:
-                                # if dist_id_add:
-                                #     api_post(self.endpoints["distributions"], dist_data) 
                                 if dist_id:
                                     api_put(f"{Endpoints.distributions}{dist_id}/", dist_data)
                                 else:
-                                    api_post({Endpoints.distributions}, dist_data)
+                                    api_post(Endpoints.distributions, dist_data)
                             except Exception as e:
                                 handle_exception(request, f"فشل حفظ توزيع رقم {i}", e)
-                        else:
-                            break
 
-                    messages.success(request, "تم حفظ المقررات بنجاح.")
-
+                    # ✅ ضع الـ redirect هنا بعد انتهاء كل العمليات
+                    return redirect("add_edit_teacher_with_courses", id=teacher_id)
                 elif form_type == "times_form":
                     for i in range(1, 100):
                         day_id = request.POST.get(f'time_day_{i}')
@@ -243,9 +239,11 @@ class TeacherAvailabilityAndCoursesView(View):
                             break
 
                     messages.success(request, "تم حفظ الأوقات المتاحة بنجاح.")
-
+                    print("--------------------------------------------------")
+                    
                 elif form_type == "delete_distribution":
-                    dist_id = request.POST.get("distribution_id")
+                    print("============================")
+                    dist_id = request.POST.get("item_id")
                     if dist_id:
                         try:
                             api_delete(f"{Endpoints.distributions}{dist_id}/")
@@ -254,7 +252,9 @@ class TeacherAvailabilityAndCoursesView(View):
                             handle_exception(request, "فشل في حذف توزيع المقرر", e)
 
                 elif form_type == "delete_availability":
-                    availability_id = request.POST.get("availability_id")
+                    print("============================")
+                    availability_id = request.POST.get("item_id")
+                    print(f"Availability ID: {availability_id}")
                     if availability_id:
                         try:
                             api_delete(f"{Endpoints.teacher_times}{availability_id}/")
@@ -270,6 +270,7 @@ class TeacherAvailabilityAndCoursesView(View):
             except Exception as e:
                 handle_exception(request, "حدث خطأ أثناء الحفظ", e)
                 return redirect(request.path_info)
+            
 
 class CoursesView(View):
     def get(self, request, id=None):

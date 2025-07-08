@@ -40,7 +40,9 @@ def api_post(endpoint, data):
         print(f"{BASE_API_URL}{endpoint}", data)
         response = requests.post(f"{BASE_API_URL}{endpoint}", json=data)
         response.raise_for_status()
+        
         return response.json()
+    
     except requests.exceptions.RequestException as e:
         raise RuntimeError(f"POST request failed: {e}")
 
@@ -98,7 +100,6 @@ def handle_file_upload_generic(request, *, file_field_name, endpoint_url, succes
             msg = response_data.get("message", success_title)
             messages.success(request, msg)
 
-            # عرض الأخطاء إن وجدت
             errors = response_data.get("errors")
             if errors:
                 for error in errors:

@@ -39,6 +39,7 @@
 <form id="deleteGenericForm" method="post" action="" class="hidden">
   {% csrf_token %}
   <input type="hidden" name="item_id" id="deleteItemIdInput">
-  <input type="hidden" name="form_type" value="delete">
+  <input type="hidden" name="form_type" id="deleteFormTypeInput">
+  <input type="hidden" name="selected_teacher_id" id="selectedTeacherId">
 
 </form>

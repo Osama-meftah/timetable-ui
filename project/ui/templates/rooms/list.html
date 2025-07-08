@@ -159,9 +159,7 @@
                     </div>
                 </div>
                 
-                {# أزرار الإجراءات في أسفل البطاقة #}
-                <div class="flex justify-end gap-3 mt-5 border-t border-gray-200 dark:border-gray-600 pt-4">
-
+                <div class="flex justify-between gap-3 mt-5 border-t border-gray-200 dark:border-gray-600 pt-4">
                     <a href="{% url 'edit_room' room.id %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-700 dark:text-indigo-100 dark:hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200 group">
                         <i class="fas fa-edit ml-2 group-hover:scale-105 transition-transform"></i> تعديل
                     </a>
@@ -170,6 +168,7 @@
                     data-id="{{ room.id }}"
                     data-type="القاعة" 
                     data-url="{% url 'delete_room' 0 %}"
+                    data-form-type="delete"
                     class="delete-btn inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium 
                     rounded-md text-red-600 bg-red-100 hover:bg-red-200 dark:bg-red-700 dark:text-red-100 dark:hover:bg-red-600 
                     focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 group"

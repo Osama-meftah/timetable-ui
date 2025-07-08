@@ -7,28 +7,38 @@ document.addEventListener('DOMContentLoaded', function () {
   const itemIdInput = document.getElementById('deleteItemIdInput');
   const confirmBtn = document.getElementById('confirmDeleteBtn');
   const closeButtons = modal.querySelectorAll('.close-modal-btn');
-
+  
   let currentActionUrl = '';
-
   document.querySelectorAll('.delete-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = btn.getAttribute('data-id');
-      const name = btn.getAttribute('data-name');
-      const type = btn.getAttribute('data-type');
-      const url = btn.getAttribute('data-url').replace('0', id);
-
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-id");
+      const name = btn.getAttribute("data-name");
+      const type = btn.getAttribute("data-type");
+      const formType = btn.getAttribute("data-form-type"); // ✅ سطر جديد
+      const url = btn.getAttribute("data-url").replace("0", id);
+      const teacherIdInput = document.getElementById("selected_teachers_id")?.value || null; // ✅ سطر جديد
+      if (selectedTeacherId) {
+        const selectedTeacherId = document.getElementById("selectedTeacherId");
+        selectedTeacherId.value = teacherIdInput;        
+      }
+      
+      // ✅ سطر جديد
       currentActionUrl = url;
       itemIdInput.value = id;
       itemName.textContent = name;
       itemType.textContent = type;
+      document.getElementById("deleteFormTypeInput").value = formType; // ✅ سطر جديد
+
       console.log(`Preparing to delete ${type} with ID ${id}`);
 
       showModal();
     });
+    
   });
 
   confirmBtn.addEventListener('click', () => {
     form.action = currentActionUrl;
+    
     form.submit();
   });
 
