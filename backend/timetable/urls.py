@@ -28,7 +28,7 @@ urlpatterns =[
     path('uploadLevels/', LevelUploadView.as_view(), name='upload_levels'),
     path('uploadSubjects/', SubjectUploadView.as_view(), name='upload_subjects'),
     path('uploadHalls/', HallUploadView.as_view(), name='upload_halls'),
-    path('run-scheduler/', run_scheduler_view, name='run_scheduler'),
+    # path('run-scheduler/', run_scheduler_view, name='run_scheduler'),
 
 
 ]

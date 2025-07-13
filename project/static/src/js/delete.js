@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const id = btn.getAttribute("data-id");
       const name = btn.getAttribute("data-name");
       const type = btn.getAttribute("data-type");
+
       const formType = btn.getAttribute("data-form-type"); // ✅ سطر جديد
       const url = btn.getAttribute("data-url").replace("0", id);
       const teacherIdInput = document.getElementById("selected_teachers_id")?.value || null; // ✅ سطر جديد
@@ -27,6 +28,15 @@ document.addEventListener('DOMContentLoaded', function () {
       itemIdInput.value = id;
       itemName.textContent = name;
       itemType.textContent = type;
+      
+      if (type === "program" || type === "level") {
+        
+        selectedLevelOrProgram = document.getElementById("selectedLevelOrProgram");
+        selectedLevelOrProgram.value = type;
+        console.log(selectedLevelOrProgram.value);
+        
+        // ✅ سطر جديد
+      }
       document.getElementById("deleteFormTypeInput").value = formType; // ✅ سطر جديد
 
       console.log(`Preparing to delete ${type} with ID ${id}`);

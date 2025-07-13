@@ -165,6 +165,7 @@ class TeacherAvailabilityAndCoursesView(View):
                 # requests.get(f"{BASE_API_URL}{self.endpoints['distributions']}").json()
                 teacher_distributions = [d for d in all_distributions if d["fk_teacher"]["id"] == int(id)]
                 # print(teacher_distributions)
+            print(days)
             context = {
                 "teacher": teacher,
                 "all_teachers": teachers,
@@ -374,7 +375,7 @@ class RoomsView(View):
                 'largest_capacity_room': largest_capacity_room,
                 'capacity_counts': capacity_counts,
             }
-            room_paginated = paginate_queryset(rooms, request, "page", "page_size",5)
+            room_paginated = paginate_queryset(rooms, request, "page", "page_size",8)
 
             context = {
                 'page_title': 'إدارة القاعات',
@@ -462,7 +463,7 @@ class DepartmentsManagementView(View):
                 'overall_total_programs': len(programs),
                 'overall_total_courses': len(levels),
             }
-
+            print(dept)
             context = {
                 'page_title': 'إدارة التخصصات والأقسام',
                 'departments': dept,
@@ -578,7 +579,6 @@ class AddAndEditProgramView(View):
                 "page_title": "إضافة"
             })
         else:
-            # ✅ حالة fallback لو المستخدم كتب فقط /program/add/ بدون ?add
             programs = api_get(f"{Endpoints.programs}")
             levels = api_get(f"{Endpoints.levels}")
             departments = api_get(f"{Endpoints.departments}")
@@ -588,6 +588,7 @@ class AddAndEditProgramView(View):
                 "departments": departments,
                 "page_title": "إضافة"
             })
+            
     def post(self, request, id=None):
         form_type = request.POST.get('form_type')
         print(form_type)
@@ -640,9 +641,10 @@ class AddAndEditProgramView(View):
                     success_title="✅ تم رفع ملف البرامج بنجاح.",
                     error_title="❌ فشل رفع ملف البرامج"
                 )
-        if request.POST.get('item_type'):
+        print(form_type)
+        if form_type =='delete':
             item_id = request.POST.get('item_id')
-            item_type = request.POST.get('item_type')
+            item_type = request.POST.get('selected_level_or_program')
             try:
                 if item_type == 'program':
                     api_delete(f"{Endpoints.programs}{item_id}/")
@@ -654,10 +656,9 @@ class AddAndEditProgramView(View):
             except Exception as e:
                 messages.error(request, f"حدث خطأ أثناء الحذف: {e}")
                 print(f"Error deleting item of type {item_type} with ID {item_id}: {e}")
-            return redirect(request.path_info) # ✅ تأكد من وجود redirect هنا أيضًا
+            # return redirect(request.path_info) # ✅ تأكد من وجود redirect هنا أيضًا
 
-        # ✅ fallback في حال لم يصل الطلب لأي من الشروط السابقة
-        # messages.error(request, "نوع النموذج غير معروف.")
+        messages.error(request, "نوع النموذج غير معروف.")
         return redirect('add_program')
 
 class TimeTableSettingsView(View):

@@ -77,6 +77,7 @@ class LevelUploadView(APIView):
 #             prepare_data=lambda row: prepare_teacher_data(row),
 #             success_message_singular="مدرس"
 #         )
+
 class TeacherUploadView(APIView):
     parser_classes = [MultiPartParser]
 

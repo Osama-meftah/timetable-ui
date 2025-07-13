@@ -70,11 +70,9 @@ class TodaySerializer(serializers.ModelSerializer):
         fields = ['id', 'day_name', 'day_name_display']
 
 class PeriodSerializer(serializers.ModelSerializer):
-    period_display = serializers.CharField(source='get_period_display', read_only=True)
-
     class Meta:
         model = Period
-        fields = ['id', 'period', 'period_display']
+        fields = ['id', 'period_from', 'period_to']
 
 class TeacherTimeSerializer(serializers.ModelSerializer):
     # للقراءة

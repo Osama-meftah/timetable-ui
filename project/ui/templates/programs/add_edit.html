@@ -210,7 +210,7 @@
                                 <div class="flex justify-between items-center bg-blue-100 dark:bg-blue-900 p-3 rounded-md shadow-sm border border-blue-200 dark:border-blue-700 transition-all duration-200 hover:shadow-md">
                                     <h5 class="font-bold text-lg text-blue-800 dark:text-blue-200 flex items-center">
                                         <i class="fas fa-cube text-blue-600 mr-2"></i>
-                                        {{ program.program_name }} (<span class="text-blue-600 dark:text-blue-400 text-sm">{{ program.fk_department.name }}</span>)
+                                        {{ program.program_name }}{{program.id}} (<span class="text-blue-600 dark:text-blue-400 text-sm">{{ program.fk_department.name }}</span>)
                                     </h5>
                                     <div class="flex gap-2">
                                         <a
@@ -218,21 +218,21 @@
                                             class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 p-1.5 rounded-full bg-blue-50 hover:bg-blue-100 dark:bg-blue-950 dark:hover:bg-blue-800 transition-colors duration-200" title="تعديل البرنامج">
                                             <i class="fas fa-edit text-lg"></i>
                                         </a>
-                                        {# زر حذف البرنامج - ستحتاج لإضافته في HTML الخاص بك إذا لم يكن موجودًا #}
-                                        {# هذا مثال لكيفية إضافته باستخدام الفئات الجديدة #}
-                                        <button type="button" class="text-red-600 hover:text-red-800 dark:text-red-400
+                                        <button type="button"
+                                            class="delete-btn text-red-600 hover:text-red-800 dark:text-red-400
                                             dark:hover:text-red-200 p-1.5 rounded-full bg-red-50 hover:bg-red-100 dark:bg-red-950 dark:hover:bg-red-800
-                                            transition-colors duration-200 delete-item-btn"
-                                            data-item-id="{{ program.id }}"
-                                            data-item-name="{{ program.program_name }}"
-                                            data-item-type="program"
-                                            title="حذف البرنامج">
-                                            <i class="fas fa-trash-alt text-lg"></i>
+                                            transition-colors duration-200"
+                                                data-id="{{ program.id }}"
+                                                data-name="{{ program.program_name }}"
+                                                data-type="program"
+                                                data-form-type="delete"
+                                                data-url="{% url 'edit_program' 0 %}"
+                                                title="حذف البرنامج">
+                                                <i class="fas fa-trash-alt"></i>
                                         </button>
                                     </div>
                                 </div>
             
-                                {# قائمة المستويات التابعة لهذا البرنامج #}
                                 {% with level_id=program.id %}
                                     <ul class="mt-3 space-y-2 pl-6 border-l-2 border-gray-200 dark:border-gray-700">
                                         {% for level in levels %}
@@ -247,17 +247,19 @@
                                                             dark:hover:text-green-200 p-1.5 rounded-full bg-green-50 hover:bg-green-100 dark:bg-green-950 dark:hover:bg-green-800 transition-colors duration-200 edit-level-btn" data-level-id="{{ level.id }}" title="تعديل المستوى">
                                                             <i class="fas fa-edit text-lg"></i>
                                                         </button>
-            
-                                                        {# زر حذف المستوى - تم تعديل الفئات وبيانات الـ data-* #}
-                                                        <button type="button" class="text-red-600 hover:text-red-800 dark:text-red-400
+                                                        <button type="button"
+                                                                class="delete-btn text-red-600 hover:text-red-800 dark:text-red-400
                                                             dark:hover:text-red-200 p-1.5 rounded-full bg-red-50 hover:bg-red-100 dark:bg-red-950 dark:hover:bg-red-800
-                                                            transition-colors duration-200 delete-item-btn"
-                                                            data-item-id="{{ level.id }}"
-                                                            data-item-name="{{ level.level_name }}"
-                                                            data-item-type="level"
-                                                            title="حذف المستوى">
-                                                            <i class="fas fa-trash-alt text-lg"></i>
-                                                        </button>
+                                                            transition-colors duration-200"
+                                                                data-id="{{ level.id }}"
+                                                                data-name="{{ level.level_name }}"
+                                                                data-type="level"
+                                                                data-form-type="delete"
+                                                                data-url="{% url 'edit_program' 0 %}"
+                                                                title="حذف مستوى">
+                                                                <i class="fas fa-trash-alt"></i>
+                                                        </button> 
+            
                                                     </div>
                                                 </li>
                                             {% endif %}
@@ -283,52 +285,8 @@
     </div>
 
 
-    <form id="deleteConfirmationForm" method="post" action="" class="hidden">
-        {% csrf_token %}
-        <input type="hidden" name="item_id" id="deleteItemId">
-        <input type="hidden" name="item_type" id="deleteItemType">
-    </form>
-    
-    <div id="deleteConfirmationModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 dark:bg-opacity-85 flex items-center justify-center z-50 transition-opacity duration-300 opacity-0 invisible" aria-hidden="true" role="dialog" aria-modal="true" tabindex="-1">
-        <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-8 w-11/12 max-w-lg transform transition-all duration-300 scale-95 opacity-0">
-            <button type="button" class="close-modal-btn absolute top-4 left-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none z-10" aria-label="إغلاق">
-                <i class="fas fa-times text-2xl"></i>
-            </button>
-    
-            <div class="text-center mb-6">
-                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 dark:bg-red-900/50 mb-4 animate-bounce-in">
-                    <svg class="h-9 w-9 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                    </svg>
-                </div>
-                <h3 class="text-2xl font-extrabold text-gray-900 dark:text-gray-100 mb-2" id="modalTitle">
-                    تأكيد الحذف
-                </h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                    يرجى قراءة التحذير بعناية قبل المتابعة.
-                </p>
-            </div>
-    
-            <p class="text-base text-gray-700 dark:text-gray-300 mb-8 leading-relaxed text-center">
-                أنت على وشك حذف: <strong id="modalItemName" class="text-indigo-700 dark:text-indigo-300 font-extrabold"></strong>.
-                <br>
-                <span class="font-bold text-red-600 dark:text-red-400">هذا الإجراء لا يمكن التراجع عنه.</span>
-                <span id="modalWarningMessage"></span> 
-            </p>
-    
-            <div class="flex flex-col sm:flex-row-reverse justify-end gap-4 mt-6">
-                <button type="button" class="close-modal-btn w-full  px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-base font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105 active:scale-95">
-                     إلغاء
-                </button>
-                <button type="button" id="confirmDeleteItemBtn" class="w-full px-6  py-3 border border-transparent rounded-lg shadow-lg text-base 
-                font-bold text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 transform hover:scale-105 active:scale-95">
-                     تأكيد الحذف
-                </button>
-            </div>
-        </div>
-    </div>
+    {% include "delete_modal.html" %}
     {% include "upload_modal.html" %}
-    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const levelManagementArea = document.getElementById('level_management_area');
@@ -452,8 +410,10 @@
             hideAllLevelPanels();
         });
     </script>
-{% comment %} script for modal delete {% endcomment %}
-    <script>
+
+
+
+    {% comment %} <script>
         document.addEventListener('DOMContentLoaded', function() {
 
             const deleteConfirmationModal = document.getElementById('deleteConfirmationModal');
@@ -618,5 +578,5 @@
                 });
             }
         });
-    </script>
+    </script> {% endcomment %}
 {% endblock %}
