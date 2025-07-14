@@ -6,6 +6,7 @@ from openpyxl import Workbook
 import random
 from .models import Department, Program, Hall, Level, Group, Subject, Teacher,Period,Today,TeacherTime, Distribution, Table
 from collections import namedtuple
+from tempfile import NamedTemporaryFile
 
 class TimeTableScheduler:
     def __init__(self):
@@ -28,12 +29,8 @@ class TimeTableScheduler:
         self.professoresdata        = []
         self.generated_schedule = []
         self.available_times        = {}
+        self.temp_file = None
 
-
-    def dicts_to_namedtuples(dict_list, typename="Row"):
-        RowClass = namedtuple(typename, dict_list[0].keys())
-        return [RowClass(**d) for d in dict_list]
-    
     def add_data(self): 
         for row in self.available_times_df:
             time_from=row.period_from
@@ -54,13 +51,15 @@ class TimeTableScheduler:
             professor_times = [t for t in self.timesProfessor if t.fk_teacher.id == professor_id]
 
             availability = defaultdict(list)
+            teacher_time_ids = professor_times[0].pk
             for t in professor_times:
                 availability[t.fk_today.id].append(t.fk_period.pk)
 
             professordata = {
                 "available": dict(availability),
                 "name": professor.teacher_name.strip(),
-                "ProfessorId": professor_id
+                "ProfessorId": professor_id,
+                "teacher_time_id":teacher_time_ids
             }
 
             self.professoresdata.append(professordata)
@@ -373,8 +372,12 @@ class TimeTableScheduler:
                     col_letter = ws.cell(row=1, column=col).column_letter  
                     ws.column_dimensions[col_letter].width = 30  
                 row_num += 1
-        wb.save('output/timetable.xlsx')
-        print("📂 تم حفظ الجدول في 'timetable.xlsx'")    
+
+                
+        temp_file = NamedTemporaryFile(delete=False, suffix=".xlsx")
+        wb.save(temp_file.name)
+        temp_file.seek(0)  # العودة لبداية الملف
+        return temp_file
 
     def solve(self):
         self.solver.parameters.random_seed=random.randint(1,10000)
@@ -393,14 +396,17 @@ class TimeTableScheduler:
                             if self.solver.Value(self.schedule_vars[(course_id, day.id, time.pk, room_name)]) == 1:
                                 id = time.pk
                                 schedule.append({
+                                    "course_id": course_id,
                                     "day": day.day_name,
                                     "time": self.available_times[id],
                                     "room": room_name,
+                                    "room_id": room.pk,
                                     "capacity_room":capacity,
                                     "course": course_info['course'],
                                     "teatcher": course_info['teacher']['name'],
                                     "available":course_info['teacher']['available'],
                                     "day_id":day.id,
+                                    "time_id": id,
                                     "group":course_info['group'],
                                     "level": course_info['level'],
                                     "dept": course_info['dept'],
@@ -409,7 +415,7 @@ class TimeTableScheduler:
 
             if schedule:
                 self.generated_schedule = schedule
-                self.save_to_excel(schedule)
+                self.temp_file=self.save_to_excel(schedule)
                 conflicts = self.check_conflicts(schedule)
             
             # Write conflicts to Excel file
