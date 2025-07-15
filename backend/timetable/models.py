@@ -332,12 +332,14 @@ class Lecture(models.Model):
         related_name='lectures', 
         verbose_name="الجدول"
     )
-    fk_teachertime = models.ForeignKey(
-        TeacherTime, 
-        on_delete=models.CASCADE, 
-        related_name='lectures', 
-        verbose_name="وقت الأستاذ"
-    )
+    # fk_teachertime = models.ForeignKey(
+    #     TeacherTime, 
+    #     on_delete=models.CASCADE, 
+    #     related_name='lectures', 
+    #     verbose_name="وقت الأستاذ"
+    # )
+    fk_day=models.ForeignKey(Today,on_delete=models.CASCADE,related_name='day_lectures',verbose_name="اليوم",default=1) # إضافة قيمة افتراضية
+    fk_period=models.ForeignKey(Period,on_delete=models.CASCADE,related_name='period_lectures',verbose_name="الفترة",default=1) # إضافة قيمة افتراضية
     fk_distribution = models.ForeignKey(
         Distribution, 
         on_delete=models.CASCADE, 
@@ -351,12 +353,12 @@ class Lecture(models.Model):
         # قيود التفرد لضمان عدم تداخل المحاضرات:
         # 1. لا يمكن أن تكون نفس القاعة مشغولة في نفس الوقت لنفس الجدول.
         # 2. لا يمكن أن تكون نفس المجموعة (عبر التوزيع) مجدولة في نفس الوقت لنفس الجدول.
-        unique_together = (
-            ('fk_hall', 'fk_teachertime', 'fk_table'),
-            ('fk_distribution', 'fk_teachertime', 'fk_table')
-        )
-        ordering = ['fk_table__created_at', 'fk_teachertime__fk_today__id', 'fk_teachertime__fk_period__period_from']
+        # unique_together = (
+        #     ('fk_hall', 'fk_teachertime', 'fk_table'),
+        #     ('fk_distribution', 'fk_teachertime', 'fk_table')
+        # )
+        # ordering = ['fk_table__created_at', 'fk_teachertime__fk_today__id', 'fk_teachertime__fk_period__id']
 
 
     def __str__(self):
-        return f"محاضرة: {self.fk_distribution.fk_subject.subject_name} في {self.fk_hall.hall_name} - {self.fk_teachertime.fk_today.day_name} {self.fk_teachertime.fk_period.get_period_display()}"
+        return f"محاضرة: {self.fk_distribution.fk_subject.subject_name} في {self.fk_hall.hall_name} - {self.fk_day.day_name} {self.fk_period.get_period_display()}"
