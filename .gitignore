@@ -11,6 +11,10 @@ __pycache__/
 
 # إذا كنت لا تريد تتبع migrations:
 # **/migrations/
+# تجاهل كل ملفات الترحيل ما عدا __init__.py
+**/migrations/*.py
+!**/migrations/__init__.py
+**/migrations/*.pyc
 
 # إعدادات البيئة
 .env
