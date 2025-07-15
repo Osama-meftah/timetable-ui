@@ -71,8 +71,8 @@ class TeacherManagementView(View):
 
             # إحصائيات
             total_teachers = len(teachers_data)
-            active_teachers = len([t for t in teachers_data if t.get("teacher_status") == "نشط"])
-            on_leave_teachers = len([t for t in teachers_data if t.get("teacher_status") == "إجازة"])
+            active_teachers = len([t for t in teachers_data if t.get("teacher_status") == "active"])
+            on_leave_teachers = len([t for t in teachers_data if t.get("teacher_status") == "vacation"])
             
             teachers_paginated = paginate_queryset(teachers_data, request, "page", "page_size",5)
             teachers_data_paginated = paginate_queryset(teachers_with_data, request, "page_detailed", "page_data_size")
@@ -367,7 +367,7 @@ class RoomsView(View):
         else:
             rooms = api_get(Endpoints.halls)
             total_rooms = len(rooms)
-            maintenance_rooms = sum(1 for room in rooms if room['hall_status'] == 'تحت الصيانة')
+            maintenance_rooms = sum(1 for room in rooms if room['hall_status'] == 'under_maintenance')
 
             largest_capacity_room = max(rooms, key=lambda r: r['capacity_hall'], default=None)
 
