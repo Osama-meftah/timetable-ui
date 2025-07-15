@@ -20,8 +20,6 @@ class DepartmentUploadView(APIView):
             },
             success_message_singular="قسم"
         )
-
-
 class ProgramUploadView(APIView):
     parser_classes = [MultiPartParser]
 
@@ -32,7 +30,8 @@ class ProgramUploadView(APIView):
             serializer_class=ProgramSerializer,
             required_fields=["program_name", "department_id"],
             get_existing=lambda data: Program.objects.filter(
-                program_name=data["program_name"], fk_department=data["fk_department"]
+                program_name=data["program_name"],
+                fk_department_id=data["department_id"]  # ✅ التصحيح هنا
             ).first(),
             prepare_data=lambda row: prepare_data_with_fk(
                 row=row,
@@ -43,6 +42,8 @@ class ProgramUploadView(APIView):
             ),
             success_message_singular="برنامج"
         )
+
+
 class LevelUploadView(APIView):
     parser_classes = [MultiPartParser]
 
@@ -63,6 +64,19 @@ class LevelUploadView(APIView):
             success_message_singular="مستوى"
         )
 
+# class TeacherUploadView(APIView):
+#     parser_classes = [MultiPartParser]
+
+#     def post(self, request):
+#         return handle_upload(
+#             request=request,
+#             model=Teacher,
+#             serializer_class=TeacherSerializer,
+#             required_fields=["teacher_name"],  # فقط الاسم هنا
+#             get_existing=lambda data: Teacher.objects.filter(teacher_email=data["teacher_email"]).first(),
+#             prepare_data=lambda row: prepare_teacher_data(row),
+#             success_message_singular="مدرس"
+#         )
 
 class TeacherUploadView(APIView):
     parser_classes = [MultiPartParser]

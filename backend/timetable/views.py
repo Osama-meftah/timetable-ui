@@ -58,9 +58,6 @@ class TeacherViewSet(ModelViewSet):
     queryset=Teacher.objects.all()
     serializer_class=TeacherSerializer
 
-
-
-
 class SubjectViewSet(ModelViewSet):
     queryset=Subject.objects.all()
     serializer_class=SubjectSerializer

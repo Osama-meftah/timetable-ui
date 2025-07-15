@@ -2,7 +2,8 @@ from django.urls import path,include
 from .views import *
 from rest_framework.routers import DefaultRouter
 from .views_upload_files import  *
-
+from .views_algorithms import run_scheduler_view
+from .views_search import *
 
 router = DefaultRouter()
 router.register('departments',DepartmentViewSet )  
@@ -27,6 +28,11 @@ urlpatterns =[
     path('uploadLevels/', LevelUploadView.as_view(), name='upload_levels'),
     path('uploadSubjects/', SubjectUploadView.as_view(), name='upload_subjects'),
     path('uploadHalls/', HallUploadView.as_view(), name='upload_halls'),
+    path("searchteachers/", SearchTeacherAPIView.as_view(), name="search_teachers_api"),
+    path("searchteachersdistribution/", SearchTeacherDistributionAPIView.as_view()),
+    path("searchcourses/", SearchCoursesAPIView.as_view()),
+    path("searchhalls/", SearchHallsAPIView.as_view(),)
+    # path('run-scheduler/', run_scheduler_view, name='run_scheduler'),
 
 
 ]

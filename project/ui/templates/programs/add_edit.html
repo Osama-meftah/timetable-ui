@@ -7,29 +7,9 @@
 
 {% block content %}
     {# System messages: Displays success or error alerts from Django's messages framework #}
-    {% if messages %}
-        <div class="mb-4 px-4">
-            {% for message in messages %}
-                <div class="rounded-md px-4 py-3 text-sm font-medium
-                    {% if message.tags == 'error' %}
-                        bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100
-                    {% elif message.tags == 'success' %}
-                        bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100
-                    {% else %}
-                        bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100
-                    {% endif %}
-                    flex items-center justify-between" role="alert">
-                    <span>{{ message }}</span>
-                    <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-transparent text-current rounded-lg p-1.5 hover:bg-current hover:bg-opacity-20 focus:ring-2 focus:ring-current focus:ring-opacity50 inline-flex h-8 w-8 dark:hover:bg-current dark:hover:bg-opacity-20" onclick="this.parentElement.style.display='none';" aria-label="Close alert">
-                        <span class="sr-only">Close</span>
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                    </button>
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
+    
     <div class="container mx-auto py-6 sm:py-8">
+
         <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6">
             <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6 text-center">
                 {{ page_title }}
@@ -39,10 +19,12 @@
 
             {# --- PROGRAM MANAGEMENT SECTION --- #}
             <div class="mb-10 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700 shadow-sm">
+                {% include "message.html" %}
                 <h3 class="text-xl font-semibold text-blue-800 dark:text-blue-200 mb-5 flex items-center">
                     <i class="fas fa-graduation-cap ml-2 text-blue-600"></i>
                     إدارة البرامج
                 </h3>
+
                 <form method="POST" action="." id="program-form">
                     {% csrf_token %}
                     <input type="hidden" name="form_type" value="program_form_submit">
@@ -107,11 +89,12 @@
                     <i class="fas fa-edit ml-2"></i> تعديل مستوى موجود
                 </button>
                 {# Button to trigger file upload modal #}
-                <button type="button" id="openFileUploadModal" class="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-200 font-bold
-                  py-2.5 px-5 rounded-md flex items-center shadow-md transition-all duration-200 transform
-                  hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto justify-center group">
-                    <i class="fas fa-upload ml-2 group-hover:rotate-6 transition-transform duration-200"></i>
-                    رفع ملف بيانات المستويات
+                <button type="button"
+                        class="upload-trigger bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md"
+                        data-type="levels"
+                        data-title="رفع ملف بيانات المستويات"
+                        data-description="يجب أن يحتوي الملف على الأعمدة: level_name, fk_program_id,number_students.">
+                    <i class="fas fa-upload ml-2"></i> رفع ملف بيانات المستويات
                 </button>
             </div>
 
@@ -127,12 +110,10 @@
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 
                                 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none">
                             <option value="">اختر مستوى...</option>
-                            {% comment %} {% for program_in_levels_list in levels %} {% endcomment %}
                                 {% for level_option in levels %}
                                     <option value="{{ level_option.id }}">
                                         {{ level_option.level_name }} ({{ level_option.fk_program.program_name }})
                                     </option>
-                                {% comment %} {% endfor %} {% endcomment %}
                             {% endfor %}
                         </select>
                     </div>
@@ -228,8 +209,8 @@
                             <li>
                                 <div class="flex justify-between items-center bg-blue-100 dark:bg-blue-900 p-3 rounded-md shadow-sm border border-blue-200 dark:border-blue-700 transition-all duration-200 hover:shadow-md">
                                     <h5 class="font-bold text-lg text-blue-800 dark:text-blue-200 flex items-center">
-                                        <i class="fas fa-cube text-blue-600 mr-2"></i>
-                                        {{ program.program_name }} (<span class="text-blue-600 dark:text-blue-400 text-sm">{{ program.fk_department.name }}</span>)
+                                        <i class="fas fa-cube text-blue-600 ml-2"></i>
+                                        {{ program.program_name }}{{program.id}} (<span class="text-blue-600 dark:text-blue-400 text-sm">{{ program.fk_department.name }}</span>)
                                     </h5>
                                     <div class="flex gap-2">
                                         <a
@@ -237,21 +218,21 @@
                                             class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 p-1.5 rounded-full bg-blue-50 hover:bg-blue-100 dark:bg-blue-950 dark:hover:bg-blue-800 transition-colors duration-200" title="تعديل البرنامج">
                                             <i class="fas fa-edit text-lg"></i>
                                         </a>
-                                        {# زر حذف البرنامج - ستحتاج لإضافته في HTML الخاص بك إذا لم يكن موجودًا #}
-                                        {# هذا مثال لكيفية إضافته باستخدام الفئات الجديدة #}
-                                        <button type="button" class="text-red-600 hover:text-red-800 dark:text-red-400
+                                        <button type="button"
+                                            class="delete-btn text-red-600 hover:text-red-800 dark:text-red-400
                                             dark:hover:text-red-200 p-1.5 rounded-full bg-red-50 hover:bg-red-100 dark:bg-red-950 dark:hover:bg-red-800
-                                            transition-colors duration-200 delete-item-btn"
-                                            data-item-id="{{ program.id }}"
-                                            data-item-name="{{ program.program_name }}"
-                                            data-item-type="program"
-                                            title="حذف البرنامج">
-                                            <i class="fas fa-trash-alt text-lg"></i>
+                                            transition-colors duration-200"
+                                                data-id="{{ program.id }}"
+                                                data-name="{{ program.program_name }}"
+                                                data-type="program"
+                                                data-form-type="delete"
+                                                data-url="{% url 'edit_program' 0 %}"
+                                                title="حذف البرنامج">
+                                                <i class="fas fa-trash-alt"></i>
                                         </button>
                                     </div>
                                 </div>
             
-                                {# قائمة المستويات التابعة لهذا البرنامج #}
                                 {% with level_id=program.id %}
                                     <ul class="mt-3 space-y-2 pl-6 border-l-2 border-gray-200 dark:border-gray-700">
                                         {% for level in levels %}
@@ -266,17 +247,19 @@
                                                             dark:hover:text-green-200 p-1.5 rounded-full bg-green-50 hover:bg-green-100 dark:bg-green-950 dark:hover:bg-green-800 transition-colors duration-200 edit-level-btn" data-level-id="{{ level.id }}" title="تعديل المستوى">
                                                             <i class="fas fa-edit text-lg"></i>
                                                         </button>
-            
-                                                        {# زر حذف المستوى - تم تعديل الفئات وبيانات الـ data-* #}
-                                                        <button type="button" class="text-red-600 hover:text-red-800 dark:text-red-400
+                                                        <button type="button"
+                                                                class="delete-btn text-red-600 hover:text-red-800 dark:text-red-400
                                                             dark:hover:text-red-200 p-1.5 rounded-full bg-red-50 hover:bg-red-100 dark:bg-red-950 dark:hover:bg-red-800
-                                                            transition-colors duration-200 delete-item-btn"
-                                                            data-item-id="{{ level.id }}"
-                                                            data-item-name="{{ level.level_name }}"
-                                                            data-item-type="level"
-                                                            title="حذف المستوى">
-                                                            <i class="fas fa-trash-alt text-lg"></i>
-                                                        </button>
+                                                            transition-colors duration-200"
+                                                                data-id="{{ level.id }}"
+                                                                data-name="{{ level.level_name }}"
+                                                                data-type="level"
+                                                                data-form-type="delete"
+                                                                data-url="{% url 'edit_program' 0 %}"
+                                                                title="حذف مستوى">
+                                                                <i class="fas fa-trash-alt"></i>
+                                                        </button> 
+            
                                                     </div>
                                                 </li>
                                             {% endif %}
@@ -302,128 +285,8 @@
     </div>
 
 
-    <form id="deleteConfirmationForm" method="post" action="" class="hidden">
-        {% csrf_token %}
-        <input type="hidden" name="item_id" id="deleteItemId">
-        <input type="hidden" name="item_type" id="deleteItemType">
-    </form>
-    
-    <div id="deleteConfirmationModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 dark:bg-opacity-85 flex items-center justify-center z-50 transition-opacity duration-300 opacity-0 invisible" aria-hidden="true" role="dialog" aria-modal="true" tabindex="-1">
-        <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-8 w-11/12 max-w-lg transform transition-all duration-300 scale-95 opacity-0">
-            <button type="button" class="close-modal-btn absolute top-4 left-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none z-10" aria-label="إغلاق">
-                <i class="fas fa-times text-2xl"></i>
-            </button>
-    
-            <div class="text-center mb-6">
-                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 dark:bg-red-900/50 mb-4 animate-bounce-in">
-                    <svg class="h-9 w-9 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                    </svg>
-                </div>
-                <h3 class="text-2xl font-extrabold text-gray-900 dark:text-gray-100 mb-2" id="modalTitle">
-                    تأكيد الحذف
-                </h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                    يرجى قراءة التحذير بعناية قبل المتابعة.
-                </p>
-            </div>
-    
-            <p class="text-base text-gray-700 dark:text-gray-300 mb-8 leading-relaxed text-center">
-                أنت على وشك حذف: <strong id="modalItemName" class="text-indigo-700 dark:text-indigo-300 font-extrabold"></strong>.
-                <br>
-                <span class="font-bold text-red-600 dark:text-red-400">هذا الإجراء لا يمكن التراجع عنه.</span>
-                <span id="modalWarningMessage"></span> 
-            </p>
-    
-            <div class="flex flex-col sm:flex-row-reverse justify-end gap-4 mt-6">
-                <button type="button" class="close-modal-btn w-full  px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-base font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105 active:scale-95">
-                     إلغاء
-                </button>
-                <button type="button" id="confirmDeleteItemBtn" class="w-full px-6  py-3 border border-transparent rounded-lg shadow-lg text-base 
-                font-bold text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 transform hover:scale-105 active:scale-95">
-                     تأكيد الحذف
-                </button>
-            </div>
-        </div>
-    </div>
-
-    
-    {# File Upload Modal - NEW #}
-    <div id="fileUploadModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden opacity-0 transition-opacity duration-300">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md transform scale-95 transition-transform duration-300">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">رفع ملف بيانات المستويات</h3>
-                <button type="button" id="closeFileUploadModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200">
-                    <i class="fas fa-times text-2xl"></i>
-                </button>
-            </div>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                يمكنك رفع ملف CSV أو Excel يحتوي على بيانات المستويات لإضافتها أو تحديثها دفعة واحدة.
-                يجب أن يحتوي الملف على أعمدة مطابقة لـ: <code class="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded text-xs">level_name</code>, 
-                <code class="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded text-xs">number_students</code>,
-                 <code class="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded text-xs">fk_program_id</code>, 
-            </p>
-            <form method="post" enctype="multipart/form-data" id="levelsFileUploadForm" class="space-y-4">
-                {% csrf_token %}
-                <input type="hidden" name="form_type" value="upload_levels"> {# Differentiate this form submission #}
-                <div>
-                    <label for="data_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        اختر ملف البيانات
-                    </label>
-                    <input
-                        type="file"
-                        name="data_file" {# Changed name to be specific for levels #}
-                        id="data_file"
-                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" {# Accept CSV and Excel files #}
-                        required
-                        class="mt-1 block w-full text-sm text-gray-900
-                            bg-gray-200 border border-gray-300 rounded-lg cursor-pointer
-                            dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                            file:mr-4 file:py-2 file:px-4
-                            file:rounded-lg file:border-0 file:text-sm file:font-semibold
-                            file:bg-green-50 file:text-green-700 hover:file:bg-green-100
-                            file:transition-colors file:duration-200 file:ease-in-out
-                            dark:file:bg-green-900 dark:file:text-green-100 dark:hover:file:bg-green-800"
-                    />
-                </div>
-                <div class="flex justify-start gap-3 mt-6">
-                    <button
-                        type="submit"
-                        class="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
-                    >
-                        رفع الملف
-                    </button>
-                    <button type="button" id="cancelFileUploadButton" class="inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm transition-colors duration-200">
-                        إلغاء
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const openBtn = document.getElementById("openFileUploadModal");
-            const closeBtn = document.getElementById("closeFileUploadModal");
-            const cancelBtn = document.getElementById("cancelFileUploadButton");
-            const modal = document.getElementById("fileUploadModal");
-    
-            function openModal() {
-                modal.classList.remove("hidden", "opacity-0", "scale-95");
-                modal.classList.add("opacity-100", "scale-100");
-            }
-    
-            function closeModal() {
-                modal.classList.add("opacity-0", "scale-95");
-                setTimeout(() => modal.classList.add("hidden"), 300); // match transition duration
-            }
-    
-            if (openBtn) openBtn.addEventListener("click", openModal);
-            if (closeBtn) closeBtn.addEventListener("click", closeModal);
-            if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
-        });
-    </script>
-    
+    {% include "delete_modal.html" %}
+    {% include "upload_modal.html" %}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const levelManagementArea = document.getElementById('level_management_area');
@@ -547,8 +410,10 @@
             hideAllLevelPanels();
         });
     </script>
-{% comment %} script for modal delete {% endcomment %}
-    <script>
+
+
+
+    {% comment %} <script>
         document.addEventListener('DOMContentLoaded', function() {
 
             const deleteConfirmationModal = document.getElementById('deleteConfirmationModal');
@@ -713,5 +578,5 @@
                 });
             }
         });
-    </script>
+    </script> {% endcomment %}
 {% endblock %}

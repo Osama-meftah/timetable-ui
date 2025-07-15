@@ -60,7 +60,8 @@ class SubjectSerializer(serializers.ModelSerializer):
 class TeacherSerializer(serializers.ModelSerializer):
     class Meta:
         model = Teacher
-        fields = '__all__'
+        fields = ['id', 'teacher_name', 'teacher_phone', 'teacher_email', 'teacher_status', 'teacher_address']
+
 
 class TodaySerializer(serializers.ModelSerializer):
     day_name_display = serializers.CharField(source='get_day_name_display', read_only=True)
@@ -70,11 +71,9 @@ class TodaySerializer(serializers.ModelSerializer):
         fields = ['id', 'day_name', 'day_name_display']
 
 class PeriodSerializer(serializers.ModelSerializer):
-    period_display = serializers.CharField(source='get_period_display', read_only=True)
-
     class Meta:
         model = Period
-        fields = ['id', 'period', 'period_display']
+        fields = ['id', 'period_from', 'period_to']
 
 class TeacherTimeSerializer(serializers.ModelSerializer):
     # للقراءة
@@ -135,3 +134,19 @@ class LectureSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lecture
         fields = '__all__'
+
+
+class TeacherCourseInfoSerializer(serializers.Serializer):
+    subject_name = serializers.CharField()
+    group = serializers.CharField()
+    level = serializers.CharField()
+    program = serializers.CharField()
+
+class AvailabilityInfoSerializer(serializers.Serializer):
+    day = serializers.CharField()
+    period = serializers.CharField()
+
+class TeacherWithDetailsSerializer(serializers.Serializer):
+    teacher = TeacherSerializer()
+    courses = TeacherCourseInfoSerializer(many=True)
+    availability = AvailabilityInfoSerializer(many=True)
