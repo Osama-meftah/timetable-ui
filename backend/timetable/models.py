@@ -20,12 +20,12 @@ class Department(models.Model):
     
 class Program(models.Model):
     program_name = models.CharField(max_length=50, verbose_name="اسم البرنامج")
-    # fk_department = models.ForeignKey(
-    #     'Department',
-    #     on_delete=models.CASCADE,
-    #     related_name='programs',
-    #     verbose_name="القسم التابع له"
-    # )
+    fk_department = models.ForeignKey(
+        'Department',
+        on_delete=models.CASCADE,
+        related_name='programs',
+        verbose_name="القسم التابع له"
+    )
     class Meta:
         verbose_name = "برنامج"
         verbose_name_plural = "البرامج"
@@ -54,10 +54,6 @@ class Hall(models.Model):
         return self.hall_name
     
 class Level(models.Model):
-<<<<<<< HEAD
-    level_name = models.CharField(max_length=50, verbose_name="اسم المستوى")
-    # number_students = models.IntegerField(verbose_name="عدد الطلاب", validators=[MinValueValidator(0)]) # إضافة MinValueValidator
-=======
 
     LEVEL_NAME_CHOICES = [
         ("الأول", "الأول"),
@@ -74,7 +70,6 @@ class Level(models.Model):
         verbose_name="عدد الطلاب",
         validators=[MinValueValidator(0)]
     )
->>>>>>> 5ee4d0c59c5610cecb638cb9dea35c7069613fcc
     fk_program = models.ForeignKey(
         'Program',
         on_delete=models.CASCADE,
@@ -174,13 +169,9 @@ class Subject(models.Model):
         ('الثاني', 'الثاني')
     ]
     subject_name = models.CharField(max_length=100, verbose_name="اسم المادة")
-<<<<<<< HEAD
     term = models.CharField(choices=STATUS_CHOICES, verbose_name="الفصل الدراسي", default='الأول',max_length=10)
     # إضافة علاقة ForeignKey مع Level
 
-=======
-    term = models.CharField(choices=STATUS_CHOICES, verbose_name="الفصل الدراسي", default='الأول')
->>>>>>> 5ee4d0c59c5610cecb638cb9dea35c7069613fcc
     class Meta:
         verbose_name = "مادة"
         verbose_name_plural = "المواد"
@@ -236,28 +227,6 @@ class Today(models.Model):
 # الفترة (Period)
 
 class Period(models.Model):
-<<<<<<< HEAD
-    # PERIOD_CHOICES = [
-    #     (1, "8:00 - 10:00"),
-    #     (2, "10:00 - 12:00"),
-    #     (3, "12:00 - 2:00"),
-    #     (4, "2:00 - 4:00"),
-    #     (5, "4:00 - 6:00"),
-    # ]
-    period_from = models.IntegerField(verbose_name="من الساعة",null=True)  # أو TimeField إذا كان وقتًا فعليًا
-    period_to = models.IntegerField(verbose_name="إلى الساعة",null=True)  # أو TimeField إذا كان وقتًا فعليًا
-    class Meta:
-        verbose_name = "فترة"
-        verbose_name_plural = "الفترات"
-        ordering: list[str] = ['id'] # ترتيب الفترات تصاعدياً
-
-    def get_period_display(self):
-        # return dict(self.PERIOD_CHOICES).get(self.period, "غير معروف")
-        return f"الفترة: {self.period_from} - {self.period_to}"
-
-    def __str__(self):
-        return self.get_period_display() # عرض الفترة بشكل نصي
-=======
     period_from = models.CharField(verbose_name="من الساعة", help_text="مثال: 08:00")
     period_to = models.CharField(verbose_name="إلى الساعة", help_text="مثال: 10:00")
 
@@ -273,7 +242,6 @@ class Period(models.Model):
         from_time = self.period_from.strftime('%I:%M %p') # %I for 12-hour, %p for AM/PM
         to_time = self.period_to.strftime('%I:%M %p')
         return f"{from_time} - {to_time}"
->>>>>>> 5ee4d0c59c5610cecb638cb9dea35c7069613fcc
 
 class TeacherTime(models.Model):
     fk_today = models.ForeignKey(
@@ -299,11 +267,7 @@ class TeacherTime(models.Model):
         verbose_name = "وقت الأستاذ"
         verbose_name_plural = "أوقات الأساتذة"
         unique_together = ('fk_teacher', 'fk_today', 'fk_period')
-<<<<<<< HEAD
-        ordering = ['fk_teacher__teacher_name', 'fk_today__id', 'fk_period__id']
-=======
         ordering = ['fk_teacher__teacher_name', 'fk_today__id', 'fk_period__period_from']
->>>>>>> 5ee4d0c59c5610cecb638cb9dea35c7069613fcc
 
     def __str__(self):
         return f"{self.fk_teacher.teacher_name} - {self.fk_today.day_name} - {self.fk_period.get_period_display()}"
@@ -391,11 +355,7 @@ class Lecture(models.Model):
             ('fk_hall', 'fk_teachertime', 'fk_table'),
             ('fk_distribution', 'fk_teachertime', 'fk_table')
         )
-<<<<<<< HEAD
-        ordering = ['fk_table__created_at', 'fk_teachertime__fk_today__id', 'fk_teachertime__fk_period__id']
-=======
         ordering = ['fk_table__created_at', 'fk_teachertime__fk_today__id', 'fk_teachertime__fk_period__period_from']
->>>>>>> 5ee4d0c59c5610cecb638cb9dea35c7069613fcc
 
 
     def __str__(self):
