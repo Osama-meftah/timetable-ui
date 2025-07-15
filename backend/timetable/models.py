@@ -268,7 +268,7 @@ class TeacherTime(models.Model):
         ordering = ['fk_teacher__teacher_name', 'fk_today__id', 'fk_period__period_from']
 
     def __str__(self):
-        return f"{self.fk_teacher.teacher_name} - {self.fk_today.day_name} - {self.fk_period}"
+        return f"{self.fk_teacher.teacher_name} - {self.fk_today.day_name}"
 
 class Distribution(models.Model):
     fk_group = models.ForeignKey(

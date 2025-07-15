@@ -47,13 +47,13 @@
 
         <nav class="flex-grow">
             <ul>
-                <li class="mb-3">
+                <li class="mb-2">
                     <a href="{% url 'dashboard' %}" class="flex items-center p-3 rounded-md text-gray-300 hover:bg-indigo-800 hover:text-indigo-200 transition-colors duration-200" data-page-title="لوحة التحكم">
                         <i class="fas fa-chart-line sidebar-icon"></i>
                         <span class="nav-text">لوحة التحكم</span>
                     </a>
                 </li>
-                <li class="mb-3">
+                <li class="mb-2">
                     <a 
                     href="{% url 'teachers_management' %}"
                      class="flex items-center p-3 rounded-md text-gray-300 hover:bg-indigo-800 hover:text-indigo-200 transition-colors duration-200" data-page-title="إدارة المدرسين">
@@ -61,7 +61,7 @@
                         <span class="nav-text">إدارة المدرسين</span>
                     </a>
                 </li>
-                <li class="mb-3">
+                <li class="mb-2">
                     <a
                      href="{% url 'courses_management' %}" 
                      class="flex items-center p-3 rounded-md text-gray-300 hover:bg-indigo-800 hover:text-indigo-200 transition-colors duration-200" data-page-title="إدارة المقررات">
@@ -69,7 +69,7 @@
                         <span class="nav-text">إدارة المقررات</span>
                     </a>
                 </li>
-                <li class="mb-3">
+                <li class="mb-2">
                     <a
                      href="{% url 'rooms_management' %}" 
                      class="flex items-center p-3 rounded-md text-gray-300 hover:bg-indigo-800 hover:text-indigo-200 transition-colors duration-200" data-page-title="إدارة القاعات">
@@ -77,7 +77,7 @@
                         <span class="nav-text">إدارة القاعات</span>
                     </a>
                 </li>
-                <li class="mb-3">
+                <li class="mb-2">
                     <a 
                     href="{% url 'departments_management' %}" 
                     class="flex items-center p-3 rounded-md text-gray-300 hover:bg-indigo-800 hover:text-indigo-200 transition-colors duration-200" data-page-title="إدارة المستويات">
@@ -85,7 +85,15 @@
                         <span class="nav-text">إدارة الاقسام والمستويات</span>
                     </a>
                 </li>
-                <li class="mb-3">
+                <li class="mb-2">
+                    <a 
+                    href="{% url 'management_periods' %}" 
+                    class="flex items-center p-3 rounded-md text-gray-300 hover:bg-indigo-800 hover:text-indigo-200 transition-colors duration-200" data-page-title="إعداد الجداول">
+                        <i class="fas fa-clock sidebar-icon"></i>
+                        <span class="nav-text">إدارة الفترات الدراسية</span>
+                    </a>
+                </li>
+                <li class="mb-2">
                     <a 
                     href="{% url 'schedule_creation' %}" 
                     class="flex items-center p-3 rounded-md text-gray-300 hover:bg-indigo-800 hover:text-indigo-200 transition-colors duration-200" data-page-title="إعداد الجداول">
@@ -93,7 +101,7 @@
                         <span class="nav-text">إعداد الجداول</span>
                     </a>
                 </li>
-                <li class="mb-3">
+                <li class="mb-2">
                     <a 
                     {% comment %} href="{% url 'schedule_view' %}"  {% endcomment %}
                     class="flex items-center p-3 rounded-md text-gray-300 hover:bg-indigo-800 hover:text-indigo-200 transition-colors duration-200" data-page-title="عرض الجداول">
@@ -139,18 +147,19 @@
                     <input
                         type="text"
                         placeholder="ابحث عن طلاب/مدرسين/مقررات..."
-                        class="search-input pr-3 pl-10 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full text-sm sm:text-base"
+                        class="search-input pr-3 pl-10 py-2 focus:outline-none focus:ring-2
+                         focus:ring-indigo-500 w-full text-sm sm:text-base"
                     />
                     <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
                 </div>
 
                 <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                    <i class="fas fa-bell text-lg sm:text-xl text-gray-500 dark:text-gray-400 cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 transition-colors"></i>
+                    <i class="fas fa-bell text-lg sm:text-xl text-gray-500 
+                    dark:text-gray-400 cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 transition-colors"></i>
                     <label class="toggle-switch">
                         <input type="checkbox" id="darkModeToggle">
                         <span class="slider round"></span>
                     </label>
-                    <img src="https://via.placeholder.com/36x36/60A5FA/FFFFFF?text=AD" alt="صورة المستخدم" class="h-8 w-8 sm:h-9 sm:w-9 rounded-full cursor-pointer border-2 border-indigo-400 p-[1px]">
                 </div>
             </div>
         </header>
@@ -197,15 +206,6 @@
                 }
         
                 link.addEventListener('click', function(e) {
-                    // No e.preventDefault() here if you want actual navigation
-                    // If it's a SPA (Single Page Application) with AJAX, then you'd prevent default
-                    // For multi-page Django app, let default navigation happen
-        
-                    // You might still want to update title immediately on click for better UX
-                    // or rely on the server to render the correct title on the new page.
-                    // For now, let's keep the highlighting and title update for consistency.
-        
-                    // Remove active state from all links
                     navLinks.forEach(item => {
                         item.classList.remove('text-indigo-300', 'bg-indigo-800');
                         item.classList.add('text-gray-300');
@@ -267,9 +267,5 @@
 
     {% block extra_js %}
     {% endblock %} 
-    {% comment %} <script src="{% static 'src/js/search.js' %}"></script> {% endcomment %}
-
-    {# Placeholder for extra JS specific to child pages #}
-    {% comment %} <script src="{% static 'src/js/search.js' %}"></script> {% endcomment %}
 </body>
 </html>
