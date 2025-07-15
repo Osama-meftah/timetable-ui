@@ -224,7 +224,11 @@ def import_distributions(file_path):
 # import_halls_from_excel("../algorithm/data/Rooms.xlsx")
 # import_levels_from_excel("../algorithm/data/levels.xlsx")
 # import_groups_from_excel("../algorithm/data/groups.xlsx")
-import_distributions("../algorithm/data/teaching_group.xlsx")
+# import_distributions("../algorithm/data/teaching_group.xlsx")
 # Teacher.objects.all().delete()
 # Subject.objects.all().delete()
 # Today.objects.all().delete()
+
+# from .models import Teacher
+for t in Teacher.objects.all():
+    print(f"{t.id} - {t.teacher_status} - {t.get_teacher_status_display()}")
