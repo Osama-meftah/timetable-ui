@@ -31,7 +31,6 @@
             }
         };
     </script>
-    {% comment %} {% block extra_head %}{% endblock %} {# Placeholder for extra head content specific to child pages #} {% endcomment %}
 </head>
 <body class="flex">
 
@@ -152,15 +151,22 @@
                     />
                     <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
                 </div>
-
-                <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                    <i class="fas fa-bell text-lg sm:text-xl text-gray-500 
-                    dark:text-gray-400 cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 transition-colors"></i>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="darkModeToggle">
-                        <span class="slider round"></span>
-                    </label>
-                </div>
+                <!-- تأكد من إضافة Font Awesome -->
+                <label class="relative inline-block w-14 h-8 cursor-pointer">
+                    <input type="checkbox" id="darkModeToggle" class="sr-only peer">
+                    
+                    <!-- الخلفية -->
+                    <div class="w-full h-full bg-gray-300 rounded-full peer-checked:bg-gray-700 transition-colors"></div>
+                    
+                    <!-- الدائرة المنقولة -->
+                    <div class="absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md flex items-center justify-center transition-all peer-checked:translate-x-6">
+                      <!-- أيقونة الهلال (light mode) -->
+                      <i class="fas fa-moon text-gray-700 text-sm dark:hidden"></i>
+                      
+                      <!-- أيقونة الشمس (dark mode) -->
+                      <i class="fas fa-sun text-yellow-400 text-sm hidden dark:inline"></i>
+                    </div>
+                  </label>
             </div>
         </header>
         <main class="flex-1 p-8 overflow-y-auto mt-4">
@@ -170,6 +176,34 @@
         </main>
         {% include "footer.html" %}
     </div>
+    <script>
+        const html = document.documentElement;
+        const toggle = document.getElementById('darkModeToggle');
+      
+        // تحميل الوضع الحالي
+        const currentTheme = localStorage.getItem('theme');
+      
+        if (currentTheme === 'dark' || (!currentTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          html.classList.add('dark');
+          toggle.checked = true;
+        } else {
+          html.classList.remove('dark');
+          toggle.checked = false;
+        }
+      
+        // التبديل عند التغيير
+        toggle.addEventListener('change', () => {
+          if (toggle.checked) {
+            html.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+          } else {
+            html.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+          }
+        });
+      </script>
+      
+
 
     <script >
         document.addEventListener('DOMContentLoaded', () => {
@@ -179,7 +213,6 @@
             const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
             const pageTitle = document.getElementById('pageTitle');
             const navLinks = document.querySelectorAll('aside nav a');
-            const darkModeToggle = document.getElementById('darkModeToggle');
         
             // وظيفة لتحديث عنوان الصفحة (الآن تقرأ من data-page-title)
             function updatePageTitle(title) {
@@ -228,38 +261,6 @@
                 });
             }
         
-            // --- Dark Mode Logic ---
-            // Set initial theme based on localStorage or system preference
-            const currentTheme = localStorage.getItem('theme');
-            if (currentTheme === 'dark') {
-                html.classList.add('dark');
-                html.classList.remove('light');
-                darkModeToggle.checked = true;
-            } else if (currentTheme === 'light') {
-                html.classList.add('light');
-                html.classList.remove('dark');
-                darkModeToggle.checked = false;
-            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                // If no preference is set in localStorage, check system preference
-                html.classList.add('dark');
-                darkModeToggle.checked = true;
-            } else {
-                html.classList.add('light');
-                darkModeToggle.checked = false;
-            }
-        
-            // Add event listener for the dark mode toggle
-            darkModeToggle.addEventListener('change', () => {
-                if (darkModeToggle.checked) {
-                    html.classList.remove('light');
-                    html.classList.add('dark');
-                    localStorage.setItem('theme', 'dark');
-                } else {
-                    html.classList.remove('dark');
-                    html.classList.add('light');
-                    localStorage.setItem('theme', 'light');
-                }
-            });
         });
     </script> 
     <script src="{% static 'src/js/upload_file.js' %}"></script>
