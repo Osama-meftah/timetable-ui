@@ -179,7 +179,6 @@
                 }
             }
         
-            // تعيين الرابط النشط عند التحميل الأولي (افتراضًا "لوحة التحكم")
             // وتحديث العنوان بناءً على الرابط النشط
             const currentPath = window.location.pathname; // Get the current URL path
         
@@ -265,8 +264,12 @@
     </script> 
     <script src="{% static 'src/js/upload_file.js' %}"></script>
     <script src="{% static 'src/js/delete.js' %}"></script>
-    <script src="{% static 'src/js/search.js' %}"></script>
+
     {% block extra_js %}
-    {% endblock %} {# Placeholder for extra JS specific to child pages #}
+    {% endblock %} 
+    {% comment %} <script src="{% static 'src/js/search.js' %}"></script> {% endcomment %}
+
+    {# Placeholder for extra JS specific to child pages #}
+    {% comment %} <script src="{% static 'src/js/search.js' %}"></script> {% endcomment %}
 </body>
 </html>

@@ -72,6 +72,8 @@ def handle_exception(request, message, exception):
     messages.error(request, error_message)
     return error_message
 
+
+
 def handle_file_upload_generic(request, *, file_field_name, endpoint_url, success_title="✅ تم رفع الملف", error_title="❌ خطأ في رفع الملف"):
     file = request.FILES.get(file_field_name)
     if not file:

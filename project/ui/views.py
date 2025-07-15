@@ -32,9 +32,10 @@ class TeacherManagementView(View):
 
             # جلب البيانات
             teachers_data = api_get(Endpoints.teachers)
+
             teacher_times_data = api_get(Endpoints.teacher_times)
             distributions_data = api_get(Endpoints.distributions)
-
+            print(distributions_data)
             teachers_with_data = []
             for teacher in teachers_data:
                 teacher_id = teacher["id"]
@@ -48,10 +49,14 @@ class TeacherManagementView(View):
                     for d in distributions_data
                     if d["fk_teacher"]["id"] == teacher_id
                 ]
+                
                 times = [
                     {
                         "day": t["fk_today"]["day_name_display"],
-                        "period": t["fk_period"]["period_display"]
+                        # "period": f"{datetime.strptime(t['fk_period']['period_from'], '%H:%M').strftime('%I:%M %p')} - {datetime.strptime(t['fk_period']['period_to'], '%H:%M').strftime('%I:%M %p')}"
+                        "period": f"{t['fk_period']['period_from']} - {t['fk_period']['period_to']}"
+
+                        # "period": t["fk_period"]["period_display"]
                     }
                     for t in teacher_times_data
                     if t["fk_teacher"]["id"] == teacher_id
@@ -71,7 +76,7 @@ class TeacherManagementView(View):
             
             teachers_paginated = paginate_queryset(teachers_data, request, "page", "page_size",5)
             teachers_data_paginated = paginate_queryset(teachers_with_data, request, "page_detailed", "page_data_size")
-
+            # print(teachers_with_data)
             context = {
                 "page_title": "إدارة المدرسين",
                 "teachers": teachers_paginated,
@@ -149,12 +154,11 @@ class TeacherAvailabilityAndCoursesView(View):
             levels = api_get(Endpoints.levels)
             programs =api_get(Endpoints.programs)
             groups = api_get(Endpoints.groups)
-            # print(groups)
-            # print(teachers)
-            # البيانات الخاصة بالمدرس إن وجد
+            # print(len(teachers))
             teacher = None
             teacher_times = []
             teacher_distributions = []
+            # print(periods)
             if id:
                 teacher =api_get(f"{Endpoints.teachers}{id}") 
 
@@ -165,7 +169,6 @@ class TeacherAvailabilityAndCoursesView(View):
                 # requests.get(f"{BASE_API_URL}{self.endpoints['distributions']}").json()
                 teacher_distributions = [d for d in all_distributions if d["fk_teacher"]["id"] == int(id)]
                 # print(teacher_distributions)
-            print(days)
             context = {
                 "teacher": teacher,
                 "all_teachers": teachers,
@@ -221,26 +224,27 @@ class TeacherAvailabilityAndCoursesView(View):
                         day_id = request.POST.get(f'time_day_{i}')
                         period_id = request.POST.get(f'time_period_{i}')
                         availability_id = request.POST.get(f'availability_id_{i}')
-
+                        print(f"alfjasljdf{availability_id}")
                         if day_id and period_id:
                             time_data = {
                                 "fk_today_id": day_id,
                                 "fk_period_id": period_id,
                                 "fk_teacher_id": teacher_id,
                             }
-                            
+                            print(time_data)
                             try:
                                 if availability_id:
+                                    print(time_data)
                                     api_put(f"{Endpoints.teacher_times}{availability_id}/", time_data)
                                 else:
+                                    print(time_data)
                                     api_post(Endpoints.teacher_times, time_data)
+                                    messages.success(request, "تم حفظ الأوقات المتاحة بنجاح.")
                             except Exception as e:
                                 handle_exception(request, f"فشل حفظ وقت رقم {i}", e)
                         else:
                             break
 
-                    messages.success(request, "تم حفظ الأوقات المتاحة بنجاح.")
-                    print("--------------------------------------------------")
                     
                 elif form_type == "delete_distribution":
                     print("============================")

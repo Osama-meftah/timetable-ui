@@ -1,6 +1,9 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from math import ceil
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+
 # Create your models here.
 
 class Department(models.Model):
@@ -33,7 +36,6 @@ class Program(models.Model):
     def __str__(self):
         return self.program_name
 
-# القاعة
 class Hall(models.Model):
     STATUS_CHOICES = [
         ('متاحة', 'متاحة'),
@@ -218,28 +220,24 @@ class Today(models.Model):
         return self.get_day_name_display() # استخدام get_FOO_display() لعرض الاسم الكامل
 
 # الفترة (Period)
+
 class Period(models.Model):
-    # PERIOD_CHOICES = [
-    #     (1, "8:00 - 10:00"),
-    #     (2, "10:00 - 12:00"),
-    #     (3, "12:00 - 2:00"),
-    #     (4, "2:00 - 4:00"),
-    #     (5, "4:00 - 6:00"),
-    # ]
-    # period = models.IntegerField(choices=PERIOD_CHOICES, verbose_name="الفترة الزمنية", unique=True) # إضافة unique=True
-    period_from = models.TimeField(verbose_name="من الساعة", help_text="مثال: 08:00",default="08:00")
-    period_to = models.TimeField(verbose_name="إلى الساعة", help_text="مثال: 10:00",default="10:00")
+    period_from = models.CharField(verbose_name="من الساعة", help_text="مثال: 08:00")
+    period_to = models.CharField(verbose_name="إلى الساعة", help_text="مثال: 10:00")
+
     class Meta:
         verbose_name = "فترة"
         verbose_name_plural = "الفترات"
-        # ordering = ['period'] # ترتيب الفترات تصاعدياً
+        # Ensure that no two periods have the exact same start and end times
+        unique_together = ('period_from', 'period_to')
+        # ordering = ['period_from','period_to'] # Order by start time for logical flow
 
     def __str__(self):
-        return f"{self.period_from.strftime('%H:%M')} - {self.period_to.strftime('%H:%M')}"
+        # Format times to 12-hour format with AM/PM
+        from_time = self.period_from.strftime('%I:%M %p') # %I for 12-hour, %p for AM/PM
+        to_time = self.period_to.strftime('%I:%M %p')
+        return f"{from_time} - {to_time}"
 
-
-
-# وقت الدكتور (TeacherTime)
 class TeacherTime(models.Model):
     fk_today = models.ForeignKey(
         Today, 

@@ -60,7 +60,8 @@ class SubjectSerializer(serializers.ModelSerializer):
 class TeacherSerializer(serializers.ModelSerializer):
     class Meta:
         model = Teacher
-        fields = '__all__'
+        fields = ['id', 'teacher_name', 'teacher_phone', 'teacher_email', 'teacher_status', 'teacher_address']
+
 
 class TodaySerializer(serializers.ModelSerializer):
     day_name_display = serializers.CharField(source='get_day_name_display', read_only=True)
@@ -133,3 +134,19 @@ class LectureSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lecture
         fields = '__all__'
+
+
+class TeacherCourseInfoSerializer(serializers.Serializer):
+    subject_name = serializers.CharField()
+    group = serializers.CharField()
+    level = serializers.CharField()
+    program = serializers.CharField()
+
+class AvailabilityInfoSerializer(serializers.Serializer):
+    day = serializers.CharField()
+    period = serializers.CharField()
+
+class TeacherWithDetailsSerializer(serializers.Serializer):
+    teacher = TeacherSerializer()
+    courses = TeacherCourseInfoSerializer(many=True)
+    availability = AvailabilityInfoSerializer(many=True)
