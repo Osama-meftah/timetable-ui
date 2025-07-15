@@ -35,7 +35,7 @@ class TeacherManagementView(View):
 
             teacher_times_data = api_get(Endpoints.teacher_times)
             distributions_data = api_get(Endpoints.distributions)
-            print(distributions_data)
+            # print(distributions_data)
             teachers_with_data = []
             for teacher in teachers_data:
                 teacher_id = teacher["id"]
@@ -360,7 +360,6 @@ class RoomsView(View):
     def get(self, request, id=None):
         if id:
             room = api_get(f"{Endpoints.halls}{id}/")
-            print(room)
             return render(request, 'rooms/add_edit.html', {"room": room})
         elif "add" in request.GET:
             return render(request, 'rooms/add_edit.html')
@@ -467,7 +466,6 @@ class DepartmentsManagementView(View):
                 'overall_total_programs': len(programs),
                 'overall_total_courses': len(levels),
             }
-            print(dept)
             context = {
                 'page_title': 'إدارة التخصصات والأقسام',
                 'departments': dept,
@@ -595,7 +593,6 @@ class AddAndEditProgramView(View):
             
     def post(self, request, id=None):
         form_type = request.POST.get('form_type')
-        print(form_type)
         if form_type == "program_form_submit":
             program_id = request.POST.get('program_id')
             program_name = request.POST.get('program_name')
@@ -645,7 +642,6 @@ class AddAndEditProgramView(View):
                     success_title="✅ تم رفع ملف البرامج بنجاح.",
                     error_title="❌ فشل رفع ملف البرامج"
                 )
-        print(form_type)
         if form_type =='delete':
             item_id = request.POST.get('item_id')
             item_type = request.POST.get('selected_level_or_program')
@@ -670,6 +666,9 @@ class TimeTableSettingsView(View):
         return render(request, 'timetables/list.html')
     
     
+class PeriodsView(View):
+    def get(self, request, id=None):
+        return render(request, 'timetables/period_management.html')
 
 
 # def timetable_settings_view(request):
