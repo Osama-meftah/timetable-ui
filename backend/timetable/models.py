@@ -1,5 +1,8 @@
 from django.db import models
 from django.core.validators import MinValueValidator
+from math import ceil
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
 
@@ -33,7 +36,6 @@ class Program(models.Model):
     def __str__(self):
         return self.program_name
 
-# القاعة
 class Hall(models.Model):
     STATUS_CHOICES = [
         ('متاحة', 'متاحة'),
@@ -46,31 +48,104 @@ class Hall(models.Model):
     class Meta:
         verbose_name = "قاعة"
         verbose_name_plural = "القاعات"
-        ordering = ['hall_name']
+        ordering = ['-capacity_hall']
 
     def __str__(self):
         return self.hall_name
     
-    
 class Level(models.Model):
+<<<<<<< HEAD
     level_name = models.CharField(max_length=50, verbose_name="اسم المستوى")
     # number_students = models.IntegerField(verbose_name="عدد الطلاب", validators=[MinValueValidator(0)]) # إضافة MinValueValidator
+=======
+
+    LEVEL_NAME_CHOICES = [
+        ("الأول", "الأول"),
+        ("الثاني", "الثاني"),
+        ("الثالث", "الثالث"),
+        ("الرابع", "الرابع"),
+    ]
+    level_name = models.CharField(
+        max_length=50,
+        choices=LEVEL_NAME_CHOICES,
+        verbose_name="اسم المستوى"
+    )
+    number_students = models.IntegerField(
+        verbose_name="عدد الطلاب",
+        validators=[MinValueValidator(0)]
+    )
+>>>>>>> 5ee4d0c59c5610cecb638cb9dea35c7069613fcc
     fk_program = models.ForeignKey(
-        Program, 
-        on_delete=models.CASCADE, 
-        related_name='levels', 
+        'Program',
+        on_delete=models.CASCADE,
+        related_name='levels',
         verbose_name="البرنامج"
     )
-    
+
     class Meta:
         verbose_name = "مستوى"
         verbose_name_plural = "المستويات"
-        ordering = ['fk_program__program_name', 'level_name'] # ترتيب حسب البرنامج ثم المستوى
         unique_together = ('level_name', 'fk_program')
 
     def __str__(self):
         return f"{self.level_name} ({self.fk_program.program_name})"
-    
+
+    def save(self, *args, **kwargs):
+        from .models import Group, Hall  # استيراد داخلي لتجنب circular import
+        is_new = self._state.adding
+        super().save(*args, **kwargs)  # نحفظ أولاً
+
+        # حذف المجموعات السابقة عند التعديل
+        if not is_new:
+            Group.objects.filter(fk_level=self).delete()
+
+        def number_to_letters(n):
+            result = ""
+            while n >= 0:
+                result = chr(n % 26 + 65) + result
+                n = n // 26 - 1
+            return result
+
+        # الحصول على سعة أكبر قاعة
+        largest_hall = Hall.objects.order_by('-capacity_hall').first()
+        max_hall_capacity = largest_hall.capacity_hall if largest_hall else 0
+
+        if max_hall_capacity == 0:
+            Group.objects.create(
+                group_name="Group A",
+                number_students=self.number_students,
+                fk_level=self
+            )
+            return
+
+        if self.number_students == 0:
+            Group.objects.create(
+                group_name="Group A",
+                number_students=0,
+                fk_level=self
+            )
+            return
+
+        if self.number_students <= max_hall_capacity:
+            Group.objects.create(
+                group_name="Group A",
+                number_students=self.number_students,
+                fk_level=self
+            )
+        else:
+            num_groups = ceil(self.number_students / max_hall_capacity)
+            remaining_students = self.number_students
+
+            for i in range(int(num_groups)):
+                group_letter = number_to_letters(i)
+                current_group_students = min(remaining_students, max_hall_capacity)
+
+                Group.objects.create(
+                    group_name=f"Group {group_letter}",
+                    number_students=current_group_students,
+                    fk_level=self
+                )
+                remaining_students -= current_group_students
 
 # المجموعة (Group)
 class Group(models.Model):
@@ -99,17 +174,19 @@ class Subject(models.Model):
         ('الثاني', 'الثاني')
     ]
     subject_name = models.CharField(max_length=100, verbose_name="اسم المادة")
+<<<<<<< HEAD
     term = models.CharField(choices=STATUS_CHOICES, verbose_name="الفصل الدراسي", default='الأول',max_length=10)
     # إضافة علاقة ForeignKey مع Level
 
+=======
+    term = models.CharField(choices=STATUS_CHOICES, verbose_name="الفصل الدراسي", default='الأول')
+>>>>>>> 5ee4d0c59c5610cecb638cb9dea35c7069613fcc
     class Meta:
         verbose_name = "مادة"
         verbose_name_plural = "المواد"
         ordering = ['subject_name']
-        # إذا كانت المادة يجب أن تكون فريدة ضمن مستوى معين
-
+        
     def __str__(self):
-        # تم تصحيح دالة __str__ لاستخدام fk_level
         return f"{self.subject_name}"
 
     
@@ -157,7 +234,9 @@ class Today(models.Model):
         return self.day_name # استخدام get_FOO_display() لعرض الاسم الكامل
 
 # الفترة (Period)
+
 class Period(models.Model):
+<<<<<<< HEAD
     # PERIOD_CHOICES = [
     #     (1, "8:00 - 10:00"),
     #     (2, "10:00 - 12:00"),
@@ -178,9 +257,24 @@ class Period(models.Model):
 
     def __str__(self):
         return self.get_period_display() # عرض الفترة بشكل نصي
+=======
+    period_from = models.CharField(verbose_name="من الساعة", help_text="مثال: 08:00")
+    period_to = models.CharField(verbose_name="إلى الساعة", help_text="مثال: 10:00")
 
+    class Meta:
+        verbose_name = "فترة"
+        verbose_name_plural = "الفترات"
+        # Ensure that no two periods have the exact same start and end times
+        unique_together = ('period_from', 'period_to')
+        # ordering = ['period_from','period_to'] # Order by start time for logical flow
 
-# وقت الدكتور (TeacherTime)
+    def __str__(self):
+        # Format times to 12-hour format with AM/PM
+        from_time = self.period_from.strftime('%I:%M %p') # %I for 12-hour, %p for AM/PM
+        to_time = self.period_to.strftime('%I:%M %p')
+        return f"{from_time} - {to_time}"
+>>>>>>> 5ee4d0c59c5610cecb638cb9dea35c7069613fcc
+
 class TeacherTime(models.Model):
     fk_today = models.ForeignKey(
         Today, 
@@ -205,7 +299,11 @@ class TeacherTime(models.Model):
         verbose_name = "وقت الأستاذ"
         verbose_name_plural = "أوقات الأساتذة"
         unique_together = ('fk_teacher', 'fk_today', 'fk_period')
+<<<<<<< HEAD
         ordering = ['fk_teacher__teacher_name', 'fk_today__id', 'fk_period__id']
+=======
+        ordering = ['fk_teacher__teacher_name', 'fk_today__id', 'fk_period__period_from']
+>>>>>>> 5ee4d0c59c5610cecb638cb9dea35c7069613fcc
 
     def __str__(self):
         return f"{self.fk_teacher.teacher_name} - {self.fk_today.day_name} - {self.fk_period.get_period_display()}"
@@ -293,7 +391,11 @@ class Lecture(models.Model):
             ('fk_hall', 'fk_teachertime', 'fk_table'),
             ('fk_distribution', 'fk_teachertime', 'fk_table')
         )
+<<<<<<< HEAD
         ordering = ['fk_table__created_at', 'fk_teachertime__fk_today__id', 'fk_teachertime__fk_period__id']
+=======
+        ordering = ['fk_table__created_at', 'fk_teachertime__fk_today__id', 'fk_teachertime__fk_period__period_from']
+>>>>>>> 5ee4d0c59c5610cecb638cb9dea35c7069613fcc
 
 
     def __str__(self):

@@ -30,70 +30,14 @@
   </div>
 {% endif %}
 
-<div class="container mx-auto py-6 sm:py-8 px-4"> {# Added horizontal padding #}
+ <div class="container mx-auto py-6 sm:py-8 px-4"> {# Added horizontal padding #}
     <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6 sm:p-8 md:p-10 border border-gray-200 dark:border-gray-700">
         <div class="flex items-center justify-between mb-6 border-b pb-4 border-gray-200 dark:border-gray-700"> {# Flex container for title and button #}
             <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-800 dark:text-gray-100 text-center"> {# flex-grow to keep title centered #}
                 {% if teacher %}تعديل بيانات المدرس {% else %}إضافة مدرس جديد{% endif %}
             </h2>
-            {# The button to toggle file upload form, only visible when adding a new teacher #}
-            {% if not teacher %}
-            <div>
 
-                <span>أدخال المدرسين من خلال ملف Excel او CSV/Excel: </span>
-                <button type="button" id="toggleFileUpload" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200 ease-in-out text-sm whitespace-nowrap">
-                    رفع ملف بيانات 
-                </button>
-            </div>
-            {% endif %}
         </div>
-
-        {# NEW SECTION: File Upload for Data - This form is separate and appears before the main form #}
-        {% if not teacher %} {# This section will only appear when adding a new teacher #}
-        <div id="fileUploadSection" class="mb-10 pb-6 border-b border-gray-200 dark:border-gray-700 hidden"> {# Initially hidden #}
-            <h3 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">
-                رفع ملف بيانات المدرسين (CSV/Excel)
-            </h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 text-center">
-                يمكنك رفع ملف CSV أو Excel يحتوي على بيانات المدرسين لإضافتهم دفعة واحدة.
-            </p>
-            <form method="post" enctype="multipart/form-data" class="space-y-4">
-                {% csrf_token %}
-                <input type="hidden" name="form_type" value="file_upload"> {# Differentiate this form submission #}
-                <div>
-                    <label for="data_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        اختر ملف البيانات
-                    </label>
-                    <input
-                        type="file"
-                        name="data_file"
-                        id="data_file"
-                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" {# Accept CSV and Excel files #}
-                        required
-                        class="mt-1 block w-full text-sm text-gray-900
-                               bg-gray-200 border border-gray-300 rounded-lg cursor-pointer
-                               dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                               file:mr-4 file:py-2 file:px-4
-                               file:rounded-lg file:border-0 file:text-sm file:font-semibold
-                               file:bg-green-50 file:text-green-700 hover:file:bg-green-100
-                               file:transition-colors file:duration-200 file:ease-in-out
-                               dark:file:bg-green-900 dark:file:text-green-100 dark:hover:file:bg-green-800"
-                    />
-                </div>
-                <div class="flex justify-center">
-                    <button
-                        type="submit"
-                        class="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-base font-medium 
-                        rounded-md text-white bg-green-600 hover:bg-green-700 
-                        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200 w-full sm:w-auto"
-                    >
-                        رفع ملف البيانات
-                    </button>
-                </div>
-            </form>
-        </div>
-        {% endif %}
-
         <form method="post" enctype="multipart/form-data" class="space-y-6 md:space-y-8">
             {% csrf_token %} {# هذا ضروري لحماية نموذج Django #}
 
@@ -195,23 +139,6 @@
             </div>
         </form>
     </div>
-</div>
+</div> 
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const toggleButton = document.getElementById('toggleFileUpload');
-        const fileUploadSection = document.getElementById('fileUploadSection');
-
-        if (toggleButton && fileUploadSection) {
-            toggleButton.addEventListener('click', function() {
-                fileUploadSection.classList.toggle('hidden');
-                if (fileUploadSection.classList.contains('hidden')) {
-                    toggleButton.textContent = 'رفع ملف بيانات';
-                } else {
-                    toggleButton.textContent = 'إخفاء قسم رفع الملفات';
-                }
-            });
-        }
-    });
-</script>
 {% endblock %}

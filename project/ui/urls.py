@@ -6,9 +6,9 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     
     
-    path('teachers/', views.TeachersView.as_view(), name='teachers_management'),
-    path('teachers/add/', views.TeacherFormView.as_view(), name='add_teacher'),
-    path('teachers/edit/<int:id>/', views.TeacherFormView.as_view(), name='edit_teacher'),
+    path('teachers/', views.TeacherManagementView.as_view(), name='teachers_management'),
+    path('teachers/add/', views.TeacherManagementView.as_view(), name='add_teacher'),
+    path('teachers/edit/<int:id>/', views.TeacherManagementView.as_view(), name='edit_teacher'),
     path('teachers/delete/<int:id>/', views.TeacherDeleteView.as_view(), name='delete_teacher'),  
  
       
@@ -26,7 +26,7 @@ urlpatterns = [
     path('rooms/', views.RoomsView.as_view(), name='rooms_management'),
     path('rooms/add/', views.RoomsView.as_view(), name='add_room'),
     path('rooms/edit/<int:id>/', views.RoomsView.as_view(), name='edit_room'),
-    path('rooms/delete/<int:id>/confirm/', views.RoomsView.as_view(), name='delete_room'),
+    path('rooms/delete/<int:id>/', views.RoomsView.as_view(), name='delete_room'),
     
     
     path('departments/', views.DepartmentsManagementView.as_view(), name='departments_management'),

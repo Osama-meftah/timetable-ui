@@ -6,28 +6,8 @@
 {% endblock %}
 
 {% block content %}
-{% if messages %}
-  <div class="mb-4 px-4"> {# Added padding here for messages #}
-    {% for message in messages %}
-      <div class="rounded-md px-4 py-3 text-sm font-medium 
-                    {% if message.tags == 'error' %}
-                      bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100
-                    {% elif message.tags == 'success' %}
-                      bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100
-                    {% else %}
-                      bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100
-                    {% endif %}
-                    flex items-center justify-between">
-        <span>{{ message }}</span>
-        {# Optional: Add a close button for messages #}
-        <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-transparent text-current rounded-lg p-1.5 hover:bg-current hover:bg-opacity-20 focus:ring-2 focus:ring-current focus:ring-opacity50 inline-flex h-8 w-8 dark:hover:bg-current dark:hover:bg-opacity-20" onclick="this.parentElement.style.display='none';">
-          <span class="sr-only">Close</span>
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-        </button>
-      </div>
-    {% endfor %}
-  </div>
-{% endif %}
+
+{% include 'message.html' %}
 
 <div class="container mx-auto py-6 sm:py-8">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -68,14 +48,32 @@
             <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
                 <div class="relative w-full sm:w-64">
                     <input
-                        type="text"
-                        placeholder="ابحث عن مدرس..."
-                        class="search-input pr-3 pl-10 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full text-sm sm:text-base dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 transition-colors duration-200"
+                      type="text"
+                      class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-white 
+                      dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 
+                      focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors 
+                      duration-200"
+                      data-type="teacher"
+                      data-title="البحث عن مدرس"
+                      placeholder="البحث باسم المدرس..."
+                      aria-label="البحث عن مدرس"
                     />
-                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                </div>
+                    
+                    <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
+                      <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
+                    </div>
+                  </div>
+
+
+                <button type="button"
+                class="upload-trigger bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md"
+                data-type="teachers"
+                data-title="رفع ملف بيانات المدرسين"
+                data-description="يجب أن يحتوي الملف على الأعمدة: teacher_name, teacher_email,teacher_phone,teacher_address,teacher_status.">
+                    <i class="fas fa-upload ml-2"></i> رفع ملف بيانات المدرسين
+                </button>
                 <a
-                    href="{% url 'add_teacher' %}"
+                    href="{% url 'add_teacher' %}?add=1"
                     class="bg-indigo-600 hover:bg-indigo-700 dark:text-gray-200 text-white font-bold py-2 px-4 rounded-md flex items-center shadow-md transition-colors duration-200 w-full sm:w-auto justify-center"
                 >
                     <i class="fas fa-plus-circle ml-2"></i>
@@ -96,20 +94,25 @@
                         <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-32">الإجراءات</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700" data-type="teacher" >
                     {# Iterate over the paginated teachers object #}
                     {% for teacher in teachers %}
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row" >
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200 search-name">
                             {{ forloop.counter }}
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
                             {{ teacher.teacher_name }}
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                            {% if teacher.teacher_phone %}
                             {{ teacher.teacher_phone }}
+                            {% else %}
+                            <span class="text-gray-400 dark:text-gray-500">غير محدد</span>
+                            {% endif %}
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
+                            
                             {{ teacher.teacher_email }}
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
@@ -123,24 +126,29 @@
                             </span>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
-                            {{ teacher.teacher_address }}
+                            {% if teacher.teacher_address %}
+                                {{ teacher.teacher_address }}
+                            {% else %}
+                            <span class="text-gray-400 dark:text-gray-500">غير محدد</span>
+                            {% endif %}
                         </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium flex items-center justify-end gap-2">
-                            <a
-                                href="{% url 'edit_teacher' teacher.id %}" {# Assumes 'edit_teacher' URL takes an ID #}
-                                class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-700 transition-colors duration-150"
-                                title="تعديل"
-                            >
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <button
-                                type="button"
-                                class="open-delete-modal text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-2 rounded-full hover:bg-red-100 dark:hover:bg-gray-700 transition-colors duration-150"
-                                data-teacher-id="{{ teacher.id }}"
-                                title="حذف"
-                            >
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
+                        <td class="px-8 py-4 whitespace-nowrap text-right text-sm font-medium flex items-center justify-end gap-2">
+                            <a href="{% url 'edit_teacher' teacher.id %}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 
+                                dark:hover:text-indigo-300 p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-700 transition-colors duration-150" title="تعديل">
+                               <i class="fas fa-edit text-lg"></i>
+                           </a>
+                           <button
+                           type="button"
+                           class="delete-btn group text-red-600 hover:text-red-800 dark:text-red-400 
+                           dark:hover:text-red-300"
+                           data-id="{{ teacher.id }}"
+                           data-name="{{ teacher.name }}"
+                           data-type="المدرس"
+                           data-url="{% url 'delete_teacher' 0 %}"
+                           data-form-type="delete"
+                           >
+                           <i class="fas fa-trash-alt text-lg group-hover:scale-110 transition-transform"></i>
+                           </button>
                         </td>
                     </tr>
                     {% empty %}
@@ -152,51 +160,14 @@
                     {% endfor %}
                 </tbody>
             </table>
+            <div class="no-results-message hidden text-center py-8 bg-gray-50 dark:bg-gray-700 
+            rounded-b-lg border-t border-gray-200 dark:border-gray-700" data-type="teacher">
+                <i class="fas fa-exclamation-triangle text-gray-400 text-3xl mb-3"></i>
+                <p class="text-lg font-medium text-gray-500 dark:text-gray-400">لا توجد مدرس مطابقة لبحثك.</p>
+                <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">حاول البحث بكلمات مختلفة أو تحقق من التهجئة.</p>
+            </div>
         </div>
-    
-        {# Pagination for Simple List (Updated) #}
-        <nav class="flex items-center justify-between pt-6">
-            <div>
-                <p class="text-sm text-gray-700 dark:text-gray-300">
-                    عرض <span class="font-medium">{{ teachers.start_index }}</span> إلى
-                    <span class="font-medium">{{ teachers.end_index }}</span>
-                    من <span class="font-medium">{{ teachers.paginator.count }}</span> نتيجة
-                </p>
-            </div>
-            <div class="flex items-center gap-2">
-                {% if teachers.has_previous %}
-                    <a href="?page={{ teachers.previous_page_number }}" class="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 transition-colors duration-200">
-                        السابق
-                    </a>
-                {% else %}
-                    <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 cursor-not-allowed">
-                        السابق
-                    </span>
-                {% endif %}
-
-                {# Page Numbers #}
-                {% for i in teachers.paginator.page_range %}
-                    <a href="?page={{ i }}" class="relative dark:text-gray-200 inline-flex items-center px-4 py-2 text-sm font-medium rounded-md 
-                        {% if teachers.number == i %}
-                            bg-indigo-600 text-white
-                        {% else %}
-                            text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600
-                        {% endif %} transition-colors duration-200">
-                        {{ i }}
-                    </a>
-                {% endfor %}
-
-                {% if teachers.has_next %}
-                    <a href="?page={{ teachers.next_page_number }}" class="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 transition-colors duration-200">
-                        التالي
-                    </a>
-                {% else %}
-                    <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 cursor-not-allowed">
-                        التالي
-                    </span>
-                {% endif %}
-            </div>
-        </nav>
+        {% include "pagination.html" with page_obj=teachers %}
     </div>
 
     {# Detailed Teachers List Section (teachers_with_data) #}
@@ -208,12 +179,21 @@
             <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
                 <div class="relative w-full sm:w-64">
                     <input
-                        type="text"
-                        placeholder="ابحث عن مدرس..."
-                        class="search-input pr-3 pl-10 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full text-sm sm:text-base dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 transition-colors duration-200"
+                      type="text"
+                      class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-white 
+                      dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 
+                      focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors 
+                      duration-200"
+                      data-type="teacherdetails"
+                      data-title="البحث عن مدرس"
+                      placeholder="البحث باسم المدرس..."
+                      aria-label="البحث عن مدرس"
                     />
-                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                </div>
+                    <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
+                      <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
+                    </div>
+                  </div>
+
                 <a
                     href="{% url 'add_edit_teacher_with_courses' %}" {# Changed from 'add_teacher_with_courses' for consistency with views #}
                     class="bg-indigo-600 dark:text-gray-200 hover:bg-indigo-700 hover:text-gray-200
@@ -237,22 +217,15 @@
                         <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-32">الإجراءات</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    {% for item in teachers_with_data %} {# Renamed 'teachers' to 'item' to avoid conflict #}
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700" data-type="teacherdetails">
+                    {% for item in teachers_with_data %}
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row" >
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200 search-name">
                             {{ forloop.counter }}
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap">
                             <div class="flex items-center">
-                                <div class="flex-shrink-0 h-10 w-10">
-                                    <img
-                                        class="h-10 w-10 rounded-full object-cover border border-gray-200 dark:border-gray-600"
-                                        src="https://placehold.co/100x100/A0A0A0/FFFFFF?text=TL" {# Placeholder for teacher image #}
-                                        alt="{{ item.teacher.teacher_name }}"
-                                        onerror="this.onerror=null;this.src='https://placehold.co/100x100/A0A0A0/FFFFFF?text=TL';"
-                                    />
-                                </div>
+                             
                                 <div class="mr-4">
                                     <div class="text-sm font-medium text-gray-900 dark:text-gray-200">
                                         {{ item.teacher.teacher_name }}
@@ -297,169 +270,141 @@
                             <span class="text-gray-400 dark:text-gray-500">غير متاح حالياً</span>
                             {% endif %}
                         </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium flex items-center justify-end gap-2">
-                            <a
-                                href="{% url 'add_edit_teacher_with_courses' item.teacher.id %}" {# Assumes 'edit_teacher' URL for a specific teacher #}
-                                class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-700 transition-colors duration-150"
-                                title="تعديل"
-                            >
-                                <i class="fas fa-edit"></i>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a href="{% url 'add_edit_teacher_with_courses' item.teacher.id %}" class="inline-flex items-center justify-center
+                                    w-10 h-10 rounded-full
+                                    bg-blue-600 hover:bg-blue-700 text-white
+                                    shadow-md hover:shadow-lg hover:text-gray-200
+                                    transition-all duration-300 ease-in-out
+                                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75
+                                    dark:bg-blue-700 dark:hover:bg-blue-600 dark:text-gray-100 dark:hover:text-gray-200" title="تعديل البرنامج">
+                                <i class="fas fa-edit text-lg"></i>
                             </a>
-                            <button
-                                type="button"
-                                class="open-delete-modal text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-2 rounded-full hover:bg-red-100 dark:hover:bg-gray-700 transition-colors duration-150"
-                                data-teacher-id="{{ item.teacher.id }}"
-                                title="حذف"
-                            >
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
                         </td>
                     </tr>
                     {% empty %}
-                    <tr>
-                        <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                    <tr class="search-row" data-type="teacherdetails">
+                        <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400 search-name">
                             لا يوجد مدرسون لعرضهم (تفصيلي).
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
+                <div class="no-results-message hidden text-center py-8 bg-gray-50 dark:bg-gray-700 
+                rounded-b-lg border-t border-gray-200 dark:border-gray-700" data-type="teacherdetails">
+                    <i class="fas fa-exclamation-triangle text-gray-400 text-3xl mb-3"></i>
+                    <p class="text-lg font-medium text-gray-500 dark:text-gray-400">لا توجد مدرس مطابقة لبحثك.</p>
+                    <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">حاول البحث بكلمات مختلفة أو تحقق من التهجئة.</p>
+                </div>
             </table>
         </div>
      {# Pagination for Detailed List (Updated) #}
-     <nav class="flex items-center justify-between pt-6">
-      <div>
-          <p class="text-sm text-gray-700 dark:text-gray-300">
-              عرض <span class="font-medium">{{ teachers_with_data.start_index }}</span> إلى
-              <span class="font-medium">{{ teachers_with_data.end_index }}</span>
-              من <span class="font-medium">{{ teachers_with_data.paginator.count }}</span> نتيجة
-          </p>
-      </div>
-      <div class="flex items-center gap-2">
-          {% if teachers_with_data.has_previous %}
-              <a href="?page_detailed={{ teachers_with_data.previous_page_number }}" 
-              class="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 transition-colors duration-200">
-                  السابق
-              </a>
-          {% else %}
-              <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 cursor-not-allowed">
-                  السابق
-              </span>
-          {% endif %}
-
-          {# Page Numbers #}
-          {% for i in teachers_with_data.paginator.page_range %}
-              <a href="?page_detailed={{ i }}" class="relative dark:text-gray-200 inline-flex items-center px-4 py-2 text-sm font-medium rounded-md 
-                  {% if teachers_with_data.number == i %}
-                      bg-indigo-600 text-white
-                  {% else %}
-                      text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600
-                  {% endif %} transition-colors duration-200">
-                  {{ i }}
-              </a>
-          {% endfor %}
-
-          {% if teachers_with_data.has_next %}
-              <a href="?page_detailed={{ teachers_with_data.next_page_number }}" class="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 transition-colors duration-200">
-                  التالي
-              </a>
-          {% else %}
-              <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 cursor-not-allowed">
-                  التالي
-              </span>
-          {% endif %}
-      </div>
-  </nav>
-    </div>
-</div>
-
-{# Delete Confirmation Modal #}
-<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden transition-opacity duration-300 opacity-0">
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-sm text-center transform scale-95 transition-transform duration-300">
-        <div class="mb-4">
-            <i class="fas fa-exclamation-triangle text-red-500 text-6xl"></i>
-        </div>
-        <h3 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-3">
-            تأكيد الحذف
-        </h3>
-        <p class="text-gray-700 dark:text-gray-300 mb-8">
-            هل أنت متأكد أنك تريد حذف هذا المدرس؟ <br />
-            **لا يمكن التراجع عن هذا الإجراء!**
-        </p>
-        <form id="deleteForm" method="POST" action=""> {# Action will be set by JS #}
-            {% csrf_token %}
-            <input type="hidden" name="delete_id" id="modalTeacherId">
-            <div class="flex justify-center gap-4">
-                <button type="button" id="cancelDeleteBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-md transition-colors duration-200 dark:bg-gray-600 dark:hover:bg-gray-700 dark:text-gray-200">
-                    إلغاء
-                </button>
-                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">
-                    حذف المدرس
-                </button>
-            </div>
-        </form>
+     {% include "pagination.html" with page_obj=teachers_with_data %}
     </div>
 </div>
 
 {# Toast notifications container (if any) #}
-<div id="toast-container" class="fixed top-20 right-4 z-[999] space-y-3"></div>
+{% include "upload_modal.html" %}
+{% include "delete_modal.html" %}
 
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const deleteModal = document.getElementById('deleteModal');
-        const modalTeacherIdInput = document.getElementById('modalTeacherId');
-        const deleteForm = document.getElementById('deleteForm');
-        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
-        const openModalButtons = document.querySelectorAll('.open-delete-modal');
-
-        function openDeleteModal(teacherId) {
-            modalTeacherIdInput.value = teacherId;
-            deleteForm.action = "{% url 'delete_teacher' 0 %}".replace('0/', teacherId + '/'); // Dynamically set action URL
-
-            deleteModal.classList.remove('hidden');
-            // Animate in
-            setTimeout(() => {
-                deleteModal.classList.remove('opacity-0');
-                deleteModal.querySelector('div').classList.remove('scale-95');
-                deleteModal.querySelector('div').classList.add('scale-100');
-            }, 10); // Small delay for transition to apply
-        }
-
-        function closeDeleteModal() {
-            deleteModal.classList.add('opacity-0');
-            deleteModal.querySelector('div').classList.remove('scale-100');
-            deleteModal.querySelector('div').classList.add('scale-95');
-            setTimeout(() => {
-                deleteModal.classList.add('hidden');
-            }, 300); // Wait for transition to finish
-        }
-
-        // Event listeners for opening the modal
-        openModalButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const teacherId = this.dataset.teacherId;
-                openDeleteModal(teacherId);
-            });
-        });
-
-        // Event listener for closing the modal (Cancel button)
-        cancelDeleteBtn.addEventListener('click', closeDeleteModal);
-
-        // Close modal when clicking outside (on the overlay)
-        deleteModal.addEventListener('click', function(event) {
-            if (event.target === deleteModal) {
-                closeDeleteModal();
-            }
-        });
-
-        // Optional: Close modal with Escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape' && !deleteModal.classList.contains('hidden')) {
-                closeDeleteModal();
-            }
-        });
+    document.addEventListener("DOMContentLoaded", () => {
+      new SearchComponent({
+        inputSelector: ".search-input[data-type='teacher']",
+        rowSelector: "tbody[data-type='teacher']",
+        noResultSelector: ".no-results-message[data-type='teacher']",
+        apiEndpoint: "http://127.0.0.1:8001/api/searchteachers/",
+        renderItemFn: (teacher, index) => `
+          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+            <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-200">${index + 1}</td>
+            <td class="px-4 py-4 text-sm font-medium text-gray-900 dark:text-gray-200">${teacher.teacher_name}</td>
+            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">${teacher.teacher_phone}</td>
+            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">${teacher.teacher_email}</td>
+            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">${teacher.teacher_status}</td>
+            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">${teacher.teacher_address}</td>
+            <td class="px-8 py-4 text-sm font-medium flex items-center justify-end gap-2">
+              <a href="/teachers/edit/${teacher.id}/" class="text-indigo-600 hover:text-indigo-900">
+                <i class="fas fa-edit text-lg"></i>
+              </a>
+            </td>
+          </tr>
+        `
+      });
     });
+    document.addEventListener("DOMContentLoaded", () => {
+        new SearchComponent({
+          inputSelector: ".search-input[data-type='teacherdetails']",
+          rowSelector: "tbody[data-type='teacherdetails']",
+          noResultSelector: ".no-results-message[data-type='teacherdetails']",
+          apiEndpoint: "http://127.0.0.1:8001/api/searchteachersdistribution/",
+          renderItemFn: (item, index) => {
+            const teacher = item.teacher;
+      
+            const statusColor = teacher.teacher_status === 'نشط'
+              ? 'text-green-600 dark:text-green-400'
+              : teacher.teacher_status === 'إجازة'
+              ? 'text-yellow-600 dark:text-yellow-400'
+              : 'text-gray-500 dark:text-gray-400';
+      
+            const coursesHTML = item.courses && item.courses.length
+              ? item.courses.map(c => `<p>${c.subject_name} (${c.level} - ${c.group})</p>`).join("")
+              : `<span class="text-gray-400 dark:text-gray-500">غير محدد</span>`;
+      
+            const availabilityHTML = item.availability && item.availability.length
+              ? `<ul class="list-disc list-inside space-y-1">` +
+                  item.availability.map(a => `<li><span class="font-medium">${a.day}:</span> ${a.period}</li>`).join("") +
+                `</ul>`
+              : `<span class="text-gray-400 dark:text-gray-500">غير متاح حالياً</span>`;
+      
+            return `
+              <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row">
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">${index + 1}</td>
+                <td class="px-4 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="mr-4">
+                      <div class="text-sm font-medium text-gray-900 dark:text-gray-200">${teacher.teacher_name}</div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400">
+                        الحالة:
+                        <span class="${statusColor} font-semibold">${teacher.teacher_status}</span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
+                  ${teacher.teacher_email}
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden lg:table-cell">
+                  ${teacher.teacher_phone}
+                </td>
+                <td class="px-4 py-4 whitespace-normal text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
+                  ${coursesHTML}
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                  ${availabilityHTML}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <a href="/teachers/edit/${teacher.id}/" class="inline-flex items-center justify-center
+                    w-10 h-10 rounded-full
+                    bg-blue-600 hover:bg-blue-700 text-white
+                    shadow-md hover:shadow-lg hover:text-gray-200
+                    transition-all duration-300 ease-in-out
+                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75
+                    dark:bg-blue-700 dark:hover:bg-blue-600 dark:text-gray-100 dark:hover:text-gray-200" title="تعديل البرنامج">
+                    <i class="fas fa-edit text-lg"></i>
+                  </a>
+                </td>
+              </tr>
+            `;
+          }
+        });
+      });
+      
 </script>
+
+  
+{% comment %} <script src="{% static 'src/js/search.js' %}"></script> {% endcomment %}
+    
 {% endblock %}

@@ -6,28 +6,6 @@
 {% endblock %}
 
 {% block content %}
-{% if messages %}
-    <div class="mb-4 px-4"> {# Added padding here for messages #}
-        {% for message in messages %}
-            <div class="rounded-md px-4 py-3 text-sm font-medium
-                         {% if message.tags == 'error' %}
-                           bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100
-                         {% elif message.tags == 'success' %}
-                           bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100
-                         {% else %}
-                           bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100
-                         {% endif %}
-                         flex items-center justify-between">
-                <span>{{ message }}</span>
-                {# Optional: Add a close button for messages #}
-                <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-transparent text-current rounded-lg p-1.5 hover:bg-current hover:bg-opacity-20 focus:ring-2 focus:ring-current focus:ring-opacity50 inline-flex h-8 w-8 dark:hover:bg-current dark:hover:bg-opacity-20" onclick="this.parentElement.style.display='none';">
-                    <span class="sr-only">Close</span>
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                </button>
-            </div>
-        {% endfor %}
-    </div>
-{% endif %}
 
 <div class="container mx-auto py-6 sm:py-8">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
@@ -55,23 +33,33 @@
     </div>
 
     <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6 sm:p-8">
+        {% include "message.html" %}
         <div class="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
             <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap">إدارة المقررات الدراسية</h2>
             <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
                 <div class="relative w-full sm:w-64">
                     <input
                       type="text"
-                      placeholder="ابحث عن مقرر..."
-                      class="search-input block w-full pr-3 pl-10 py-2.5 rounded-md border border-gray-300 dark:border-gray-600 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:ring-indigo-500 focus:border-indigo-500 text-sm shadow-sm transition-colors duration-200"
+                      class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-white 
+                      dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 
+                      focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors 
+                      duration-200"
+                      data-type="courses"
+                      data-title="البحث عن مقرر"
+                      placeholder="البحث باسم المقرر..."
+                      aria-label="البحث عن مقرر"
                     />
-                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                </div>
+                    <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
+                      <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
+                    </div>
+                  </div>
                 {# Button to trigger file upload modal #}
-                <button type="button" id="openFileUploadModal" class="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-200 font-bold
-                  py-2.5 px-5 rounded-md flex items-center shadow-md transition-all duration-200 transform
-                  hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto justify-center group">
-                    <i class="fas fa-upload ml-2 group-hover:rotate-6 transition-transform duration-200"></i>
-                    رفع ملف بيانات المقررات
+                <button type="button"
+                        class="upload-trigger bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md"
+                        data-type="subjects"
+                        data-title="رفع ملف بيانات المقررات"
+                        data-description="يجب أن يحتوي الملف على الأعمدة: name, description.">
+                    <i class="fas fa-upload ml-2"></i> رفع ملف بيانات المقررات
                 </button>
                 <a
                 href="{% url 'add_course' %}?add=1"
@@ -94,25 +82,28 @@
                         <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider w-40">الإجراءات</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700" data-type="courses">
                     {% for course in courses %} {# <-- Correct opening of the for loop #}
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">{{ for.loop.counter }}</td>
-                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">{{ course.subject_name }}</td>
-                       
-
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150  search-row" >
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">  {{ forloop.counter }}</td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200 search-name" >{{ course.subject_name }}</td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">{{ course.term }}</td>
-                        <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium flex items-center justify-end gap-2">
-                            <a href="{% url 'edit_course' course.id %}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-700 transition-colors duration-150" title="تعديل">
-                                <i class="fas fa-edit"></i>
+                        <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium flex items-center justify-start w-1/3 gap-4">
+                            <a href="{% url 'edit_course' course.id %}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 
+                            dark:hover:text-indigo-300 p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-700 transition-colors duration-150" title="تعديل">
+                                <i class="fas fa-edit text-lg"></i>
                             </a>
                             <button
-                              type="button"
-                              onclick="showDeleteConfirmation({{ course.id }}, '{{ course.subject_name }}')"
-                              class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-2 rounded-full hover:bg-red-100 dark:hover:bg-gray-700 transition-colors duration-150"
-                              title="حذف"
+                            type="button"
+                            class="delete-btn group text-red-600 hover:text-red-800 dark:text-red-400 
+                            dark:hover:text-red-300"
+                            data-id="{{ course.id }}"
+                            data-name="{{ course.name }}"
+                            data-type="المقرر" 
+                            data-url="{% url 'delete_course' 0 %}"
+                            data-form-type="delete"
                             >
-                                <i class="fas fa-trash-alt"></i>
+                            <i class="fas fa-trash-alt text-lg group-hover:scale-110 transition-transform"></i>
                             </button>
                         </td>
                     </tr>
@@ -122,238 +113,61 @@
                     </tr>
                     {% endfor %} {# <-- Correct closing of the for loop #}
                 </tbody>
+                <div class="no-results-message hidden text-center py-8 bg-gray-50 dark:bg-gray-700 
+                rounded-b-lg border-t border-gray-200 dark:border-gray-700" data-type="courses">
+                    <i class="fas fa-exclamation-triangle text-gray-400 text-3xl mb-3"></i>
+                    <p class="text-lg font-medium text-gray-500 dark:text-gray-400">لا توجد مقررات مطابقة لبحثك.</p>
+                    <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">حاول البحث بكلمات مختلفة أو تحقق من التهجئة.</p>
+                </div>
             </table>
         </div>
     </div>
+    {% include "pagination.html" with page_obj=courses %}
 </div>
 
-<form id="deleteForm" method="post" style="display:none;">
-    {% csrf_token %}
-    <input type="hidden" name="form_type" value="delete">
-</form>
 
-{# Delete Confirmation Modal - Existing #}
-<div id="deleteConfirmationModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden opacity-0 transition-opacity duration-300">
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-sm transform scale-95 transition-transform duration-300">
-        <div class="text-center">
-            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/20">
-                <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400 text-2xl"></i>
-            </div>
-            <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">تأكيد الحذف</h3>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                هل أنت متأكد أنك تريد حذف المادة <span id="courseNameToDelete" class="font-semibold"></span>؟ لا يمكن التراجع عن هذا الإجراء.
-            </p>
-        </div>
-        <div class="mt-5 sm:mt-6 flex justify-center gap-3">
-            <button type="button" id="cancelDeleteButton" class="inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm transition-colors duration-200">
-                إلغاء
-            </button>
-            <button type="button" id="confirmDeleteButton" class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm transition-colors duration-200">
-                حذف
-            </button>
-        </div>
-    </div>
-</div>
-
-{# File Upload Modal - NEW #}
-<div id="fileUploadModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden opacity-0 transition-opacity duration-300">
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md transform scale-95 transition-transform duration-300">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">رفع ملف بيانات المقررات</h3>
-            <button type="button" id="closeFileUploadModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200">
-                <i class="fas fa-times text-2xl"></i>
-            </button>
-        </div>
-        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            يمكنك رفع ملف CSV أو Excel يحتوي على بيانات المقررات لإضافتها أو تحديثها دفعة واحدة.
-            يجب أن يحتوي الملف على أعمدة مطابقة لـ: <code class="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded text-xs">subject_name
-             <code class="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded text-xs">term</code>.
-        </p>
-        <form method="post" enctype="multipart/form-data" id="courseFileUploadForm" class="space-y-4">
-            {% csrf_token %}
-            <input type="hidden" name="form_type" value="upload_subjects"> {# Differentiate this form submission #}
-            <div>
-                <label for="course_data_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    اختر ملف البيانات
-                </label>
-                <input
-                    type="file"
-                    name="data_file" {# Changed name to be specific for courses #}
-                    id="data_file"
-                    accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" {# Accept CSV and Excel files #}
-                    required
-                    class="mt-1 block w-full text-sm text-gray-900
-                           bg-gray-200 border border-gray-300 rounded-lg cursor-pointer
-                           dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                           file:mr-4 file:py-2 file:px-4
-                           file:rounded-lg file:border-0 file:text-sm file:font-semibold
-                           file:bg-green-50 file:text-green-700 hover:file:bg-green-100
-                           file:transition-colors file:duration-200 file:ease-in-out
-                           dark:file:bg-green-900 dark:file:text-green-100 dark:hover:file:bg-green-800"
-                />
-            </div>
-            <div class="flex justify-start gap-3 mt-6">
-                <button
-                    type="submit"
-                    class="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
-                >
-                    رفع الملف
-                </button>
-                <button type="button" id="cancelFileUploadButton" class="inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm transition-colors duration-200">
-                    إلغاء
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
+{% include "upload_modal.html" %}
+{% include "delete_modal.html" %}
 
 {% endblock %}
-
 {% block extra_js %}
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const openBtn = document.getElementById("openFileUploadModal");
-        const closeBtn = document.getElementById("closeFileUploadModal");
-        const cancelBtn = document.getElementById("cancelFileUploadButton");
-        const modal = document.getElementById("fileUploadModal");
 
-        function openModal() {
-            modal.classList.remove("hidden", "opacity-0", "scale-95");
-            modal.classList.add("opacity-100", "scale-100");
-        }
-
-        function closeModal() {
-            modal.classList.add("opacity-0", "scale-95");
-            setTimeout(() => modal.classList.add("hidden"), 300); // match transition duration
-        }
-
-        if (openBtn) openBtn.addEventListener("click", openModal);
-        if (closeBtn) closeBtn.addEventListener("click", closeModal);
-        if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
-    });
-</script>
 
 <script>
-    // Delete Confirmation Modal Logic (Existing)
-    const deleteConfirmationModal = document.getElementById('deleteConfirmationModal');
-    const cancelDeleteButton = document.getElementById('cancelDeleteButton');
-    const confirmDeleteButton = document.getElementById('confirmDeleteButton');
-    const courseNameToDelete = document.getElementById('courseNameToDelete');
-    const deleteForm = document.getElementById('deleteForm');
-
-    let courseIdToDelete = null;
-
-    function showDeleteConfirmation(courseId, courseName) {
-        courseIdToDelete = courseId;
-        courseNameToDelete.textContent = `"${courseName}"`;
-        deleteConfirmationModal.classList.remove('hidden');
-        setTimeout(() => {
-            deleteConfirmationModal.classList.add('opacity-100');
-            deleteConfirmationModal.querySelector('div').classList.remove('scale-95');
-            deleteConfirmationModal.querySelector('div').classList.add('scale-100');
-        }, 10);
-    }
-
-    function hideDeleteConfirmation() {
-        deleteConfirmationModal.classList.remove('opacity-100');
-        deleteConfirmationModal.querySelector('div').classList.remove('scale-100');
-        deleteConfirmationModal.querySelector('div').classList.add('scale-95');
-        setTimeout(() => {
-            deleteConfirmationModal.classList.add('hidden');
-            courseIdToDelete = null;
-        }, 300);
-    }
-
-    cancelDeleteButton.addEventListener('click', hideDeleteConfirmation);
-
-    confirmDeleteButton.addEventListener('click', function() {
-        if (courseIdToDelete !== null) {
-            // تحديد رابط الحذف (تأكد أن الرابط مطابق لمسارات urls.py)
-            deleteForm.action = `/courses/delete/${courseIdToDelete}/`; // Adjust this URL if needed
-            deleteForm.submit();
-        }
-    });
-
-    deleteConfirmationModal.addEventListener('click', function(event) {
-        if (event.target === deleteConfirmationModal) {
-            hideDeleteConfirmation();
-        }
-    });
-
-    // File Upload Modal Logic (NEW)
-    const openFileUploadButton = document.getElementById('openFileUploadModal');
-    const fileUploadModal = document.getElementById('fileUploadModal');
-    const closeFileUploadModalButton = document.getElementById('closeFileUploadModal');
-    const cancelFileUploadButton = document.getElementById('cancelFileUploadButton');
-
-    function showFileUploadModal() {
-        fileUploadModal.classList.remove('hidden');
-        setTimeout(() => {
-            fileUploadModal.classList.add('opacity-100');
-            fileUploadModal.querySelector('div').classList.remove('scale-95');
-            fileUploadModal.querySelector('div').classList.add('scale-100');
-        }, 10);
-    }
-
-    function hideFileUploadModal() {
-        fileUploadModal.classList.remove('opacity-100');
-        fileUploadModal.querySelector('div').classList.remove('scale-100');
-        fileUploadModal.querySelector('div').classList.add('scale-95');
-        setTimeout(() => {
-            fileUploadModal.classList.add('hidden');
-        }, 300);
-    }
-
-    if (openFileUploadButton) {
-        openFileUploadButton.addEventListener('click', showFileUploadModal);
-    }
-    if (closeFileUploadModalButton) {
-        closeFileUploadModalButton.addEventListener('click', hideFileUploadModal);
-    }
-    if (cancelFileUploadButton) {
-        cancelFileUploadButton.addEventListener('click', hideFileUploadModal);
-    }
-    fileUploadModal.addEventListener('click', function(event) {
-        if (event.target === fileUploadModal) {
-            hideFileUploadModal();
-        }
-    });
-
-    // Search functionality (Existing)
-    document.querySelector('.search-input').addEventListener('keyup', function() {
-        const searchTerm = this.value.toLowerCase();
-        const rows = document.querySelectorAll('tbody tr');
-        rows.forEach(row => {
-            // Check if the row is the "no results" row (colspan="6")
-            const isNoResultsRow = row.querySelector('td[colspan="6"]');
-            if (isNoResultsRow) {
-                row.style.display = 'none'; // Initially hide it during search
-                return;
-            }
-
-            const subjectName = row.children[1].textContent.toLowerCase();
-            const programName = row.children[2].textContent.toLowerCase(); // Get text from the new program column
-            const levelName = row.children[3].textContent.toLowerCase();
-            const term = row.children[4].textContent.toLowerCase();
-
-            if (subjectName.includes(searchTerm) || programName.includes(searchTerm) || levelName.includes(searchTerm) || term.includes(searchTerm)) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
-
-        // Handle "No results" message after filtering
-        const visibleRowsAfterSearch = Array.from(rows).filter(row => row.style.display !== 'none' && !row.querySelector('td[colspan="6"]'));
-        const noCoursesMessageRow = document.querySelector('td[colspan="6"]');
-
-        if (noCoursesMessageRow) { // Only manipulate if the "no courses" row exists
-            if (visibleRowsAfterSearch.length === 0) {
-                noCoursesMessageRow.parentElement.style.display = ''; // Show the "No courses" row
-            } else {
-                noCoursesMessageRow.parentElement.style.display = 'none'; // Hide the "No courses" row
-            }
-        }
-    });
+    document.addEventListener("DOMContentLoaded", () => {
+        new SearchComponent({
+            inputSelector: ".search-input[data-type='courses']",
+            rowSelector: "tbody[data-type='courses']",
+            noResultSelector: ".no-results-message[data-type='courses']",
+            apiEndpoint: "http://127.0.0.1:8001/api/searchcourses/",
+            renderItemFn: (course, index) => `
+              <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row" data-type="courses">
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">${index + 1}</td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">${course.subject_name}</td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">${course.term}</td>
+                <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium flex items-center justify-start w-1/3 gap-4">
+                  <a href="/courses/edit/${course.id}/" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 
+                    dark:hover:text-indigo-300 p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-700 transition-colors duration-150" 
+                    title="تعديل">
+                    <i class="fas fa-edit text-lg"></i>
+                  </a>
+                  <button type="button"
+                    class="delete-btn group text-red-600 hover:text-red-800 dark:text-red-400 
+                    dark:hover:text-red-300"
+                    data-id="${course.id}"
+                    data-name="${course.subject_name}"
+                    data-type="المقرر"
+                    data-url="/courses/delete/${course.id}/"
+                    data-form-type="delete">
+                    <i class="fas fa-trash-alt text-lg group-hover:scale-110 transition-transform"></i>
+                  </button>
+                </td>
+              </tr>
+            `
+          });
+          
+      });
 </script>
+<script src="{% static 'src/js/search.js' %}"></script>
 {% endblock %}
+

@@ -1,0 +1,53 @@
+{% with total=page_obj.paginator.num_pages %}
+{% with current=page_obj.number %}
+<nav class="flex items-center justify-center pt-6">
+    <div class="flex items-center gap-2">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 transition-colors duration-200">
+                السابق
+            </a>
+        {% else %}
+            <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 cursor-not-allowed">
+                السابق
+            </span>
+        {% endif %}
+
+        {% for i in page_obj.paginator.page_range %}
+            {% if i == 1 or i == total %}
+                <a href="?page={{ i }}" class="relative dark:text-gray-200 inline-flex items-center px-4 py-2 text-sm font-medium rounded-md
+                    {% if page_obj.number == i %}
+                        bg-indigo-600 text-white
+                    {% else %}
+                        text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600
+                    {% endif %} transition-colors duration-200">
+                    {{ i }}
+                </a>
+            {% else %}
+                {% if i >= current|add:"-2" and i <= current|add:"2" %}
+                    <a href="?page={{ i }}" class="relative dark:text-gray-200 inline-flex items-center px-4 py-2 text-sm font-medium rounded-md
+                        {% if page_obj.number == i %}
+                            bg-indigo-600 text-white
+                        {% else %}
+                            text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600
+                        {% endif %} transition-colors duration-200">
+                        {{ i }}
+                    </a>
+                {% elif i == current|add:"-3" or i == current|add:"3" %}
+                    <span class="px-2 select-none">...</span>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 transition-colors duration-200">
+                التالي
+            </a>
+        {% else %}
+            <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 cursor-not-allowed">
+                التالي
+            </span>
+        {% endif %}
+    </div>
+</nav>
+{% endwith %}
+{% endwith %}

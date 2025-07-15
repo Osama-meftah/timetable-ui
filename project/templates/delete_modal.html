@@ -1,0 +1,45 @@
+<!-- delete_modal.html -->
+<div id="deleteGenericModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 dark:bg-opacity-85 flex items-center justify-center z-50 transition-opacity duration-300 opacity-0 invisible" aria-hidden="true" role="dialog" aria-modal="true" tabindex="-1">
+  <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-8 w-11/12 max-w-lg transform transition-all duration-300 scale-95 opacity-0 max-w-lg">
+    <button type="button" class="close-modal-btn absolute top-4 left-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none z-10" aria-label="إغلاق">
+      <i class="fas fa-times text-2xl"></i>
+    </button>
+
+    <div class="text-center mb-6">
+      <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 dark:bg-red-900/50 mb-4">
+        <svg class="h-9 w-9 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+        </svg>
+      </div>
+      <h3 class="text-2xl font-extrabold text-gray-900 dark:text-gray-100 mb-2">
+        تأكيد الحذف النهائي
+      </h3>
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        يرجى قراءة التحذير بعناية قبل المتابعة.
+      </p>
+    </div>
+
+    <p class="text-base text-gray-700 dark:text-gray-300 mb-8 leading-relaxed text-center">
+      أنت على وشك حذف <strong id="modalItemType" class="text-indigo-600 dark:text-indigo-300 font-bold"></strong>:
+      <strong id="modalItemName" class="text-indigo-700 dark:text-indigo-300 font-extrabold"></strong>.<br>
+      <span class="font-bold text-red-600 dark:text-red-400">هذا الإجراء لا يمكن التراجع عنه.</span>
+    </p>
+
+    <div class="flex flex-col sm:flex-row justify-center gap-4 mt-6">
+      <button type="button" id="confirmDeleteBtn" class="w-full sm:w-auto px-6 py-3 border border-transparent rounded-lg shadow-lg text-base font-bold text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 transform hover:scale-105 active:scale-95">
+        تأكيد الحذف
+      </button>
+      <button type="button" class="close-modal-btn w-full sm:w-auto px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-base font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105 active:scale-95">
+        إلغاء
+      </button>
+    </div>
+  </div>
+</div>
+
+<form id="deleteGenericForm" method="post" action="" class="hidden">
+  {% csrf_token %}
+  <input type="hidden" name="item_id" id="deleteItemIdInput">
+  <input type="hidden" name="form_type" id="deleteFormTypeInput">
+  <input type="hidden" name="selected_teacher_id" id="selectedTeacherId">
+  <input type="hidden" name="selected_level_or_program" id="selectedLevelOrProgram">
+</form>
