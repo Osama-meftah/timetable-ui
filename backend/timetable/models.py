@@ -3,6 +3,7 @@ from django.core.validators import MinValueValidator
 from math import ceil
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -182,6 +183,7 @@ class Subject(models.Model):
     
 # الدكتور (Teacher)
 class Teacher(models.Model):
+    user=models.OneToOneField(User,on_delete=models.CASCADE,default=None)
     STATUS_CHOICES: list[tuple[str, str]] = [
         ('active', 'نشط'),
         ('vacation', 'إجازة')
@@ -219,8 +221,9 @@ class Today(models.Model):
         # يمكن الترتيب حسب ID أو ترتيب مخصص للأيام، لكن مع choices يفضل الترتيب المخصص إذا أردت ترتيب أيام الأسبوع بشكل منطقي
         ordering = ['id'] 
 
+
     def __str__(self):
-        return self.day_name # استخدام get_FOO_display() لعرض الاسم الكامل
+        return self.get_day_name_display() # استخدام get_FOO_display() لعرض الاسم الكامل
 
 # الفترة (Period)
 
@@ -237,9 +240,9 @@ class Period(models.Model):
 
     def __str__(self):
         # Format times to 12-hour format with AM/PM
-        from_time = self.period_from.strftime('%I:%M %p') # %I for 12-hour, %p for AM/PM
-        to_time = self.period_to.strftime('%I:%M %p')
-        return f"{from_time} - {to_time}"
+        # from_time = self.period_from.strftime('%I:%M %p') # %I for 12-hour, %p for AM/PM
+        # to_time = self.period_to.strftime('%I:%M %p')
+        return f"{self.period_from} - {self.period_to}"
 
 class TeacherTime(models.Model):
     fk_today = models.ForeignKey(
@@ -354,4 +357,4 @@ class Lecture(models.Model):
 
 
     def __str__(self):
-        return f"محاضرة: {self.fk_distribution.fk_subject.subject_name} في {self.fk_hall.hall_name} - {self.fk_day.day_name} {self.fk_period}"
+        return f"محاضرة: {self.fk_distribution.fk_subject.subject_name} في {self.fk_hall.hall_name} - {self.fk_period.period_from}-{self.fk_period.period_to})"

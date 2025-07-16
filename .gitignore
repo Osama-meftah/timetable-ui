@@ -31,3 +31,4 @@ __pycache__/
 # ملفات الأنظمة و IDE
 .vscode/
 .idea/
+./backend/import_data_from_excel.py

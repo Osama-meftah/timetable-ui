@@ -1,13 +1,9 @@
 from .models import *
 from .serializers import *
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.decorators import action
-from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.views import APIView
-import pandas as pd
-import io
+from .utils import create_random_password, extract_username_from_email, send_password_email
 
 class DepartmentViewSet(ModelViewSet):
     queryset=Department.objects.all()
@@ -57,6 +53,41 @@ class LevelViewSet(ModelViewSet):
 class TeacherViewSet(ModelViewSet):
     queryset=Teacher.objects.all()
     serializer_class=TeacherSerializer
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            password=create_random_password()
+            email=serializer.data['teacher_email']
+            teacher_name=serializer.data['teacher_name']
+            teacher_status=serializer.data['teacher_status']
+            is_staff=serializer.data.get('is_staff', False)
+            teacher_id=request.data.get('id', None)
+        
+            if not email:
+                return JsonResponse({'status': 'error', 'message': 'البريد الإلكتروني واسم المستخدم مطلوبان.'}, status=400)
+            username= extract_username_from_email(email)
+            user = User.objects.create_user(username=username, email=email, is_staff=is_staff)
+            user.set_password(password)
+            user.save()
+
+            teacher = Teacher.objects.create(
+            id=teacher_id,
+            user=user,
+            teacher_name=teacher_name,
+            teacher_status=teacher_status,
+            teacher_email=email
+                )
+            teacher.save()
+            if teacher_status == 'active':
+                send_password_email(user, password)
+            
+            # if Teacher.objects.filter(username=username).exists():
+                # return Response({"error": "User with this username already exists."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                "message": "Teacher created successfully.",
+                "teacher": serializer.data
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class SubjectViewSet(ModelViewSet):
     queryset=Subject.objects.all()

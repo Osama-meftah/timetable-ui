@@ -67,7 +67,6 @@ class TeacherSerializer(serializers.ModelSerializer):
 
 class TodaySerializer(serializers.ModelSerializer):
     day_name_display = serializers.CharField(source='get_day_name_display', read_only=True)
-
     class Meta:
         model = Today
         fields = ['id', 'day_name', 'day_name_display']
