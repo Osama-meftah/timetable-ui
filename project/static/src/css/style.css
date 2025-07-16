@@ -1,55 +1,36 @@
-/* استيراد خط Montserrat من Google Fonts */
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap");
 
 body {
     font-family: "Montserrat", sans-serif;
     overflow-x: hidden;
-    /* لمنع شريط التمرير الأفقي */
-    background-color: #f0f2f5;
-    /* Light mode default background */
-    color: #333333;
-    /* Light mode default text color */
-}
+        background-color: #f0f2f5;
+        color: #333333;
+    }
 
-/* Dark mode base styles */
 .dark body {
     background-color: #1a202c;
-    /* Dark mode background */
-    color: #e2e8f0;
-    /* Dark mode text */
-}
+        color: #e2e8f0;
+    }
 
-/* Sidebar Styling */
 aside#sidebar {
-    /* Targeted with ID for specificity */
-    background-color: #1f2937;
-    /* Original indigo-900 */
-    width: 256px;
-    /* Default width (16rem) */
-    transition: width 0.3s ease-in-out, padding 0.3s ease-in-out;
-    /* Add padding to transition */
-    overflow-x: hidden;
-    /* Hide horizontal scrollbar if content exceeds width */
-    position: fixed;
-    /* Keep it fixed */
-    top: 0;
+        background-color: #1f2937;
+        width: 256px;
+        transition: width 0.3s ease-in-out, padding 0.3s ease-in-out, right 0.3s ease-in-out;
+            overflow-x: hidden;
+        position: fixed;
+        top: 0;
     right: 0;
     height: 100%;
-    /* Full height */
-    z-index: 20;
-    /* Ensure it's on top */
-}
+        z-index: 20;
+    }
 
 .dark aside#sidebar {
     background-color: #1a202c;
-    /* Even darker for dark mode sidebar */
-}
+    }
 
-/* Sidebar Collapsed State */
 aside#sidebar.sidebar-collapsed {
     width: 80px;
-    /* Collapsed width (5rem) */
-    padding-left: 0;
+        padding-left: 0;
     padding-right: 0;
 }
 
@@ -57,76 +38,53 @@ aside#sidebar.sidebar-collapsed .nav-text,
 aside#sidebar.sidebar-collapsed .logo-text,
 aside#sidebar.sidebar-collapsed .logout-text {
     display: none;
-    /* Hide text when collapsed */
-    opacity: 0;
-    /* Add fade effect */
-    transition: opacity 0.3s ease-in-out;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
 }
 
 aside#sidebar.sidebar-collapsed .sidebar-icon {
     margin-left: 0;
-    /* Remove specific margin for icons in collapsed state */
-    margin-right: 0;
+        margin-right: 0;
     justify-content: center;
-    /* Center icons if needed by flex container */
-    width: 100%;
-    /* Allow icons to take full width of collapsed sidebar */
-    text-align: center;
-    /* Center icon within its flex item */
-}
+        width: 100%;
+        text-align: center;
+    }
 
 aside#sidebar.sidebar-collapsed .flex.items-center.gap-4 {
-    /* Logo section */
-    justify-content: center;
-    /* Center logo icon */
-}
+        justify-content: center;
+    }
 
 aside#sidebar.sidebar-collapsed .flex.items-center.gap-4 .size-8 {
     margin-left: 0 !important;
-    /* Remove ml-4 if exists */
-    margin-right: 0 !important;
-    /* Remove mr-4 if exists */
-}
+        margin-right: 0 !important;
+    }
 
 aside#sidebar.sidebar-collapsed .pb-4.mb-6 {
-    /* Adjust border line under logo */
-    border-bottom: none;
-    /* Remove border if it looks bad */
-    padding-bottom: 0;
+        border-bottom: none;
+        padding-bottom: 0;
     margin-bottom: 0;
 }
-/* aside#sidebar.sidebar-collapsed nav ul {
-    margin-top: 20px;
-} */
+
 aside#sidebar.sidebar-collapsed nav ul li a {
-    /* Center icons in collapsed state */
-    margin-top: 20px !important;
+        margin-top: 20px !important;
     justify-content: center;
 }
 
 aside#sidebar.sidebar-collapsed .mt-auto a {
-    /* Logout link */
-    justify-content: center;
+        justify-content: center;
 }
 
-/* Main content area */
 .main-content {
     margin-right: 256px;
-    /* Initial margin for full sidebar (16rem) */
-    transition: margin-right 0.3s ease-in-out, width 0.3s ease-in-out;
+        transition: margin-right 0.3s ease-in-out, width 0.3s ease-in-out;
     width: calc(100% - 256px);
-    /* Full width minus sidebar width */
-}
+    }
 
 .main-content-collapsed {
     margin-right: 80px;
-    /* Margin when sidebar is collapsed (5rem) */
-    width: calc(100% - 80px);
-    /* Full width minus collapsed sidebar width */
-}
+        width: calc(100% - 80px);
+    }
 
-/* Top Main Navbar */
-/*  */
 .top-main-navbar {
     position: sticky;
     top: -17px;
@@ -135,49 +93,41 @@ aside#sidebar.sidebar-collapsed .mt-auto a {
     border-bottom: 1px solid #e8e8e8;
     border-radius: 0 0 16px 16px;
     margin-top: -15px;
-    margin-right: 24px;
+    margin-right: 256px;
     margin-left: 24px;
     padding: 18px 32px;
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    
+
     transform: translateY(16px);
     opacity: 0.98;
 }
+
 .dark .top-main-navbar {
     background-color: #2d3748;
-    /* Dark mode */
-    border-bottom: 1px solid #4a5568;
+        border-bottom: 1px solid #4a5568;
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
 
 .top-main-navbar .text-gray-800 {
-    /* Page title in navbar */
-    color: #333333;
-    /* Darker text for light mode */
-}
+        color: #333333;
+    }
 
 .dark .top-main-navbar .text-gray-800 {
     color: #e2e8f0;
-    /* Lighter text for dark mode */
-}
+    }
 
-
-/* Info Cards */
 .info-card {
     background-color: #ffffff;
-    /* Light mode */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
     transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-    /* Add transition */
-}
+    }
 
 .dark .info-card {
     background-color: #2d3748;
-    /* Dark mode */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .info-card:hover {
@@ -189,7 +139,6 @@ aside#sidebar.sidebar-collapsed .mt-auto a {
     box-shadow: 0 16px 25px rgba(0, 0, 0, 0.4);
 }
 
-/* Card Text Colors (keep original vibrant colors for meaning) */
 .card-blue {
     color: #288cfa;
 }
@@ -210,7 +159,6 @@ aside#sidebar.sidebar-collapsed .mt-auto a {
     color: #e74c3c;
 }
 
-/* Icon Backgrounds (adjust for dark mode to be less contrasting) */
 .icon-blue {
     background-color: #e0f2fe;
     color: #288cfa;
@@ -221,7 +169,6 @@ aside#sidebar.sidebar-collapsed .mt-auto a {
     color: #63b3ed;
 }
 
-/* Darker background, slightly lighter icon */
 .icon-green {
     background-color: #e8f5e9;
     color: #2E865F;
@@ -262,7 +209,6 @@ aside#sidebar.sidebar-collapsed .mt-auto a {
     color: #fc8181;
 }
 
-/* General Links */
 a {
     color: #3498db;
     transition: color 0.2s ease-in-out;
@@ -276,37 +222,26 @@ a:hover {
     color: #63b3ed;
 }
 
-/* Lighter blue for dark mode links */
 .dark a:hover {
     color: #90cdf4;
 }
 
-/* Search Input */
-/*  */
 .search-input {
     background-color: #eef2f6;
-    /* لون خلفية أفتح قليلاً لشريط البحث */
-    border-radius: 24px;
-    /* حواف مستديرة جداً */
-    padding: 0.6rem 1.2rem;
-    /* مسافات داخلية أكبر */
-    border: none;
+        border-radius: 24px;
+        padding: 0.6rem 1.2rem;
+        border: none;
     outline: none;
     width: 320px;
-    /* عرض ثابت لشريط البحث */
-    font-size: 0.95rem;
-    /* حجم خط أكبر قليلاً */
-    color: #4a4a4a;
-    /* لون نص أغمق */
-    text-align: right;
-    /* لمحاذاة النص لليمين */
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-    /* ظل داخلي خفيف */
-}
+        font-size: 0.95rem;
+        color: #4a4a4a;
+        text-align: right;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
 .dark .search-input {
     background-color: #4a5568;
-    /* Dark mode */
-    color: #e2e8f0;
+        color: #e2e8f0;
 }
 
 .search-input::placeholder {
@@ -321,96 +256,69 @@ a:hover {
     color: #a0a0a0;
 }
 
-/* Light mode search icon */
 .dark .fas.fa-search {
     color: #a0aec0;
 }
 
-/* Dark mode search icon */
 
-
-/* General White Background Sections (tables, alerts, quick links) */
 .bg-white {
-    /* This is a Tailwind class, but overriding for dark mode */
-    background-color: #ffffff;
-    /* Light mode */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+        background-color: #ffffff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
 }
 
 .dark .bg-white {
     background-color: #2d3748;
-    /* Dark mode */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* Table headers */
 .bg-gray-50 {
-    /* Tailwind, but overriding */
-    background-color: #f9fafb;
-    /* Light mode */
-}
+        background-color: #f9fafb;
+    }
 
 .dark .bg-gray-50 {
     background-color: #4a5568;
-    /* Dark mode */
-}
+    }
 
 .text-gray-500 {
-    /* Tailwind, but overriding */
-    color: #6b7280;
-    /* Light mode */
-}
+        color: #6b7280;
+    }
 
 .dark .text-gray-500 {
     color: #a0aec0;
-    /* Dark mode */
-}
+    }
 
 .divide-gray-200> :not([hidden])~ :not([hidden]) {
-    /* Tailwind, but overriding */
-    border-color: #e5e7eb;
-    /* Light mode */
-}
+        border-color: #e5e7eb;
+    }
 
 .dark .divide-gray-200> :not([hidden])~ :not([hidden]) {
     border-color: #4a5568;
-    /* Dark mode */
-}
+    }
 
 .text-gray-900 {
-    /* Tailwind, but overriding */
-    color: #1a202c;
-    /* Light mode table cell text */
-}
+        color: #1a202c;
+    }
 
 .dark .text-gray-900 {
     color: #e2e8f0;
-    /* Dark mode table cell text */
-}
+    }
 
 .border-gray-200 {
-    /* Tailwind, but overriding */
-    border-color: #e5e7eb;
-    /* Light mode */
-}
+        border-color: #e5e7eb;
+    }
 
 .dark .border-gray-200 {
     border-color: #4a5568;
-    /* Dark mode */
-}
+    }
 
 .text-gray-700 {
-    /* Tailwind, but overriding */
-    color: #4b5563;
-    /* Light mode general text */
-}
+        color: #4b5563;
+    }
 
 .dark .text-gray-700 {
     color: #cbd5e0;
-    /* Dark mode general text */
-}
+    }
 
-/* Alert/Status Spans (keep original colors for meaning, adjust bg slightly) */
 .bg-green-100 {
     background-color: #d1fae5;
 }
@@ -419,7 +327,6 @@ a:hover {
     background-color: #2f855a;
 }
 
-/* Darker green background */
 .text-green-800 {
     color: #065f46;
 }
@@ -428,7 +335,6 @@ a:hover {
     color: #9ae6b4;
 }
 
-/* Lighter green text */
 
 .bg-yellow-100 {
     background-color: #fffac8;
@@ -438,7 +344,6 @@ a:hover {
     background-color: #c05621;
 }
 
-/* Darker yellow background */
 .text-yellow-800 {
     color: #8a6401;
 }
@@ -455,7 +360,6 @@ a:hover {
     background-color: #c53030;
 }
 
-/* Darker red background */
 .text-red-800 {
     color: #991b1b;
 }
@@ -464,31 +368,25 @@ a:hover {
     color: #fc8181;
 }
 
-/* Sidebar specific text and hover colors */
 aside .border-indigo-800 {
     border-color: #374151;
-    /* Lighter border for contrast */
-}
+    }
 
 .dark aside .border-indigo-800 {
     border-color: #2d3748;
-    /* Darker border in dark mode */
-}
+    }
 
 aside a {
     color: #d1d5db;
-    /* Light grey for text in sidebar */
-}
+    }
 
 aside a.bg-indigo-800 {
     background-color: #374151;
-    /* Darker bg for active link in sidebar */
-}
+    }
 
 .dark aside a.bg-indigo-800 {
     background-color: #4a5568;
-    /* Darker bg for active link in dark sidebar */
-}
+    }
 
 aside a.hover\:bg-indigo-800:hover {
     background-color: #374151;
@@ -500,40 +398,26 @@ aside a.hover\:bg-indigo-800:hover {
 
 .sidebar-icon {
     margin-right: 0;
-    /* Remove default ml-3 for RTL */
-    margin-left: 0.75rem;
-    /* Add margin to the left for spacing */
-    min-width: 24px;
-    /* Ensure icon has a minimum width to prevent collapse */
-}
+        margin-left: 0.75rem;
+        min-width: 24px;
+    }
 
-/* For select boxes (maintain original look, add dark mode colors) */
 select {
     appearance: none;
-    /* Remove default arrow */
-    -webkit-appearance: none;
+        -webkit-appearance: none;
     -moz-appearance: none;
-    /* Light mode arrow */
-    background-image: url("data:image/svg+xml;utf8,<svg fill='%236B7280' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
-    /* Custom arrow */
-    background-repeat: no-repeat;
+        background-image: url("data:image/svg+xml;utf8,<svg fill='%236B7280' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+        background-repeat: no-repeat;
     background-position: left 0.75rem center;
-    /* Position the arrow to the left for RTL */
-    background-size: 1.5em;
-    /* Size of the arrow */
-    padding-right: 0.75rem;
-    /* Normal right padding for text */
-    padding-left: 2.5rem;
-    /* Space for the arrow (left side in RTL) */
-}
+        background-size: 1.5em;
+        padding-right: 0.75rem;
+        padding-left: 2.5rem;
+    }
 
 .dark select {
-    /* Dark mode arrow */
-    background-image: url("data:image/svg+xml;utf8,<svg fill='%23A0AEC0' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
-    /* Lighter arrow for dark mode */
-}
+        background-image: url("data:image/svg+xml;utf8,<svg fill='%23A0AEC0' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+    }
 
-/* Toggle Button styling */
 .toggle-switch {
     position: relative;
     display: inline-block;
@@ -566,8 +450,7 @@ select {
     height: 18px;
     width: 18px;
     right: 3px;
-    /* Adjusted for RTL: starts from right */
-    bottom: 3px;
+        bottom: 3px;
     background-color: white;
     -webkit-transition: .4s;
     transition: .4s;
@@ -584,28 +467,19 @@ input:focus+.slider {
 
 input:checked+.slider:before {
     -webkit-transform: translateX(-24px);
-    /* Moves left for RTL */
-    -ms-transform: translateX(-24px);
+        -ms-transform: translateX(-24px);
     transform: translateX(-24px);
 }
 
-/* Sun and Moon icons for toggle */
-/* Ensure Font Awesome 5 Free is used for the font-family */
 .slider.round:after {
-    /* Sun icon */
-    content: "\f185";
-    /* Unicode for Font Awesome sun icon */
-    font-family: "Font Awesome 5 Free";
-    /* Crucial for FA icons */
-    font-weight: 900;
-    /* Required for solid icons in FA 5 */
-    color: #f39c12;
-    /* Yellow for sun */
-    font-size: 14px;
+        content: "\f185";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        color: #f39c12;
+        font-size: 14px;
     position: absolute;
     left: 5px;
-    /* Position to the left for RTL */
-    top: 50%;
+        top: 50%;
     transform: translateY(-50%);
     transition: opacity 0.4s;
     opacity: 1;
@@ -613,32 +487,163 @@ input:checked+.slider:before {
 
 input:checked+.slider.round:after {
     opacity: 0;
-    /* Hide sun when checked */
-}
+    }
 
 .slider.round:before {
-    /* Moon icon (on handle) */
-    content: "\f186";
-    /* Unicode for Font Awesome moon icon */
-    font-family: "Font Awesome 5 Free";
-    /* Crucial for FA icons */
-    font-weight: 900;
-    /* Required for solid icons in FA 5 */
-    color: #ffffff;
-    /* White for moon */
-    font-size: 14px;
+        content: "\f186";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        color: #ffffff;
+        font-size: 14px;
     position: absolute;
     right: 3px;
-    /* Position to the right for RTL */
-    top: 50%;
+        top: 50%;
     transform: translateY(-50%) translateX(0);
-    /* Initial position for moon */
-    transition: transform 0.4s;
+        transition: transform 0.4s;
 }
 
 input:checked+.slider.round:before {
     content: "\f186";
-    /* Keep moon icon */
-    transform: translateY(-50%) translateX(-24px);
-    /* Move moon with handle to the left */
+        transform: translateY(-50%) translateX(-24px);
+    }
+
+@media (max-width: 768px) {
+    body {
+        display: block;
+                position: relative;
+            }
+
+        .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 15;
+                display: none;
+    }
+
+    .show-overlay {
+        display: block;
+    }
+
+    aside#sidebar {
+                position: absolute;
+                top: 0;
+                right: 0;
+        width: 100%;
+                height: 0;
+                overflow: hidden;
+                padding-top: 0;
+                padding-bottom: 0;
+                transition: height 0.3s ease-in-out, padding 0.3s ease-in-out;
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        background-color: #1f2937;
+                z-index: 18;
+            }
+
+    aside#sidebar.open-mobile-sidebar {
+        height: auto;
+                max-height: 100vh;
+                padding: 1.5rem;
+            }
+
+    aside#sidebar .nav-text,
+    aside#sidebar .logo-text,
+    aside#sidebar .logout-text {
+        display: block;
+                opacity: 1;
+            }
+
+        aside#sidebar:not(.open-mobile-sidebar) .nav-text,
+    aside#sidebar:not(.open-mobile-sidebar) .logo-text,
+    aside#sidebar:not(.open-mobile-sidebar) .logout-text {
+        display: none;
+            }
+
+        aside#sidebar:not(.open-mobile-sidebar) .sidebar-icon {
+        margin-left: auto;
+        margin-right: auto;
+        width: 100%;
+        text-align: center;
+    }
+
+    aside#sidebar:not(.open-mobile-sidebar) nav ul li a {
+        justify-content: center;
+    }
+
+    aside#sidebar:not(.open-mobile-sidebar) .flex.items-center.gap-4 {
+        justify-content: center;
+    }
+
+    aside#sidebar:not(.open-mobile-sidebar) .pb-4.mb-6 {
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-bottom: 0;
+    }
+
+        .main-content {
+        margin-right: 0;
+                width: 100%;
+                        display: block;
+            }
+
+        #toggleSidebarBtn {
+        display: block;
+                cursor: pointer;
+    }
+
+        .top-main-navbar {
+        position: sticky;
+                top: 0;
+        margin-right: 0;
+                margin-left: 0;
+        padding: 10px 15px;
+                border-radius: 0;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                transform: translateY(0);
+                opacity: 1;
+            }
+
+    .top-main-navbar .flex-shrink-0 {
+        width: auto;
+                justify-content: flex-start;
+                margin-bottom: 0;
+            }
+
+    .top-main-navbar .search-input {
+        width: 100%;
+                margin-top: 10px;
+                order: 2;
+            }
+
+    .top-main-navbar .fas.fa-search {
+        left: 15px;
+            }
+
+    .top-main-navbar .bg-green-600 {
+        margin-top: 10px;
+                order: 3;
+                width: 100%;
+                justify-content: center;
+            }
+
+    .top-main-navbar .flex.items-center.gap-2 {
+        width: auto;
+                justify-content: flex-end;
+                order: 1;
+            }
+
+    .top-main-navbar #toggleSidebarBtn {
+        margin-left: 0;
+                margin-right: 10px;
+            }
+
+    .top-main-navbar #pageTitle {
+        font-size: 1.25rem;
+                margin-right: 0;
+            }
 }
