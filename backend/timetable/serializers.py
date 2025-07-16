@@ -22,6 +22,7 @@ class ProgramSerializer(serializers.ModelSerializer):
         fields = ['id', 'program_name', 'fk_department', 'department_id']
 
 class HallSerializer(serializers.ModelSerializer):
+    hall_status_display = serializers.CharField(source='get_hall_status_display', read_only=True)
     class Meta:
         model = Hall
         fields = '__all__'

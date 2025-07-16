@@ -1,27 +1,27 @@
 # import_students.py
 import pandas as pd
-from timetable.models import Teacher, Today, Period, TeacherTime,Subject,Program,Hall,Level,Group,Distribution,Department
-
+from timetable.models import Teacher, Today, Period, TeacherTime,Subject,Program,Hall,Level,Group,Distribution,Department,Table
+from django.apps import apps
 def import_from_availability_excel(file_path):
     df = pd.read_excel(file_path)
     teacher_times = []
 
     # خريطة الأعمدة إلى رقم الفترة
     time_columns = {
-        'Time1': 1,
+        'Time1': 4,
         'Time2': 2,
         'Time3': 3
     }
 
     for _, row in df.iterrows():
         professor_id = row['ProfessorID']
-        day_id = row['Days']
+        day_id = row['Days']+7
 
         try:
             teacher = Teacher.objects.get(id=professor_id)
             today: Today = Today.objects.get(id=day_id)
         except (Teacher.DoesNotExist, Today.DoesNotExist) as e:
-            print(f"❌ تخطي الصف بسبب خطأ في الأستاذ أو اليوم: {e}")
+            print(f"❌ skip row  {e} for ProfessorID: {professor_id}, Day ID: {day_id}")
             continue
 
         for column, period_number in time_columns.items():
@@ -31,10 +31,10 @@ def import_from_availability_excel(file_path):
                     teacher_times.append(TeacherTime(
                         fk_teacher=teacher,
                         fk_today=today,
-                        fk_period=period
+                        fk_period=period,
                     ))
                 except Period.DoesNotExist:
-                    print(f"⚠️ لم يتم العثور على فترة برقم {period_number}")
+                    print(f"⚠️ not find period {period_number}")
 
     TeacherTime.objects.bulk_create(teacher_times)
     print(f"✅ تم إدخال {len(teacher_times)} وقتًا بنجاح.")
@@ -153,6 +153,7 @@ def import_levels_from_excel(file_path):
     for _, row in df.iterrows():
         level_name = row['name']
         fk_program_id = row['program_id']
+        level_id = row['id']  # استخدام معرف المستوى من الملف
 
 
         if level_name and fk_program_id is not None:
@@ -162,6 +163,7 @@ def import_levels_from_excel(file_path):
                 fk_program_id=Program.objects.get(id=fk_program_id)  # الحصول على الكائن البرنامج باستخدام المعرف
                 # إنشاء الكائن المستوى
                 level = Level(
+                    id=level_id,  # استخدام معرف المستوى من الملف
                     level_name=level_name,
                     fk_program=fk_program_id,
                     number_students=300
@@ -179,12 +181,14 @@ def import_groups_from_excel(file_path):
         group_name = row['name']
         fk_level_id = row['level_id']
         number_students = row['std_count']
+        group_id = row['id']  # استخدام معرف المجموعة من الملف
 
         if group_name and fk_level_id is not None:
             # تحقق إذا كانت المجموعة موجودة بنفس الاسم لتفادي التكرار (يمكن تغييره حسب المطلوب)
             if not Group.objects.filter(group_name=group_name, fk_level_id=fk_level_id).exists():
                 fk_level_id = Level.objects.get(id=fk_level_id)
                 group = Group(
+                    id=group_id,  # استخدام معرف المجموعة من الملف
                     group_name=group_name,
                     fk_level=fk_level_id,
                     number_students=number_students
@@ -209,13 +213,13 @@ def import_distributions(file_path):
                 fk_group=group
             )
         except Teacher.DoesNotExist:
-            print(f"❌ المدرس غير موجود: ID = {row['ProfessorID']}")
+            print(f"❌ not found teacher: ID = {row['ProfessorID']}")
         except Subject.DoesNotExist:
-            print(f"❌ المادة غير موجودة: ID = {row['CourseID']}")
+            print(f"❌ not foun course: ID = {row['CourseID']}")
         except Group.DoesNotExist:
-            print(f"❌ المجموعة غير موجودة: ID = {row['GroupID']}")
+            print(f"❌not found group: ID = {row['GroupID']}")
         except Exception as e:
-            print(f"⚠️ خطأ غير متوقع في السطر {row}: {e}")
+            print(f"⚠️ error {row}: {e}")
 
     print("✅ تم استيراد التوزيع بنجاح.")
 def import_deptartments(file_path):
@@ -237,7 +241,7 @@ folder_path="C:/Users/abuba/Desktop/alogorithm timetable/-university-timetable-s
 def import_all_data():
     # import_teachers_from_excel(folder_path + "Professors.xlsx")
     # import_subjects_from_excel(folder_path + "Courses_with_terms.xlsx")
-    # import_from_availability_excel(folder_path + "ProDayTimes.xlsx")
+    # import_from_availability_excel(folder_path + "ProDayTimes (1).xlsx")
     # import_day(folder_path + "Days.xlsx")
     # import_period(folder_path + "period.xlsx")
     # import_deptartments(folder_path + "department.xlsx")
@@ -245,8 +249,8 @@ def import_all_data():
     # import_halls_from_excel(folder_path + "Rooms.xlsx")
     # import_levels_from_excel(folder_path + "levels.xlsx")
     # import_groups_from_excel(folder_path + "groups.xlsx")
-    # import_distributions(folder_path + "teaching_group - Copy.xlsx")
-    import_distributions(folder_path + "teaching_group.xlsx")
+    import_distributions(folder_path + "teaching_group - Copy.xlsx")
+    # import_distributions(folder_path + "teaching_group.xlsx")
 
 
 # الاستخدام:
@@ -264,8 +268,15 @@ def import_all_data():
 # Subject.objects.all().delete()
 # Today.objects.all().delete()
 # Distribution.objects.all().delete()
-import_all_data()
 # TeacherTime.objects.all().delete()
+# Level.objects.all().delete()
+# Group.objects.all().delete()
+# for model in apps.get_models():
+#     model.objects.all().delete()
+
+Table.objects.all().delete()
+
+# import_all_data()
 # from .models import Teacher
 # for t in Teacher.objects.all():
 #     print(f"{t.id} - {t.teacher_status} - {t.get_teacher_status_display()}")
