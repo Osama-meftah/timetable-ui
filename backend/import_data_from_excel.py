@@ -1,6 +1,6 @@
 # import_students.py
 import pandas as pd
-from timetable.models import Teacher, Today, Period, TeacherTime,Subject,Program,Hall,Level,Group,Distribution
+from timetable.models import Teacher, Today, Period, TeacherTime,Subject,Program,Hall,Level,Group,Distribution,Department
 
 def import_from_availability_excel(file_path):
     df = pd.read_excel(file_path)
@@ -70,13 +70,15 @@ def import_subjects_from_excel(file_path):
     df=pd.read_excel(file_path)
     for _, row in df.iterrows():
         subject_name= row.get('Subject')
-        id= row.get('CourseID')  # استخدام معرف المادة من الملف
+        id= row.get('CourseID')
+        term=row.get('term')  # استخدام معرف المادة من الملف
         if subject_name:
             # تحقق إذا كانت المادة موجودة بنفس الاسم لتفادي التكرار (يمكن تغييره حسب المطلوب)
             if not Subject.objects.filter(subject_name=subject_name).exists():
                 subject = Subject(
                     subject_name=subject_name,
-                    id=id,  # استخدام معرف المادة من الملف
+                    id=id,
+                    term=term  # استخدام معرف المادة من الملف
                     # افتراضياً الفصل الأول
                 )
                 subject.save()
@@ -111,12 +113,14 @@ def import_programs(file_path):
     df = pd.read_excel(file_path)
     for _, row in df.iterrows():
         program_name = row['name']
+        fk_department_id = row['fk_dept']
         
         if program_name:
             # تحقق إذا كان البرنامج موجود بنفس الاسم لتفادي التكرار (يمكن تغييره حسب المطلوب)
             if not Program.objects.filter(program_name=program_name).exists():
                 program = Program(
                     program_name=program_name,
+                    fk_department=Department.objects.get(id=fk_department_id)
                 )
                 program.save()
             else:
@@ -160,6 +164,7 @@ def import_levels_from_excel(file_path):
                 level = Level(
                     level_name=level_name,
                     fk_program=fk_program_id,
+                    number_students=300
                    
                 )
                 level.save()
@@ -213,18 +218,54 @@ def import_distributions(file_path):
             print(f"⚠️ خطأ غير متوقع في السطر {row}: {e}")
 
     print("✅ تم استيراد التوزيع بنجاح.")
+def import_deptartments(file_path):
+    df = pd.read_excel(file_path)
+    for _, row in df.iterrows():
+        dept_name = row['dept_name']
+        if dept_name:
+            # تحقق إذا كان القسم موجود بنفس الاسم لتفادي التكرار (يمكن تغييره حسب المطلوب)
+            if not Department.objects.filter(name=dept_name).exists():
+                department = Department(
+                    name=dept_name,
+                )
+                department.save()
+            else:
+                print(f"Department '{dept_name}' already exists, skipping.")
+        else:
+            print("Empty department name, skipping.")
+folder_path="C:/Users/abuba/Desktop/alogorithm timetable/-university-timetable-scheduler/data/"
+def import_all_data():
+    # import_teachers_from_excel(folder_path + "Professors.xlsx")
+    # import_subjects_from_excel(folder_path + "Courses_with_terms.xlsx")
+    # import_from_availability_excel(folder_path + "ProDayTimes.xlsx")
+    # import_day(folder_path + "Days.xlsx")
+    # import_period(folder_path + "period.xlsx")
+    # import_deptartments(folder_path + "department.xlsx")
+    # import_programs(folder_path + "programs.xlsx")
+    # import_halls_from_excel(folder_path + "Rooms.xlsx")
+    # import_levels_from_excel(folder_path + "levels.xlsx")
+    # import_groups_from_excel(folder_path + "groups.xlsx")
+    # import_distributions(folder_path + "teaching_group - Copy.xlsx")
+    import_distributions(folder_path + "teaching_group.xlsx")
+
 
 # الاستخدام:
 # import_from_availability_excel("../algorithm/data/ProDayTimes.xlsx")
-# import_teachers_from_excel("../algorithm/data/Professors.xlsx")
-# import_subjects_from_excel("../algorithm/data/Courses.xlsx")
+# import_teachers_from_excel(folder_path + "Professors.xlsx")
+# import_subjects_from_excel( folder_path + "Courses_with_terms.xlsx")
 # import_day("../algorithm/data/Days.xlsx")
 # import_period("../algorithm/data/period.xlsx")
 # import_programs("../algorithm/data/programs.xlsx")
 # import_halls_from_excel("../algorithm/data/Rooms.xlsx")
 # import_levels_from_excel("../algorithm/data/levels.xlsx")
 # import_groups_from_excel("../algorithm/data/groups.xlsx")
-import_distributions("../algorithm/data/teaching_group.xlsx")
+# import_distributions("../algorithm/data/teaching_group.xlsx")
 # Teacher.objects.all().delete()
 # Subject.objects.all().delete()
 # Today.objects.all().delete()
+# Distribution.objects.all().delete()
+import_all_data()
+# TeacherTime.objects.all().delete()
+# from .models import Teacher
+# for t in Teacher.objects.all():
+#     print(f"{t.id} - {t.teacher_status} - {t.get_teacher_status_display()}")

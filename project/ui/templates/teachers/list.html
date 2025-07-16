@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block page_header_title %}
-    {{ page_title }} {# Assuming page_title is passed from views for the dashboard-like page #}
+{{ page_title }} {# Assuming page_title is passed from views for the dashboard-like page #}
 {% endblock %}
 
 {% block content %}
@@ -12,27 +12,30 @@
 <div class="container mx-auto py-6 sm:py-8">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {# Card: Total Teachers #}
-        <div class="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-700 dark:to-blue-800 rounded-lg shadow-lg p-6 text-white flex items-center justify-between transition-transform transform hover:scale-105 duration-300">
+        <div
+            class="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-700 dark:to-blue-800 rounded-lg shadow-lg p-6 text-white flex items-center justify-between transition-transform transform hover:scale-105 duration-300">
             <div>
                 <h3 class="text-lg font-medium opacity-90">إجمالي المدرسين</h3>
                 <p class="text-4xl font-bold mt-1">{{ total_teachers }}</p>
             </div>
             <i class="fas fa-users text-5xl opacity-30"></i>
         </div>
-    
+
         {# Card: Active Teachers #}
-        <div class="bg-gradient-to-r from-green-500 to-green-600 dark:from-green-700 dark:to-green-800 rounded-lg shadow-lg p-6 text-white flex items-center justify-between transition-transform transform hover:scale-105 duration-300">
+        <div
+            class="bg-gradient-to-r from-green-500 to-green-600 dark:from-green-700 dark:to-green-800 rounded-lg shadow-lg p-6 text-white flex items-center justify-between transition-transform transform hover:scale-105 duration-300">
             <div>
                 <h3 class="text-lg font-medium opacity-90">مدرسون نشطون</h3>
                 <p class="text-4xl font-bold mt-1">{{ active_teachers }}</p>
             </div>
             <i class="fas fa-user-check text-5xl opacity-30"></i>
         </div>
-    
+
         {# Card: Teachers on Leave #}
-        <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 dark:from-yellow-700 dark:to-yellow-800 rounded-lg shadow-lg p-6 text-white flex items-center justify-between transition-transform transform hover:scale-105 duration-300">
+        <div
+            class="bg-gradient-to-r from-yellow-500 to-yellow-600 dark:from-yellow-700 dark:to-yellow-800 rounded-lg shadow-lg p-6 text-white flex items-center justify-between transition-transform transform hover:scale-105 duration-300">
             <div>
-                <h3 class="text-lg font-medium opacity-90">مدرسون في إجازة</h3>
+                <h3 class="text-lg font-medium opacity-90">مدرسون في vacation</h3>
                 <p class="text-4xl font-bold mt-1">{{ on_leave_teachers }}</p>
             </div>
             <i class="fas fa-user-times text-5xl opacity-30"></i>
@@ -47,35 +50,26 @@
             </h2>
             <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
                 <div class="relative w-full sm:w-64">
-                    <input
-                      type="text"
-                      class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-white 
+                    <input type="text" class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-white 
                       dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 
                       focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors 
-                      duration-200"
-                      data-type="teacher"
-                      data-title="البحث عن مدرس"
-                      placeholder="البحث باسم المدرس..."
-                      aria-label="البحث عن مدرس"
-                    />
-                    
+                      duration-200" data-type="teacher" data-title="البحث عن مدرس" placeholder="البحث باسم المدرس..."
+                        aria-label="البحث عن مدرس" />
+
                     <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
-                      <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
+                        <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
                     </div>
-                  </div>
+                </div>
 
 
                 <button type="button"
-                class="upload-trigger bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md"
-                data-type="teachers"
-                data-title="رفع ملف بيانات المدرسين"
-                data-description="يجب أن يحتوي الملف على الأعمدة: teacher_name, teacher_email,teacher_phone,teacher_address,teacher_status.">
+                    class="upload-trigger bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md"
+                    data-type="teachers" data-title="رفع ملف بيانات المدرسين"
+                    data-description="يجب أن يحتوي الملف على الأعمدة: teacher_name, teacher_email,teacher_phone,teacher_address,teacher_status.">
                     <i class="fas fa-upload ml-2"></i> رفع ملف بيانات المدرسين
                 </button>
-                <a
-                    href="{% url 'add_teacher' %}?add=1"
-                    class="bg-indigo-600 hover:bg-indigo-700 dark:text-gray-200 text-white font-bold py-2 px-4 rounded-md flex items-center shadow-md transition-colors duration-200 w-full sm:w-auto justify-center"
-                >
+                <a href="{% url 'add_teacher' %}?add=1"
+                    class="bg-indigo-600 hover:bg-indigo-700 dark:text-gray-200 text-white font-bold py-2 px-4 rounded-md flex items-center shadow-md transition-colors duration-200 w-full sm:w-auto justify-center">
                     <i class="fas fa-plus-circle ml-2"></i>
                     إضافة مدرس
                 </a>
@@ -85,19 +79,34 @@
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-12">#</th>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">اسم المدرس</th>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">الهاتف</th>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">البريد الإلكتروني</th>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">حالة المدرس</th>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">العنوان</th>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-32">الإجراءات</th>
+                        <th scope="col"
+                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-12">
+                            #</th>
+                        <th scope="col"
+                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            اسم المدرس</th>
+                        <th scope="col"
+                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            الهاتف</th>
+                        <th scope="col"
+                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">
+                            البريد الإلكتروني</th>
+                        <th scope="col"
+                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">
+                            حالة المدرس</th>
+                        <th scope="col"
+                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">
+                            العنوان</th>
+                        <th scope="col"
+                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-32">
+                            الإجراءات</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700" data-type="teacher" >
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"
+                    data-type="teacher">
                     {# Iterate over the paginated teachers object #}
                     {% for teacher in teachers %}
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row" >
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row">
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200 search-name">
                             {{ forloop.counter }}
                         </td>
@@ -111,44 +120,43 @@
                             <span class="text-gray-400 dark:text-gray-500">غير محدد</span>
                             {% endif %}
                         </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
-                            
+                        <td
+                            class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
+
                             {{ teacher.teacher_email }}
                         </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
+                        <td
+                            class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
                             {# Displaying status with colors based on 'active'/'on_leave' values #}
                             <span class="
-                                {% if teacher.teacher_status == 'نشط' %}text-green-600 dark:text-green-400
-                                {% elif teacher.teacher_status == 'إجازة' %}text-yellow-600 dark:text-yellow-400
+                                {% if teacher.teacher_status == 'active' %}text-green-600 dark:text-green-400
+                                {% elif teacher.teacher_status == 'vacation' %}text-yellow-600 dark:text-yellow-400
                                 {% else %}text-gray-500 dark:text-gray-400{% endif %} font-semibold">
                                 {# Ensure you have a get_teacher_status_display method in your Teacher model #}
-                                {{ teacher.teacher_status }}
+                                {{ teacher.teacher_status_display }}
                             </span>
                         </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
+                        <td
+                            class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
                             {% if teacher.teacher_address %}
-                                {{ teacher.teacher_address }}
+                            {{ teacher.teacher_address }}
                             {% else %}
                             <span class="text-gray-400 dark:text-gray-500">غير محدد</span>
                             {% endif %}
                         </td>
-                        <td class="px-8 py-4 whitespace-nowrap text-right text-sm font-medium flex items-center justify-end gap-2">
-                            <a href="{% url 'edit_teacher' teacher.id %}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 
-                                dark:hover:text-indigo-300 p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-700 transition-colors duration-150" title="تعديل">
-                               <i class="fas fa-edit text-lg"></i>
-                           </a>
-                           <button
-                           type="button"
-                           class="delete-btn group text-red-600 hover:text-red-800 dark:text-red-400 
-                           dark:hover:text-red-300"
-                           data-id="{{ teacher.id }}"
-                           data-name="{{ teacher.name }}"
-                           data-type="المدرس"
-                           data-url="{% url 'delete_teacher' 0 %}"
-                           data-form-type="delete"
-                           >
-                           <i class="fas fa-trash-alt text-lg group-hover:scale-110 transition-transform"></i>
-                           </button>
+                        <td
+                            class="px-8 py-4 whitespace-nowrap text-right text-sm font-medium flex items-center justify-end gap-2">
+                            <a href="{% url 'edit_teacher' teacher.id %}"
+                                class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 
+                                dark:hover:text-indigo-300 p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-700 transition-colors duration-150"
+                                title="تعديل">
+                                <i class="fas fa-edit text-lg"></i>
+                            </a>
+                            <button type="button" class="delete-btn group text-red-600 hover:text-red-800 dark:text-red-400 
+                           dark:hover:text-red-300" data-id="{{ teacher.id }}" data-name="{{ teacher.name }}"
+                                data-type="المدرس" data-url="{% url 'delete_teacher' 0 %}" data-form-type="delete">
+                                <i class="fas fa-trash-alt text-lg group-hover:scale-110 transition-transform"></i>
+                            </button>
                         </td>
                     </tr>
                     {% empty %}
@@ -164,7 +172,8 @@
             rounded-b-lg border-t border-gray-200 dark:border-gray-700" data-type="teacher">
                 <i class="fas fa-exclamation-triangle text-gray-400 text-3xl mb-3"></i>
                 <p class="text-lg font-medium text-gray-500 dark:text-gray-400">لا توجد مدرس مطابقة لبحثك.</p>
-                <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">حاول البحث بكلمات مختلفة أو تحقق من التهجئة.</p>
+                <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">حاول البحث بكلمات مختلفة أو تحقق من التهجئة.
+                </p>
             </div>
         </div>
         {% include "pagination.html" with page_obj=teachers %}
@@ -178,27 +187,20 @@
             </h2>
             <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
                 <div class="relative w-full sm:w-64">
-                    <input
-                      type="text"
-                      class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-white 
+                    <input type="text" class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-white 
                       dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 
                       focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors 
-                      duration-200"
-                      data-type="teacherdetails"
-                      data-title="البحث عن مدرس"
-                      placeholder="البحث باسم المدرس..."
-                      aria-label="البحث عن مدرس"
-                    />
+                      duration-200" data-type="teacherdetails" data-title="البحث عن مدرس"
+                        placeholder="البحث باسم المدرس..." aria-label="البحث عن مدرس" />
                     <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
-                      <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
+                        <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
                     </div>
-                  </div>
+                </div>
 
-                <a
-                    href="{% url 'add_edit_teacher_with_courses' %}" {# Changed from 'add_teacher_with_courses' for consistency with views #}
+                <a href="{% url 'add_edit_teacher_with_courses' %}"
+                    {# Changed from 'add_teacher_with_courses' for consistency with views #}
                     class="bg-indigo-600 dark:text-gray-200 hover:bg-indigo-700 hover:text-gray-200
-                     text-white font-bold py-2 px-4 rounded-md flex items-center shadow-md transition-colors duration-200 w-full sm:w-auto justify-center"
-                >
+                     text-white font-bold py-2 px-4 rounded-md flex items-center shadow-md transition-colors duration-200 w-full sm:w-auto justify-center">
                     <i class="fas fa-plus-circle ml-2"></i>
                     ربط مدرس جديد بالمقررات والوقت
                 </a>
@@ -208,24 +210,39 @@
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-12">#</th>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">المدرس</th>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">البريد الإلكتروني</th>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden lg:table-cell">الهاتف</th>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden md:table-cell">المقررات</th>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">الأيام المتاحة</th>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-32">الإجراءات</th>
+                        <th scope="col"
+                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-12">
+                            #</th>
+                        <th scope="col"
+                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            المدرس</th>
+                        <th scope="col"
+                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">
+                            البريد الإلكتروني</th>
+                        <th scope="col"
+                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden lg:table-cell">
+                            الهاتف</th>
+                        <th scope="col"
+                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden md:table-cell">
+                            المقررات</th>
+                        <th scope="col"
+                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            الأيام المتاحة</th>
+                        <th scope="col"
+                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-32">
+                            الإجراءات</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700" data-type="teacherdetails">
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"
+                    data-type="teacherdetails">
                     {% for item in teachers_with_data %}
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row" >
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row">
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200 search-name">
                             {{ forloop.counter }}
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap">
                             <div class="flex items-center">
-                             
+
                                 <div class="mr-4">
                                     <div class="text-sm font-medium text-gray-900 dark:text-gray-200">
                                         {{ item.teacher.teacher_name }}
@@ -233,28 +250,31 @@
                                     <div class="text-xs text-gray-500 dark:text-gray-400">
                                         الحالة:
                                         <span class="
-                                            {% if item.teacher.teacher_status == 'نشط' %}text-green-600 dark:text-green-400
-                                            {% elif item.teacher.teacher_status == 'إجازة' %}text-yellow-600 dark:text-yellow-400
+                                            {% if item.teacher.teacher_status == 'active' %}text-green-600 dark:text-green-400
+                                            {% elif item.teacher.teacher_status == 'vacation' %}text-yellow-600 dark:text-yellow-400
                                             {% else %}text-gray-500 dark:text-gray-400{% endif %} font-semibold">
-                                            {{ item.teacher.teacher_status }} 
+                                            {{ item.teacher.teacher_status }}
                                         </span>
                                     </div>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
+                        <td
+                            class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
                             {{ item.teacher.teacher_email }}
                         </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden lg:table-cell">
+                        <td
+                            class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden lg:table-cell">
                             {{ item.teacher.teacher_phone }}
                         </td>
-                        <td class="px-4 py-4 whitespace-normal text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
+                        <td
+                            class="px-4 py-4 whitespace-normal text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
                             {% if item.courses %}
-                                {% for course in item.courses %}
-                                    <p>{{ course.subject_name }} ({{ course.level }} - {{ course.group }})</p>
-                                {% endfor %}
+                            {% for course in item.courses %}
+                            <p>{{ course.subject_name }} ({{ course.level }} - {{ course.group }})</p>
+                            {% endfor %}
                             {% else %}
-                                <span class="text-gray-400 dark:text-gray-500">غير محدد</span>
+                            <span class="text-gray-400 dark:text-gray-500">غير محدد</span>
                             {% endif %}
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
@@ -271,7 +291,8 @@
                             {% endif %}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{% url 'add_edit_teacher_with_courses' item.teacher.id %}" class="inline-flex items-center justify-center
+                            <a href="{% url 'add_edit_teacher_with_courses' item.teacher.id %}"
+                                class="inline-flex items-center justify-center
                                     w-10 h-10 rounded-full
                                     bg-blue-600 hover:bg-blue-700 text-white
                                     shadow-md hover:shadow-lg hover:text-gray-200
@@ -284,7 +305,8 @@
                     </tr>
                     {% empty %}
                     <tr class="search-row" data-type="teacherdetails">
-                        <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400 search-name">
+                        <td colspan="7"
+                            class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400 search-name">
                             لا يوجد مدرسون لعرضهم (تفصيلي).
                         </td>
                     </tr>
@@ -294,12 +316,13 @@
                 rounded-b-lg border-t border-gray-200 dark:border-gray-700" data-type="teacherdetails">
                     <i class="fas fa-exclamation-triangle text-gray-400 text-3xl mb-3"></i>
                     <p class="text-lg font-medium text-gray-500 dark:text-gray-400">لا توجد مدرس مطابقة لبحثك.</p>
-                    <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">حاول البحث بكلمات مختلفة أو تحقق من التهجئة.</p>
+                    <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">حاول البحث بكلمات مختلفة أو تحقق من
+                        التهجئة.</p>
                 </div>
             </table>
         </div>
-     {# Pagination for Detailed List (Updated) #}
-     {% include "pagination.html" with page_obj=teachers_with_data %}
+        {# Pagination for Detailed List (Updated) #}
+        {% include "pagination.html" with page_obj=teachers_with_data %}
     </div>
 </div>
 
@@ -312,12 +335,12 @@
 {% block extra_js %}
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-      new SearchComponent({
-        inputSelector: ".search-input[data-type='teacher']",
-        rowSelector: "tbody[data-type='teacher']",
-        noResultSelector: ".no-results-message[data-type='teacher']",
-        apiEndpoint: "http://127.0.0.1:8001/api/searchteachers/",
-        renderItemFn: (teacher, index) => `
+        new SearchComponent({
+            inputSelector: ".search-input[data-type='teacher']",
+            rowSelector: "tbody[data-type='teacher']",
+            noResultSelector: ".no-results-message[data-type='teacher']",
+            apiEndpoint: "http://127.0.0.1:8001/api/searchteachers/",
+            renderItemFn: (teacher, index) => `
           <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
             <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-200">${index + 1}</td>
             <td class="px-4 py-4 text-sm font-medium text-gray-900 dark:text-gray-200">${teacher.teacher_name}</td>
@@ -332,34 +355,34 @@
             </td>
           </tr>
         `
-      });
+        });
     });
     document.addEventListener("DOMContentLoaded", () => {
         new SearchComponent({
-          inputSelector: ".search-input[data-type='teacherdetails']",
-          rowSelector: "tbody[data-type='teacherdetails']",
-          noResultSelector: ".no-results-message[data-type='teacherdetails']",
-          apiEndpoint: "http://127.0.0.1:8001/api/searchteachersdistribution/",
-          renderItemFn: (item, index) => {
-            const teacher = item.teacher;
-      
-            const statusColor = teacher.teacher_status === 'نشط'
-              ? 'text-green-600 dark:text-green-400'
-              : teacher.teacher_status === 'إجازة'
-              ? 'text-yellow-600 dark:text-yellow-400'
-              : 'text-gray-500 dark:text-gray-400';
-      
-            const coursesHTML = item.courses && item.courses.length
-              ? item.courses.map(c => `<p>${c.subject_name} (${c.level} - ${c.group})</p>`).join("")
-              : `<span class="text-gray-400 dark:text-gray-500">غير محدد</span>`;
-      
-            const availabilityHTML = item.availability && item.availability.length
-              ? `<ul class="list-disc list-inside space-y-1">` +
-                  item.availability.map(a => `<li><span class="font-medium">${a.day}:</span> ${a.period}</li>`).join("") +
-                `</ul>`
-              : `<span class="text-gray-400 dark:text-gray-500">غير متاح حالياً</span>`;
-      
-            return `
+            inputSelector: ".search-input[data-type='teacherdetails']",
+            rowSelector: "tbody[data-type='teacherdetails']",
+            noResultSelector: ".no-results-message[data-type='teacherdetails']",
+            apiEndpoint: "http://127.0.0.1:8001/api/searchteachersdistribution/",
+            renderItemFn: (item, index) => {
+                const teacher = item.teacher;
+
+                const statusColor = teacher.teacher_status === 'active'
+                    ? 'text-green-600 dark:text-green-400'
+                    : teacher.teacher_status === 'vacation'
+                        ? 'text-yellow-600 dark:text-yellow-400'
+                        : 'text-gray-500 dark:text-gray-400';
+
+                const coursesHTML = item.courses && item.courses.length
+                    ? item.courses.map(c => `<p>${c.subject_name} (${c.level} - ${c.group})</p>`).join("")
+                    : `<span class="text-gray-400 dark:text-gray-500">غير محدد</span>`;
+
+                const availabilityHTML = item.availability && item.availability.length
+                    ? `<ul class="list-disc list-inside space-y-1">` +
+                    item.availability.map(a => `<li><span class="font-medium">${a.day}:</span> ${a.period}</li>`).join("") +
+                    `</ul>`
+                    : `<span class="text-gray-400 dark:text-gray-500">غير متاح حالياً</span>`;
+
+                return `
               <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row">
                 <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">${index + 1}</td>
                 <td class="px-4 py-4 whitespace-nowrap">
@@ -398,13 +421,14 @@
                 </td>
               </tr>
             `;
-          }
+            }
         });
-      });
-      
+    });
+
 </script>
 
-  
-{% comment %} <script src="{% static 'src/js/search.js' %}"></script> {% endcomment %}
-    
+
+{% comment %}
+<script src="{% static 'src/js/search.js' %}"></script> {% endcomment %}
+
 {% endblock %}

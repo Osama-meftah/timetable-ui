@@ -58,9 +58,10 @@ class SubjectSerializer(serializers.ModelSerializer):
 
 
 class TeacherSerializer(serializers.ModelSerializer):
+    teacher_status_display = serializers.CharField(source='get_teacher_status_display', read_only=True)
     class Meta:
         model = Teacher
-        fields = ['id', 'teacher_name', 'teacher_phone', 'teacher_email', 'teacher_status', 'teacher_address']
+        fields = ['id', 'teacher_name', 'teacher_phone', 'teacher_email', 'teacher_status','teacher_status_display', 'teacher_address']
 
 
 class TodaySerializer(serializers.ModelSerializer):

@@ -31,9 +31,8 @@ urlpatterns =[
     path("searchteachers/", SearchTeacherAPIView.as_view(), name="search_teachers_api"),
     path("searchteachersdistribution/", SearchTeacherDistributionAPIView.as_view()),
     path("searchcourses/", SearchCoursesAPIView.as_view()),
-    path("searchhalls/", SearchHallsAPIView.as_view(),)
-    # path('run-scheduler/', run_scheduler_view, name='run_scheduler'),
-
+    path("searchhalls/", SearchHallsAPIView.as_view(),),
+    path('run-scheduler/', run_scheduler_view, name='run_scheduler'),
 
 ]
  
