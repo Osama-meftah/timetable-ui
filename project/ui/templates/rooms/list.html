@@ -131,25 +131,26 @@
                         <span
                             class="px-3 py-1.5 inline-flex text-sm leading-5 font-bold rounded-full bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100 shadow-sm">
                             <i class="fas fa-circle-check text-green-600 dark:text-green-300 ml-1 text-sm"></i>
-                            available
+                            {{ room.hall_status_display }}
                         </span>
-                        {% elif room.hall_status == 'مشغولة' %} {# Changed from room.status to room.hall_status #}
+                        {% elif room.hall_status == 'under_maintenance' %}
+                        {# Changed from room.status to room.hall_status #}
                         <span
                             class="px-3 py-1.5 inline-flex text-sm leading-5 font-bold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-100 shadow-sm">
                             <i class="fas fa-users-rectangle text-yellow-600 dark:text-yellow-300 ml-1 text-sm"></i>
-                            مشغولة
+                            {{ room.hall_status_display }}
                         </span>
                         {% elif room.hall_status == 'under_maintenance' %}
                         {# Changed from room.status to room.hall_status #}
                         <span
                             class="px-3 py-1.5 inline-flex text-sm leading-5 font-bold rounded-full bg-red-100 text-red-800 dark:bg-red-700 dark:text-red-100 shadow-sm">
-                            <i class="fas fa-screwdriver-wrench text-red-600 dark:text-red-300 ml-1 text-sm"></i> تحت
-                            الصيانة
+                            <i class="fas fa-screwdriver-wrench text-red-600 dark:text-red-300 ml-1 text-sm"></i>
+                            {{ room.hall_status_display }}
                         </span>
                         {% else %}
                         <span
                             class="px-3 py-1.5 inline-flex text-sm leading-5 font-bold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100 shadow-sm">
-                            {{ room.hall_status }} {# Changed from room.status to room.hall_status #}
+                            {{ room.hall_status_display }} {# Changed from room.status to room.hall_status #}
                         </span>
                         {% endif %}
                     </div>
