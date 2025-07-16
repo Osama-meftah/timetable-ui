@@ -1,3 +1,4 @@
+from django.conf import settings
 import pandas as pd
 from ortools.sat.python import cp_model
 from collections import defaultdict
@@ -7,9 +8,11 @@ import random
 from .models import Department, Program, Hall, Level, Group, Subject, Teacher,Period,Today,TeacherTime, Distribution, Table
 from collections import namedtuple
 from tempfile import NamedTemporaryFile
+import os
 
 class TimeTableScheduler:
-    def __init__(self):
+    def __init__(self,semester_filter=None):
+        self.semester_filter = semester_filter
         self.model                  = cp_model.CpModel() 
         self.solver                 = cp_model.CpSolver()
 
@@ -20,7 +23,11 @@ class TimeTableScheduler:
         self.rooms = list(Hall.objects.all())
         self.days = list(Today.objects.all())
         self.timesProfessor =list(TeacherTime.objects.all())
-        self.teatchingGroups =list(Distribution.objects.all())
+        if self.semester_filter:
+            self.teatchingGroups = list(Distribution.objects.filter(fk_subject__term=self.semester_filter))
+        else:
+            self.teatchingGroups = list(Distribution.objects.all())
+        # self.teatchingGroups =list(Distribution.objects.all())
         self.programs = {p.id: p for p in Program.objects.all()}
         self.levels = {l.id: l for l in Level.objects.all()}
         self.groups = {g.id: g for g in Group.objects.all()}
@@ -51,7 +58,6 @@ class TimeTableScheduler:
             professor_times = [t for t in self.timesProfessor if t.fk_teacher.id == professor_id]
 
             availability = defaultdict(list)
-            teacher_time_ids = professor_times[0].pk
             for t in professor_times:
                 availability[t.fk_today.id].append(t.fk_period.pk)
 
@@ -59,7 +65,6 @@ class TimeTableScheduler:
                 "available": dict(availability),
                 "name": professor.teacher_name.strip(),
                 "ProfessorId": professor_id,
-                "teacher_time_id":teacher_time_ids
             }
 
             self.professoresdata.append(professordata)
@@ -208,7 +213,8 @@ class TimeTableScheduler:
     def write_conflicts_to_excel(self, conflicts):
         if conflicts:
             # Create a new Excel writer object
-            conflict_writer = pd.ExcelWriter('output/conflicts.xlsx', engine='openpyxl')
+            # file_path = os.path.join(settings.MEDIA_ROOT, '')
+            conflict_writer = pd.ExcelWriter(os.path.join(settings.MEDIA_ROOT, 'conflicts.xlsx'), engine='openpyxl')
             
             # Convert conflicts to DataFrame
             conflict_df = pd.DataFrame(conflicts)

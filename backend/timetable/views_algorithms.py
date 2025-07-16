@@ -9,10 +9,14 @@ from django.core.files import File
 from django.conf import settings
 from io import BytesIO
 from django.core.files.base import ContentFile
+from rest_framework.decorators import api_view
 
+@api_view(['POST'])
 def run_scheduler_view(request):
     try:
-        scheduler = TimeTableScheduler()
+        semester=request.data.get('semester')
+        print(f"Received semester: {semester}")
+        scheduler = TimeTableScheduler(semester_filter=semester)
         timestamp = datetime.now().strftime("%Y-%m-%d_%I-%M-%p")  # %I: ساعة بنظام 12 ساعة، %p: AM/PM
         unique_id = str(uuid.uuid4())[:8]
         filename = f"schedule_{timestamp}_{unique_id}.xlsx"
