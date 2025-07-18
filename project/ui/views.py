@@ -9,6 +9,9 @@ from collections import Counter
 
 BASE_API_URL = "http://127.0.0.1:8001/api/"
 
+def page_notfoun_view(reqest):
+    return render(reqest,'notFoune.html')
+
 def login(request):
     """
     عرض صفحة تسجيل الدخول.
@@ -98,13 +101,14 @@ class TeacherManagementView(View):
     def post(self, request, id=None):
         form_type = request.POST.get("form_type")
         teacher_data = {
-            "id": id,
+            # "id": id,
             "teacher_name": request.POST.get("teacher_name", "").strip(),
-            "teacher_phone": request.POST.get("teacher_phone", "").strip(),
+            # "teacher_phone": request.POST.get("teacher_phone", "").strip(),
             "teacher_email": request.POST.get("teacher_email", "").strip(),
-            "teacher_address": request.POST.get("teacher_address", "").strip(),
+            # "teacher_address": request.POST.get("teacher_address", "").strip(),
             "teacher_status": request.POST.get("teacher_status", "").strip(),
         }
+        print(teacher_data)
 
         # if not teacher_data["teacher_name"] or not teacher_data["teacher_email"]:
         #     messages.error(request, "الاسم والبريد الإلكتروني مطلوبان.")

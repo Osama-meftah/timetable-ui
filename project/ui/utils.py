@@ -2,15 +2,16 @@ import requests
 from django.contrib import messages
 from types import SimpleNamespace
 from django.core.paginator import Paginator
-
 BASE_API_URL = "http://127.0.0.1:8001/api/"
 
 class Endpoints:
+    login = "login/"
+    logout = "logout/"
     departments = "departments/"
     departmentsUpload ="uploadDepartments/"
     programsUpload="uploadPrograms/"
     levelsUpload="uploadLevels/"
-    todays = "todays/"
+    todays: str = "todays/"
     periods = "periods/"
     halls = "halls/"
     uploadHalls = "uploadHalls/"
@@ -40,7 +41,7 @@ def api_post(endpoint, data):
         print(f"{BASE_API_URL}{endpoint}", data)
         response = requests.post(f"{BASE_API_URL}{endpoint}", json=data)
         response.raise_for_status()
-        
+
         return response.json()
     
     except requests.exceptions.RequestException as e:
