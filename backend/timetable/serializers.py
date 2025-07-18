@@ -11,7 +11,7 @@ class DepartmentSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'description']
         
         
-?# class ProgramSerializer(serializers.ModelSerializer):
+# class ProgramSerializer(serializers.ModelSerializer):
 #     fk_department = DepartmentSerializer(read_only=True) 
 #     department_id = serializers.PrimaryKeyRelatedField(
 #         queryset=Department.objects.all(), write_only=True, source='fk_department'
