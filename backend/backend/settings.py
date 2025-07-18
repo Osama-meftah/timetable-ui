@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-^9r_$2&)yhw9c$t&iq0l9q_nmh^mi8&w8c3@*7jn)nlk2%p-pj
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -40,8 +40,14 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'timetable',
     'rest_framework',
-    'corsheaders'
+    'corsheaders',
+    'rest_framework_simplejwt'
 ]
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -92,6 +98,12 @@ TEMPLATES = [
     },
 ]
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'abubaker773880@gmail.com'  # استبدل بالبريد الصحيح
+EMAIL_HOST_PASSWORD = 'ldzp eaba oajr icnl'
 WSGI_APPLICATION = "backend.wsgi.application"
 
 

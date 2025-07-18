@@ -37,6 +37,7 @@ class TimeTableScheduler:
         self.generated_schedule = []
         self.available_times        = {}
         self.temp_file = None
+        print(len(self.teatchingGroups), "teatchingGroups")
 
     def add_data(self): 
         for row in self.available_times_df:
@@ -59,7 +60,7 @@ class TimeTableScheduler:
 
             availability = defaultdict(list)
             for t in professor_times:
-                availability[t.fk_today.id].append(t.fk_period.pk)
+                availability[t.fk_today.pk].append(t.fk_period.pk)
 
             professordata = {
                 "available": dict(availability),
@@ -83,8 +84,8 @@ class TimeTableScheduler:
             for day in self.days: 
                 for time_index in self.available_times_df:  
                     for room in self.rooms:  
-                        var_name = f'course_{course_id}_day_{day.id}_time_{time_index.pk}_room_{room.hall_name}'
-                        self.schedule_vars[(course_id, day.id, time_index.pk, room.hall_name)] = self.model.NewBoolVar(var_name)
+                        var_name = f'course_{course_id}_day_{day.pk}_time_{time_index.pk}_room_{room.hall_name}'
+                        self.schedule_vars[(course_id, day.pk, time_index.pk, room.hall_name)] = self.model.NewBoolVar(var_name)
 
     def add_constraints(self):
         self.add_courses_constraints()
@@ -101,8 +102,8 @@ class TimeTableScheduler:
                 for time_index in self.available_times_df:  
                     times=[]
                     for room in self.rooms:
-                        course.append(self.schedule_vars[(course_id, day.id, time_index.pk, room.hall_name)])  
-                        times.append(self.schedule_vars[(course_id, day.id, time_index.pk, room.hall_name)])
+                        course.append(self.schedule_vars[(course_id, day.pk, time_index.pk, room.hall_name)])  
+                        times.append(self.schedule_vars[(course_id, day.pk, time_index.pk, room.hall_name)])
                     # self.model.Add(sum(times)<=1)  
             self.model.Add(sum(course) == 1)
     
@@ -117,9 +118,9 @@ class TimeTableScheduler:
                     for course_id, course_info in self.lecture_times.items():
                         student_count = course_info['std_count']
                         if student_count > capacity:
-                            self.model.Add(self.schedule_vars[(course_id, day.id, time_index.pk, room_name)]==0)
+                            self.model.Add(self.schedule_vars[(course_id, day.pk, time_index.pk, room_name)]==0)
 
-                        lectures_in_room.append(self.schedule_vars[(course_id, day.id, time_index.pk, room_name)])
+                        lectures_in_room.append(self.schedule_vars[(course_id, day.pk, time_index.pk, room_name)])
                     self.model.AddAtMostOne(lectures_in_room)
 
     # قيد عدم تكرار المدرس في نفس الوقت
@@ -133,7 +134,7 @@ class TimeTableScheduler:
                         if course_info['teacher']["name"] == teacher_name:
                             # print("========================= ",course_info['teacher']["name"])
                             for room in self.rooms:
-                                lectures.append(self.schedule_vars[(course_id, day.id, time_index.pk, room.hall_name)])
+                                lectures.append(self.schedule_vars[(course_id, day.pk, time_index.pk, room.hall_name)])
                     self.model.Add(sum(lectures) <= 1) 
 
     # قيد تعيين المدرس في الاوقات المتاحة لة
@@ -145,8 +146,8 @@ class TimeTableScheduler:
            for day in self.days:
               for time_index in self.available_times_df:
                   for room in self.rooms:
-                     var = self.schedule_vars.get((course_id, day.id, time_index.pk, room.hall_name))                 
-                     if day.id in available_times and time_index.pk in available_times[day.id]:
+                     var = self.schedule_vars.get((course_id, day.pk, time_index.pk, room.hall_name))                 
+                     if day.pk in available_times and time_index.pk in available_times[day.pk]:
                         assigned_times.append(var)
            if assigned_times:
                self.model.Add(sum(assigned_times) >= 1)  # يجب أن يتم تعيينه على الأقل مرة واحدة للمادة  
@@ -165,7 +166,7 @@ class TimeTableScheduler:
                     time_slot_vars = []
                     for course_id in courses:
                         for room in self.rooms:
-                            time_slot_vars.append(self.schedule_vars[(course_id, day.id, time_index.pk, room.hall_name)])
+                            time_slot_vars.append(self.schedule_vars[(course_id, day.pk, time_index.pk, room.hall_name)])
                     # لا يمكن جدولة أكثر من مادة لنفس القسم والمستوى في نفس الوقت
                     if time_slot_vars:
                         self.model.Add(sum(time_slot_vars) <= 1)
@@ -193,7 +194,8 @@ class TimeTableScheduler:
                 for day_a, times in available.items():
                     
                     # day_name = self.days['Day Name'].loc[int(day_a)]
-                    day_name = self.days[day_a].day_name
+                    day_name = [d for d in self.days if d.id == day][0].day_name
+
                     for time_idx in times:
                         time_slot = f"{day_name} {self.available_times[time_idx]}"
                         if time_slot not in available_times_str:
@@ -283,7 +285,8 @@ class TimeTableScheduler:
             for course in courses:
                 for day, times in course['available_times'].items():
                     # day_name = self.days['Day Name'].loc[int(day)]
-                    day_name= self.days[day].day_name
+                    # day_name= self.days[day].day_name
+                    day_name = [d for d in self.days if d.id == day][0].day_name
                     for time_idx in times:
                         time_slot = f"{day_name} {self.available_times[time_idx]}"
                         if time_slot not in available_times_str:
@@ -399,7 +402,7 @@ class TimeTableScheduler:
                         capacity=room.capacity_hall
                         room_name=room.hall_name
                         for course_id, course_info in self.lecture_times.items():
-                            if self.solver.Value(self.schedule_vars[(course_id, day.id, time.pk, room_name)]) == 1:
+                            if self.solver.Value(self.schedule_vars[(course_id, day.pk, time.pk, room_name)]) == 1:
                                 id = time.pk
                                 schedule.append({
                                     "course_id": course_id,
@@ -411,7 +414,7 @@ class TimeTableScheduler:
                                     "course": course_info['course'],
                                     "teatcher": course_info['teacher']['name'],
                                     "available":course_info['teacher']['available'],
-                                    "day_id":day.id,
+                                    "day_id":day.pk,
                                     "time_id": id,
                                     "group":course_info['group'],
                                     "level": course_info['level'],

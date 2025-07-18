@@ -4,6 +4,9 @@ from rest_framework.routers import DefaultRouter
 from .views_upload_files import  *
 from .views_algorithms import run_scheduler_view
 from .views_search import *
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
+from .views_accounts import Login
 
 router = DefaultRouter()
 router.register('departments',DepartmentViewSet )  
@@ -33,6 +36,13 @@ urlpatterns =[
     path("searchcourses/", SearchCoursesAPIView.as_view()),
     path("searchhalls/", SearchHallsAPIView.as_view(),),
     path('run-scheduler/', run_scheduler_view, name='run_scheduler'),
+
+    # urls acounts
+    path('login/', Login, name='create_user'),
+
+    # get token
+    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
 ]
  

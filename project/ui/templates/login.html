@@ -117,9 +117,11 @@
         class="absolute top-0 h-full w-1/2 right-0 z-[2] transition-all duration-600 ease-in-out group-[.right-panel-active]:-translate-x-full"
       >
         <form
-          action="#"
+        method="post"
+          action="{% url 'login' %}"
           class="bg-white flex items-center justify-center flex-col px-12 h-full text-center"
         >
+          {% csrf_token %}
           <h1 class="font-bold text-3xl">تسجيل الدخول</h1>
           <div class="my-5">
             <a
@@ -140,14 +142,16 @@
           </div>
           <span class="text-xs">أو استخدم حسابك</span>
           <input
-            type="email"
+            type="username"
             placeholder="البريد الإلكتروني"
             class="bg-gray-200 border-none p-3 my-2 w-full"
+            name="username"
           />
           <input
             type="password"
             placeholder="كلمة المرور"
             class="bg-gray-200 border-none p-3 my-2 w-full"
+            name="password"
           />
           <a href="#" class="text-sm my-4">هل نسيت كلمة المرور؟</a>
           <button

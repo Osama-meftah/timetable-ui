@@ -4,9 +4,29 @@ import io
 from rest_framework.response import Response
 from .models import *
 from .serializers import *
-import re
 import random
+import string
+from django.core.mail import send_mail
 
+
+def create_random_password():
+    length = 8  # طول كلمة المرور
+    characters = string.ascii_letters + string.digits + string.punctuation
+    password = ''.join(random.choice(characters) for i in range(length))
+    return password
+
+def extract_username_from_email(email):
+    if '@' in email:
+        return email.split('@')[0]
+    return email
+
+def send_password_email(user, password):
+    subject = 'Welcome to the Timetable System'
+    message = f'Your account has been created successfully.\nUsername: {user.username}\nPassword: {password}'
+    from_email = 'abubaker773880@gmail.com'
+    recipient_list = [user.email]
+    send_mail(subject,message,from_email,recipient_list)
+    
 
 def read_file_to_dataframe(file):
     file_content = io.BytesIO(file.read())

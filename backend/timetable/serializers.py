@@ -58,6 +58,7 @@ class ProgramSerializer(serializers.ModelSerializer):
 
 
 class HallSerializer(serializers.ModelSerializer):
+    hall_status_display = serializers.CharField(source='get_hall_status_display', read_only=True)
     class Meta:
         model = Hall
         fields = '__all__'
@@ -129,7 +130,6 @@ class TeacherSerializer(serializers.ModelSerializer):
 
 class TodaySerializer(serializers.ModelSerializer):
     day_name_display = serializers.CharField(source='get_day_name_display', read_only=True)
-
     class Meta:
         model = Today
         fields = ['id', 'day_name', 'day_name_display']
