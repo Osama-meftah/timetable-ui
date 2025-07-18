@@ -159,6 +159,7 @@ class TeacherAvailabilityAndCoursesView(View):
             teacher_times = []
             teacher_distributions = []
             # print(periods)
+            
             if id:
                 teacher =api_get(f"{Endpoints.teachers}{id}") 
 
@@ -187,13 +188,12 @@ class TeacherAvailabilityAndCoursesView(View):
         except requests.exceptions.RequestException as e:
             messages.error(request, f"فشل في جلب البيانات: {e}")
             return redirect("teachers_management")
+        
     def post(self, request, id=None):
             form_type = request.POST.get('form_type')
             teacher_id = request.POST.get('selected_teacher_id')
-            # if not teacher_id:
-            #     messages.error(request, "يرجى اختيار المدرس.")
-            #     return redirect(request.path_info)
-
+            path = request.path  # مثل: /teacherswithcourses/add/
+            is_add = path.endswith("/add/") 
             try:
                 if form_type == "courses_form":
                     for i in range(1, 100):
@@ -218,6 +218,7 @@ class TeacherAvailabilityAndCoursesView(View):
                                 handle_exception(request, f"فشل حفظ توزيع رقم {i}", e)
 
                     # ✅ ضع الـ redirect هنا بعد انتهاء كل العمليات
+                    
                     return redirect("add_edit_teacher_with_courses", id=teacher_id)
                 elif form_type == "times_form":
                     for i in range(1, 100):
@@ -669,6 +670,18 @@ class TimeTableSettingsView(View):
 class PeriodsView(View):
     def get(self, request, id=None):
         return render(request, 'timetables/period_management.html')
+
+
+
+class GroupsView(View):
+    def get(self, request, id=None):
+        gropus = api_get(f"{Endpoints.groups}")
+        levels = api_get(f"{Endpoints.levels}")
+        gropus_paginated = paginate_queryset(gropus, request, "page", "page_data_size",5)
+
+        return render(request, 'groups/list.html', {"groups": gropus_paginated,"levels": levels, "page_title": "إدارة المجموعات"})
+
+
 
 
 # def timetable_settings_view(request):

@@ -71,7 +71,7 @@
                         class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-base text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 ease-in-out appearance-none pr-10">
                         <option value="" disabled {% if not room.hall_status %}selected{% endif %}
                             class="text-gray-500 dark:text-gray-400">اختر حالة القاعة...</option>
-                        <option value="available" {% if room.hall_status == 'available' %}selected{% endif %}>available
+                        <option value="available" {% if room.hall_status == 'available' %}selected{% endif %}>متاحة
                         </option>
                         <option value="under_maintenance"
                             {% if room.hall_status == 'under_maintenance' %}selected{% endif %}>تحت

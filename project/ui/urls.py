@@ -41,4 +41,6 @@ urlpatterns = [
     
     path('timetable/', views.TimeTableSettingsView.as_view(), name='schedule_creation'),
     path('periods/', views.PeriodsView.as_view(), name='management_periods'),
+    
+    path('groups/', views.GroupsView.as_view(), name='groups_management'),
 ]

@@ -65,7 +65,7 @@
         <i
             class="fas fa-tools text-6xl opacity-15 absolute -bottom-4 -right-4 group-hover:rotate-6 transition-transform duration-300"></i>
         <div class="z-10">
-            <p class="text-sm font-light opacity-90 mb-1">under_maintenance</p>
+            <p class="text-sm font-light opacity-90 mb-1">تحت الصيانة</p>
             <p class="text-5xl font-extrabold leading-none">{{ stats.maintenance_rooms }}</p>
         </div>
     </div>
@@ -131,13 +131,7 @@
                         <span
                             class="px-3 py-1.5 inline-flex text-sm leading-5 font-bold rounded-full bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100 shadow-sm">
                             <i class="fas fa-circle-check text-green-600 dark:text-green-300 ml-1 text-sm"></i>
-                            available
-                        </span>
-                        {% elif room.hall_status == 'مشغولة' %} {# Changed from room.status to room.hall_status #}
-                        <span
-                            class="px-3 py-1.5 inline-flex text-sm leading-5 font-bold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-100 shadow-sm">
-                            <i class="fas fa-users-rectangle text-yellow-600 dark:text-yellow-300 ml-1 text-sm"></i>
-                            مشغولة
+                            متاحة
                         </span>
                         {% elif room.hall_status == 'under_maintenance' %}
                         {# Changed from room.status to room.hall_status #}
