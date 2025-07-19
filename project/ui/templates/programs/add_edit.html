@@ -1,6 +1,6 @@
 {% extends 'base.html' %} {# Make sure 'base.html' exists and is correctly configured #}
 {% load static %} {# Load static files (if you have any, like custom CSS/JS) #}
-
+{% load arabic_filters %}
 {% block page_header_title %}
     {{ page_title }} {# This variable should be passed from your Django view #}
 {% endblock %}
@@ -93,7 +93,7 @@
                         class="upload-trigger bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md"
                         data-type="levels"
                         data-title="رفع ملف بيانات المستويات"
-                        data-description="يجب أن يحتوي الملف على الأعمدة: level_name, fk_program_id,number_students.">
+                        data-description="يجب أن يحتوي الملف على الأعمدة: level_name, program_name,number_students.">
                     <i class="fas fa-upload ml-2"></i> رفع ملف بيانات المستويات
                 </button>
             </div>
@@ -146,6 +146,7 @@
                             <label for="level_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 اسم المستوى <span class="text-red-500">*</span>
                             </label>
+
                             <input type="text" id="level_name" name="level_name"
                                    value=""
                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
@@ -226,7 +227,7 @@
                                                 data-name="{{ program.program_name }}"
                                                 data-type="program"
                                                 data-form-type="delete"
-                                                data-url="{% url 'edit_program' 0 %}"
+                                                data-url="{% url 'delete_program' 0 %}"
                                                 title="حذف البرنامج">
                                                 <i class="fas fa-trash-alt"></i>
                                         </button>
@@ -240,7 +241,7 @@
                                                 <li class="flex justify-between items-center bg-white dark:bg-gray-900 p-3 rounded-md shadow-sm border border-gray-100 dark:border-gray-700 transition-all duration-200 hover:shadow-md">
                                                     <span class="text-base text-gray-800 dark:text-gray-200 flex items-center">
                                                         <i class="fas fa-circle-notch text-green-500 mr-2"></i>
-                                                        {{ level.level_name }} (<span class="text-gray-600 dark:text-gray-400 text-xs">{{ level.number_students }} طلاب</span>)
+                                                        {{ level.level_name|arabic_level }} (<span class="text-gray-600 dark:text-gray-400 text-xs">{{ level.number_students }} طلاب</span>)
                                                     </span>
                                                     <div class="flex gap-2">
                                                         <button type="button" class="text-green-600 hover:text-green-800 dark:text-green-400
@@ -255,7 +256,7 @@
                                                                 data-name="{{ level.level_name }}"
                                                                 data-type="level"
                                                                 data-form-type="delete"
-                                                                data-url="{% url 'edit_program' 0 %}"
+                                                                data-url="{% url 'delete_program' 0 %}"
                                                                 title="حذف مستوى">
                                                                 <i class="fas fa-trash-alt"></i>
                                                         </button> 

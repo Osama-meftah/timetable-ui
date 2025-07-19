@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load arabic_filters %}
 
 {% block page_header_title %}
     إدارة التخصصات والأقسام
@@ -243,7 +244,7 @@
                                 <ul class="list-disc pr-5 space-y-1 text-xs">
                                     {% for level in program.levels %}
                                         <li>
-                                            <span class="font-medium text-gray-800 dark:text-gray-200">{{ level.level_name }}</span>
+                                            <span class="font-medium text-gray-800 dark:text-gray-200">{{ level.level_name|arabic_level }}</span>
                                             (<span class="text-indigo-600 dark:text-indigo-400">{{ level.number_students }}</span> طلاب)
                                         </li>
                                     {% endfor %}

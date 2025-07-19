@@ -99,7 +99,7 @@
                     <i class="fas fa-upload ml-2"></i> رفع ملف بيانات القاعات
                 </button>
                 <a href="{% url 'add_room' %}?add=1"
-                    class="inline-flex items-center px-6 py-3 border
+                    class="inline-flex items-center px-6 py-2 border
                 border-transparent rounded-lg shadow-md block text-base font-bold dark:text-gray-200 text-white bg-indigo-600
                 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto justify-center group">
                     <i class="fas fa-plus ml-2 group-hover:rotate-6 transition-transform duration-200"></i>
@@ -131,9 +131,6 @@
                         <span
                             class="px-3 py-1.5 inline-flex text-sm leading-5 font-bold rounded-full bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100 shadow-sm">
                             <i class="fas fa-circle-check text-green-600 dark:text-green-300 ml-1 text-sm"></i>
-<<<<<<< HEAD
-                            متاحة
-=======
                             {{ room.hall_status_display }}
                         </span>
                         {% elif room.hall_status == 'under_maintenance' %}
@@ -142,8 +139,9 @@
                             class="px-3 py-1.5 inline-flex text-sm leading-5 font-bold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-100 shadow-sm">
                             <i class="fas fa-users-rectangle text-yellow-600 dark:text-yellow-300 ml-1 text-sm"></i>
                             {{ room.hall_status_display }}
->>>>>>> origin/recovery-branch2
+
                         </span>
+                        
                         {% elif room.hall_status == 'under_maintenance' %}
                         {# Changed from room.status to room.hall_status #}
                         <span
@@ -210,14 +208,14 @@
         renderItemFn: (room, index) => {
             const statusHTML = room.hall_status === "available"
                 ? `<span class="px-3 py-1.5 inline-flex text-sm leading-5 font-bold rounded-full bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100 shadow-sm">
-                 <i class="fas fa-circle-check text-green-600 dark:text-green-300 ml-1 text-sm"></i> available
+                 <i class="fas fa-circle-check text-green-600 dark:text-green-300 ml-1 text-sm"></i> ${room.hall_status_display}
                </span>`
                 : room.hall_status === "مشغولة"
                     ? `<span class="px-3 py-1.5 inline-flex text-sm leading-5 font-bold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-100 shadow-sm">
-                 <i class="fas fa-users-rectangle text-yellow-600 dark:text-yellow-300 ml-1 text-sm"></i> مشغولة
+                 <i class="fas fa-users-rectangle text-yellow-600 dark:text-yellow-300 ml-1 text-sm"></i> ${room.hall_status_display}
                </span>`
                     : `<span class="px-3 py-1.5 inline-flex text-sm leading-5 font-bold rounded-full bg-red-100 text-red-800 dark:bg-red-700 dark:text-red-100 shadow-sm">
-                 <i class="fas fa-screwdriver-wrench text-red-600 dark:text-red-300 ml-1 text-sm"></i> ${room.hall_status}
+                 <i class="fas fa-screwdriver-wrench text-red-600 dark:text-red-300 ml-1 text-sm"></i> ${room.hall_status_display}
                  </span>`;
 
             return `
