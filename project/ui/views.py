@@ -25,17 +25,19 @@ class TeacherManagementView(View):
     def get(self, request, id=None):
         try:
             if id:
-                teacher = api_get(f"{Endpoints.teachers}{id}/")
-                return render(request, "teachers/add_edit.html", {"teacher": teacher})
+                # استخدم api_get مع إعادة عرض القالب مباشرة
+                return api_get(f"{Endpoints.teachers}{id}/", request=request, 
+                               render_template="teachers/add_edit.html",
+                               render_context={})
+            
             elif "add" in request.GET:
                 return render(request, "teachers/add_edit.html", {"page_title": "إضافة مدرس"})
 
             # جلب البيانات
-            teachers_data = api_get(Endpoints.teachers)
+            teachers_data = api_get(Endpoints.teachers, request=request) or []
+            teacher_times_data = api_get(Endpoints.teacher_times, request=request) or []
+            distributions_data = api_get(Endpoints.distributions, request=request) or []
 
-            teacher_times_data = api_get(Endpoints.teacher_times)
-            distributions_data = api_get(Endpoints.distributions)
-            # print(distributions_data)
             teachers_with_data = []
             for teacher in teachers_data:
                 teacher_id = teacher["id"]
@@ -49,14 +51,11 @@ class TeacherManagementView(View):
                     for d in distributions_data
                     if d["fk_teacher"]["id"] == teacher_id
                 ]
-                
+
                 times = [
                     {
                         "day": t["fk_today"]["day_name_display"],
-                        # "period": f"{datetime.strptime(t['fk_period']['period_from'], '%H:%M').strftime('%I:%M %p')} - {datetime.strptime(t['fk_period']['period_to'], '%H:%M').strftime('%I:%M %p')}"
                         "period": f"{t['fk_period']['period_from']} - {t['fk_period']['period_to']}"
-
-                        # "period": t["fk_period"]["period_display"]
                     }
                     for t in teacher_times_data
                     if t["fk_teacher"]["id"] == teacher_id
@@ -69,14 +68,13 @@ class TeacherManagementView(View):
                         "availability": times,
                     })
 
-            # إحصائيات
             total_teachers = len(teachers_data)
             active_teachers = len([t for t in teachers_data if t.get("teacher_status") == "active"])
             on_leave_teachers = len([t for t in teachers_data if t.get("teacher_status") == "vacation"])
-            
-            teachers_paginated = paginate_queryset(teachers_data, request, "page", "page_size",5)
+
+            teachers_paginated = paginate_queryset(teachers_data, request, "page", "page_size", 5)
             teachers_data_paginated = paginate_queryset(teachers_with_data, request, "page_detailed", "page_data_size")
-            # print(teachers_with_data)
+
             context = {
                 "page_title": "إدارة المدرسين",
                 "teachers": teachers_paginated,
@@ -106,29 +104,29 @@ class TeacherManagementView(View):
             "teacher_status": request.POST.get("teacher_status", "").strip(),
         }
 
-        # if not teacher_data["teacher_name"] or not teacher_data["teacher_email"]:
-        #     messages.error(request, "الاسم والبريد الإلكتروني مطلوبان.")
-        #     return redirect(request.path_info)
-
         try:
             if id:
-                api_put(f"{Endpoints.teachers}{id}/", teacher_data)
-                messages.success(request, "✅ تم تعديل بيانات المدرس.")
-                return render(request, "teachers/add_edit.html", context={"teacher": teacher_data})
+                # تعديل باستخدام api_put مع إعادة عرض الصفحة بعد التعديل
+                return api_put(f"{Endpoints.teachers}{id}/", teacher_data, request=request,
+                               render_template="teachers/add_edit.html",
+                               render_context={"teacher": teacher_data})
+            
             elif form_type == "upload_teachers":
-                handle_file_upload_generic(
-                request,
-                file_field_name='data_file',
-                endpoint_url=f"{BASE_API_URL}{Endpoints.teachersUpload}",
-                success_title="✅ تم رفع ملف المدرسين بنجاح.",
-                error_title="❌ فشل رفع ملف المدرسين"
+                result = handle_file_upload_generic(
+                    request,
+                    file_field_name='data_file',
+                    endpoint_url=f"{BASE_API_URL}{Endpoints.teachersUpload}",
+                    success_title="✅ تم رفع ملف المدرسين بنجاح.",
+                    error_title="❌ فشل رفع ملف المدرسين",
+                    redirect_to=request.path_info
                 )
-                return redirect(request.path_info)
+                return result or redirect(request.path_info)
             else:
-                api_post(Endpoints.teachers, teacher_data)
+                # إضافة باستخدام api_post مع إعادة توجيه بعد الإضافة
+                api_post(Endpoints.teachers, teacher_data, request=request)
                 messages.success(request, "✅ تم إضافة المدرس.")
                 return redirect("teachers_management")
-            
+
         except Exception as e:
             messages.error(request, f"❌ حدث خطأ أثناء حفظ بيانات المدرس: {str(e)}")
             return redirect("teachers_management")
@@ -137,39 +135,37 @@ class TeacherManagementView(View):
 class TeacherDeleteView(View):
     def post(self, request, id):
         try:
-            api_delete(f"{Endpoints.teachers}{id}/")
+            api_delete(f"{Endpoints.teachers}{id}/", request=request,redirect_to='teacher_management')
             messages.success(request, "تم حذف المدرس بنجاح.")
         except Exception as e:
             handle_exception(request, "حدث خطأ أثناء حذف المدرس", e)
-        return redirect("teachers_management")
+        # return redirect("teachers_management")
 
 
 class TeacherAvailabilityAndCoursesView(View):
     def get(self, request, id=None):
         try:
-            teachers = api_get(Endpoints.teachers)
-            days = api_get(Endpoints.todays)
-            periods = api_get(Endpoints.periods)
-            subjects = api_get(Endpoints.subjects)
-            levels = api_get(Endpoints.levels)
-            programs =api_get(Endpoints.programs)
-            groups = api_get(Endpoints.groups)
-            # print(len(teachers))
+            teachers = api_get(Endpoints.teachers, request=request) or []
+            days = api_get(Endpoints.todays, request=request) or []
+            periods = api_get(Endpoints.periods, request=request) or []
+            subjects = api_get(Endpoints.subjects, request=request) or []
+            levels = api_get(Endpoints.levels, request=request) or []
+            programs = api_get(Endpoints.programs, request=request) or []
+            groups = api_get(Endpoints.groups, request=request) or []
+
             teacher = None
             teacher_times = []
             teacher_distributions = []
-            # print(periods)
-            
-            if id:
-                teacher =api_get(f"{Endpoints.teachers}{id}") 
 
-                all_times = api_get(f"{Endpoints.teacher_times}")
+            if id:
+                teacher = api_get(f"{Endpoints.teachers}{id}/", request=request)
+
+                all_times = api_get(f"{Endpoints.teacher_times}", request=request) or []
                 teacher_times = [t for t in all_times if t["fk_teacher"]["id"] == int(id)]
 
-                all_distributions = api_get(f"{Endpoints.distributions}")
-                # requests.get(f"{BASE_API_URL}{self.endpoints['distributions']}").json()
+                all_distributions = api_get(f"{Endpoints.distributions}", request=request) or []
                 teacher_distributions = [d for d in all_distributions if d["fk_teacher"]["id"] == int(id)]
-                # print(teacher_distributions)
+
             context = {
                 "teacher": teacher,
                 "all_teachers": teachers,
@@ -190,263 +186,236 @@ class TeacherAvailabilityAndCoursesView(View):
             return redirect("teachers_management")
         
     def post(self, request, id=None):
-            form_type = request.POST.get('form_type')
-            teacher_id = request.POST.get('selected_teacher_id')
-            path = request.path  # مثل: /teacherswithcourses/add/
-            is_add = path.endswith("/add/") 
-            try:
-                if form_type == "courses_form":
-                    for i in range(1, 100):
-                        group_id = request.POST.get(f'dist_group_{i}')
-                        subject_id = request.POST.get(f'dist_subject_{i}')
-                        dist_id = request.POST.get(f'distribution_id_{i}')
-                        print(f"Group ID: {group_id}, Subject ID: {subject_id}, Distribution ID: {dist_id}")
-                        
-                        if group_id and subject_id:
-                            dist_data = {
-                                "fk_group_id": group_id,
-                                "fk_teacher_id": teacher_id,
-                                "fk_subject_id": subject_id,
-                            }
-
-                            try:
-                                if dist_id:
-                                    api_put(f"{Endpoints.distributions}{dist_id}/", dist_data)
-                                else:
-                                    api_post(Endpoints.distributions, dist_data)
-                            except Exception as e:
-                                handle_exception(request, f"فشل حفظ توزيع رقم {i}", e)
-
-                    # ✅ ضع الـ redirect هنا بعد انتهاء كل العمليات
+        form_type = request.POST.get('form_type')
+        teacher_id = request.POST.get('selected_teacher_id')
+        path = request.path  # مثل: /teacherswithcourses/add/
+        is_add = path.endswith("/add/") 
+        try:
+            if form_type == "courses_form":
+                for i in range(1, 100):
+                    group_id = request.POST.get(f'dist_group_{i}')
+                    subject_id = request.POST.get(f'dist_subject_{i}')
+                    dist_id = request.POST.get(f'distribution_id_{i}')
                     
-                    return redirect("add_edit_teacher_with_courses", id=teacher_id)
-                elif form_type == "times_form":
-                    for i in range(1, 100):
-                        day_id = request.POST.get(f'time_day_{i}')
-                        period_id = request.POST.get(f'time_period_{i}')
-                        availability_id = request.POST.get(f'availability_id_{i}')
-                        print(f"alfjasljdf{availability_id}")
-                        if day_id and period_id:
-                            time_data = {
-                                "fk_today_id": day_id,
-                                "fk_period_id": period_id,
-                                "fk_teacher_id": teacher_id,
-                            }
-                            print(time_data)
-                            try:
-                                if availability_id:
-                                    print(time_data)
-                                    api_put(f"{Endpoints.teacher_times}{availability_id}/", time_data)
-                                else:
-                                    print(time_data)
-                                    api_post(Endpoints.teacher_times, time_data)
-                                    messages.success(request, "تم حفظ الأوقات المتاحة بنجاح.")
-                            except Exception as e:
-                                handle_exception(request, f"فشل حفظ وقت رقم {i}", e)
-                        else:
-                            break
-
-                    
-                elif form_type == "delete_distribution":
-                    print("============================")
-                    dist_id = request.POST.get("item_id")
-                    if dist_id:
+                    if group_id and subject_id:
+                        dist_data = {
+                            "fk_group_id": group_id,
+                            "fk_teacher_id": teacher_id,
+                            "fk_subject_id": subject_id,
+                        }
                         try:
-                            api_delete(f"{Endpoints.distributions}{dist_id}/")
-                            messages.success(request, "تم حذف توزيع المقرر بنجاح.")
+                            if dist_id:
+                                api_put(f"{Endpoints.distributions}{dist_id}/", dist_data, request=request)
+                            else:
+                                api_post(Endpoints.distributions, dist_data, request=request)
                         except Exception as e:
-                            handle_exception(request, "فشل في حذف توزيع المقرر", e)
-
-                elif form_type == "delete_availability":
-                    print("============================")
-                    availability_id = request.POST.get("item_id")
-                    print(f"Availability ID: {availability_id}")
-                    if availability_id:
-                        try:
-                            api_delete(f"{Endpoints.teacher_times}{availability_id}/")
-                            messages.success(request, "تم حذف وقت التوفر بنجاح.")
-                        except Exception as e:
-                            handle_exception(request, "فشل في حذف وقت التوفر", e)
-
-                else:
-                    messages.error(request, "نوع النموذج غير معروف.")
+                            handle_exception(request, f"فشل حفظ توزيع رقم {i}", e)
 
                 return redirect("add_edit_teacher_with_courses", id=teacher_id)
-
-            except Exception as e:
-                handle_exception(request, "حدث خطأ أثناء الحفظ", e)
-                return redirect(request.path_info)
             
-
-class CoursesView(View):
-    def get(self, request, id=None):
-        try:
-            if id:
-                subject = api_get(f"{Endpoints.subjects}{id}/")
-                levels = api_get(Endpoints.levels)
-                return render(request, "courses/add_edit.html", context={
-                    "subject": subject,
-                    "levels": levels,
-                    "page_title": "تعديل"
-                })
-
-            elif "add" in request.GET:
-                levels = api_get(Endpoints.levels)
-                return render(request, "courses/add_edit.html", context={
-                    "levels": levels,
-                    "page_title": "إضافة مقرر"
-                })
-
+            elif form_type == "times_form":
+                for i in range(1, 100):
+                    day_id = request.POST.get(f'time_day_{i}')
+                    period_id = request.POST.get(f'time_period_{i}')
+                    availability_id = request.POST.get(f'availability_id_{i}')
+                    
+                    if day_id and period_id:
+                        time_data = {
+                            "fk_today_id": day_id,
+                            "fk_period_id": period_id,
+                            "fk_teacher_id": teacher_id,
+                        }
+                        try:
+                            if availability_id:
+                                api_put(f"{Endpoints.teacher_times}{availability_id}/", time_data, request=request)
+                            else:
+                                api_post(Endpoints.teacher_times, time_data, request=request)
+                                messages.success(request, "تم حفظ الأوقات المتاحة بنجاح.")
+                        except Exception as e:
+                            handle_exception(request, f"فشل حفظ وقت رقم {i}", e)
+                    else:
+                        break
+                
+                return redirect("add_edit_teacher_with_courses", id=teacher_id)
+            
+            elif form_type == "delete_distribution":
+                dist_id = request.POST.get("item_id")
+                if dist_id:
+                    try:
+                        api_delete(f"{Endpoints.distributions}{dist_id}/", request=request)
+                        messages.success(request, "تم حذف توزيع المقرر بنجاح.")
+                    except Exception as e:
+                        handle_exception(request, "فشل في حذف توزيع المقرر", e)
+                return redirect("add_edit_teacher_with_courses", id=teacher_id)
+            
+            elif form_type == "delete_availability":
+                availability_id = request.POST.get("item_id")
+                if availability_id:
+                    try:
+                        api_delete(f"{Endpoints.teacher_times}{availability_id}/", request=request)
+                        messages.success(request, "تم حذف وقت التوفر بنجاح.")
+                    except Exception as e:
+                        handle_exception(request, "فشل في حذف وقت التوفر", e)
+                return redirect("add_edit_teacher_with_courses", id=teacher_id)
+            
             else:
-                subjects = api_get(Endpoints.subjects)
-
-                total_courses = len(subjects)
-                active_courses = sum(1 for c in subjects if c.get("active", True))
-                full_courses = sum(1 for c in subjects if c.get("is_full", False))
-
-                csrf_token = get_token(request)
-                subjects_paginated = paginate_queryset(subjects, request, "page", "page_size",5)
-
-                return render(request, "courses/list.html", {
-                    "courses": subjects_paginated,
-                    "page_title": "إدارة المقررات",
-                    "total_courses": total_courses,
-                    "active_courses": active_courses,
-                    "full_courses": full_courses,
-                    "csrf_token": csrf_token,
-                })
+                messages.error(request, "نوع النموذج غير معروف.")
+                return redirect(request.path_info)
 
         except Exception as e:
-            handle_exception(request, "فشل في تحميل البيانات", e)
-            return render(request, "courses/list.html", {"error": str(e)})
+            handle_exception(request, "حدث خطأ أثناء الحفظ", e)
+            return redirect(request.path_info)
 
-    def post(self, request, id=None):
-        form_type = request.POST.get("form_type", "create")
+class CoursesListView(View):
+    def get(self, request):
+        subjects = api_get(Endpoints.subjects, request=request) or []
+        total_courses = len(subjects)
+        active_courses = sum(1 for c in subjects if c.get("active", True))
+        full_courses = sum(1 for c in subjects if c.get("is_full", False))
+        csrf_token = get_token(request)
+        subjects_paginated = paginate_queryset(subjects, request, "page", "page_size", 5)
+        return render(request, "courses/list.html", {
+            "courses": subjects_paginated,
+            "page_title": "إدارة المقررات",
+            "total_courses": total_courses,
+            "active_courses": active_courses,
+            "full_courses": full_courses,
+            "csrf_token": csrf_token,
+        })
+    
+    def post(self, request):
+        if request.POST.get("form_type") == "upload_subjects":
+            return handle_file_upload(
+                request,
+                file_field_name='data_file',
+                endpoint_url=f"{BASE_API_URL}{Endpoints.uploadSubjects}",
+                success_title="✅ تم رفع ملف المقررات بنجاح.",
+                error_title="❌ فشل رفع ملف المقررات",
+                redirect_to="courses_management"
+            )
+        
+        messages.error(request, "عملية غير صالحة.")
+        return redirect("courses_management")
 
+class CourseCreateView(View):
+    def get(self, request):
+        levels = api_get(Endpoints.levels, request=request)
+        if not levels:
+            return redirect("courses_management")
+        return render(request, "courses/add_edit.html", {"levels": levels, "page_title": "إضافة مقرر"})
+
+    def post(self, request):
         data = {
             "subject_name": request.POST.get("subject_name"),
             "term": request.POST.get("term"),
         }
-        try:
-            # print(form_type)
-            if form_type == "delete" and id:
-                print(id)
-                api_delete(f"{Endpoints.subjects}{id}/")
-                messages.success(request, "تم حذف المقرر بنجاح.")
-            elif form_type == 'upload_subjects':
-                handle_file_upload_generic(
-                    request,
-                    file_field_name='data_file',
-                    endpoint_url=f"{BASE_API_URL}{Endpoints.uploadSubjects}",
-                    success_title="✅ تم رفع ملف البرامج بنجاح.",
-                    error_title="❌ فشل رفع ملف البرامج"
-                )
-            elif id and form_type == "edit":
-                api_put(f"{Endpoints.subjects}{id}/", data)
-                messages.success(request, "تم تعديل المقرر بنجاح.")
-
-            elif form_type == "add":
-                api_post(Endpoints.subjects, data)
-                messages.success(request, "تم إضافة المقرر بنجاح.")
-            else:
-                return redirect("courses_management")
-                # messages.error(request, "نوع النموذج غير معروف أو البيانات غير مكتملة.")
+        return api_post(Endpoints.subjects, data, request=request, redirect_to="add_course")
+class CourseUpdateView(View):
+    def get(self, request, id):
+        subject = api_get(f"{Endpoints.subjects}{id}/", request=request)
+        levels = api_get(Endpoints.levels, request=request)
+        if not subject or not levels:
             return redirect("courses_management")
+        return render(request, "courses/add_edit.html", {"subject": subject, "levels": levels, "page_title": "تعديل"})
 
-        except Exception as e:
-            handle_exception(request, "حدث خطأ أثناء حفظ البيانات", e)
-            return redirect(request.path_info)
+    def post(self, request, id):
+        data = {
+            "subject_name": request.POST.get("subject_name"),
+            "term": request.POST.get("term"),
+        }
+        return api_put(f"{Endpoints.subjects}{id}/", data, request=request, redirect_to="courses_management")
+class CourseDeleteView(View):
+    def post(self, request, id):
+        print(f"Deleting course with ID: {id}"
+              f" and request data: {request.POST}")
+        return api_delete(f"{Endpoints.subjects}{id}/", request=request, redirect_to="courses_management")
+
+class RoomsListView(View):
+    def get(self, request):
+        rooms = api_get(Endpoints.halls)
+        total_rooms = len(rooms)
+        maintenance_rooms = sum(1 for room in rooms if room['hall_status'] == 'under_maintenance')
+        largest_capacity_room = max(rooms, key=lambda r: r['capacity_hall'], default=None)
+
+        capacity_list = [room['capacity_hall'] for room in rooms]
+        capacity_counts = dict(Counter(capacity_list))
+        stats = {
+            'total_rooms': total_rooms,
+            'maintenance_rooms': maintenance_rooms,
+            'largest_capacity_room': largest_capacity_room,
+            'capacity_counts': capacity_counts,
+        }
+
+        room_paginated = paginate_queryset(rooms, request, "page", "page_size", 8)
+
+        context = {
+            'page_title': 'إدارة القاعات',
+            'rooms': room_paginated,
+            'stats': stats,
+        }
+        return render(request, 'rooms/list.html', context)
+
+    def post(self, request):
+        # رفع ملف القاعات من نفس الصفحة
+        return handle_file_upload(
+            request,
+            file_field_name='data_file',
+            endpoint_url=f"{BASE_API_URL}{Endpoints.uploadHalls}",  # تأكد من صحة الرابط
+            success_title="✅ تم رفع ملف القاعات بنجاح.",
+            error_title="❌ فشل رفع ملف القاعات.",
+            redirect_to="rooms_management"
+        )
+
+class RoomCreateView(View):
+    def get(self, request):
+        return render(request, 'rooms/add_edit.html', {"page_title": "إضافة قاعة"})
+
+    def post(self, request):
+        new_room_data = {
+            "hall_name": request.POST.get("name"),
+            "capacity_hall": int(request.POST.get("capacity")),
+            "hall_status": request.POST.get("status"),
+        }
+        try:
+            api_post(Endpoints.halls, new_room_data, request=request)
+            # messages.success(request, "✅ تم إضافة القاعة بنجاح.")
+        except RuntimeError as e:
+            messages.error(request, f"❌ خطأ في إضافة القاعة: {e}")
+
+        return render(request, 'rooms/add_edit.html', {
+            "page_title": "إضافة قاعة",
+        })
         
-class RoomsView(View):
-    def get(self, request, id=None):
-        if id:
-            room = api_get(f"{Endpoints.halls}{id}/")
-            return render(request, 'rooms/add_edit.html', {"room": room})
-        elif "add" in request.GET:
-            return render(request, 'rooms/add_edit.html')
-        else:
-            rooms = api_get(Endpoints.halls)
-            total_rooms = len(rooms)
-            maintenance_rooms = sum(1 for room in rooms if room['hall_status'] == 'under_maintenance')
+class RoomUpdateView(View):
+    def get(self, request, id):
+        room = api_get(f"{Endpoints.halls}{id}/", request=request)
+        return render(request, 'rooms/add_edit.html', {"page_title": "تعديل قاعة", "room": room})
 
-            largest_capacity_room = max(rooms, key=lambda r: r['capacity_hall'], default=None)
-
-            capacity_list = [room['capacity_hall'] for room in rooms]
-            capacity_counts = dict(Counter(capacity_list))
-            stats = {
-                'total_rooms': total_rooms,
-                'maintenance_rooms': maintenance_rooms,
-                'largest_capacity_room': largest_capacity_room,
-                'capacity_counts': capacity_counts,
-            }
-            room_paginated = paginate_queryset(rooms, request, "page", "page_size",8)
-
-            context = {
-                'page_title': 'إدارة القاعات',
-                'rooms': room_paginated,
-                'stats': stats,
-            }
-
-            return render(request, 'rooms/list.html', context)
-       
-    def post(self, request, id=None):
-        form_type = request.POST.get('form_type')
-
-        if form_type == 'add':
-            new_room_data = {
-                "hall_name": request.POST.get("name"),
-                "capacity_hall": int(request.POST.get("capacity")),
-                "hall_status": request.POST.get("status"),
-            }
-            try:
-                api_post(Endpoints.halls, new_room_data)
-                messages.success(request, "تم إضافة القاعة بنجاح.")
-            except RuntimeError as e:
-                messages.error(request, f"خطأ في إضافة القاعة: {e}")
-        elif form_type == 'upload_rooms':
-            handle_file_upload_generic(
-                    request,
-                    file_field_name='data_file',
-                    endpoint_url=f"{BASE_API_URL}{Endpoints.uploadHalls}",
-                    success_title="✅ تم رفع ملف البرامج بنجاح.",
-                    error_title="❌ فشل رفع ملف البرامج"
-                )
-        elif form_type == 'edit':
-            room_id = request.POST.get("room_id")
-            updated_data = {
-                "hall_name": request.POST.get("name"),
-                "capacity_hall": int(request.POST.get("capacity")),
-                "hall_status": request.POST.get("status"),
-            }
-            try:
-                api_put(f"{Endpoints.halls}{room_id}/", updated_data)
-                messages.success(request, "تم تحديث بيانات القاعة بنجاح.")
-            except RuntimeError as e:
-                messages.error(request, f"خطأ في تحديث القاعة: {e}")
-
-        elif form_type == 'delete':
-            room_id = request.POST.get("item_id")
-            try:
-                api_delete(f"{Endpoints.halls}{id}/")
-                messages.success(request, "تم حذف القاعة بنجاح.")
-            except RuntimeError as e:
-                messages.error(request, f"خطأ في حذف القاعة: {e}")
-
-        else:
-            messages.error(request, "إجراء غير معروف.")
+    def post(self, request, id):
+        updated_data = {
+            "hall_name": request.POST.get("name"),
+            "capacity_hall": int(request.POST.get("capacity")),
+            "hall_status": request.POST.get("status"),
+        }
+        try:
+            api_put(f"{Endpoints.halls}{id}/", updated_data)
+            messages.success(request, "✅ تم تحديث القاعة بنجاح.")
+        except RuntimeError as e:
+            messages.error(request, f"❌ خطأ في التحديث: {e}")
 
         return redirect('rooms_management')
-
-class DepartmentsManagementView(View):
-    def get(self, request, id=None):
+class RoomDeleteView(View):
+    def post(self, request, id):
         try:
-            if id:
-                dept = api_get(f"{Endpoints.departments}{id}/")
-                return render(request, 'departments/add_edit.html', {"department": dept})
+            api_delete(f"{Endpoints.halls}{id}/", request=request)
+            # messages.success(request, "✅ تم حذف القاعة بنجاح.")
+        except RuntimeError as e:
+            messages.error(request, f"❌ فشل حذف القاعة: {e}")
+        return redirect('rooms_management')
 
-            elif "add" in request.GET:
-                return render(request, 'departments/add_edit.html')
-
+class DepartmentsListView(View):
+    def get(self, request):
+        try:
             dept = api_get(Endpoints.departments)
             programs = api_get(Endpoints.programs)
             levels = api_get(Endpoints.levels)
@@ -467,135 +436,111 @@ class DepartmentsManagementView(View):
                 'overall_total_programs': len(programs),
                 'overall_total_courses': len(levels),
             }
+
             context = {
                 'page_title': 'إدارة التخصصات والأقسام',
                 'departments': dept,
                 'programs': programs_with_levels,
                 'stats': stats,
             }
-
             return render(request, 'departments/list.html', context)
         except Exception as e:
-            context = {
-                'page_title': 'إدارة التخصصات والأقسام',
-                'departments': dept,
-                'programs': programs_with_levels,
-                'stats': stats,
-            }
             handle_exception(request, "فشل في جلب البيانات", e)
-            return render(request, 'departments/list.html', context)
-
-
-        except Exception as e:
             messages.error(request, f"حدث خطأ أثناء تحميل الصفحة: {e}")
-            return redirect('departments_management')  # أو صفحة خطأ مناسبة
+            return redirect('departments_management')
 
-    def post(self, request, id=None):
+    def post(self, request):
+        action = request.POST.get('form_type')
+
+        if action == 'upload_departments':
+            return handle_file_upload_generic(
+                request,
+                file_field_name='data_file',
+                endpoint_url=f"{BASE_API_URL}{Endpoints.departmentsUpload}",
+                success_title="✅ تم رفع ملف الأقسام بنجاح.",
+                error_title="❌ فشل رفع ملف الأقسام",
+                redirect_to='departments_management'
+            )
+        elif action == 'upload_programs':
+            return handle_file_upload_generic(
+                request,
+                file_field_name='data_file',
+                endpoint_url=f"{BASE_API_URL}{Endpoints.programsUpload}",
+                success_title="✅ تم رفع ملف البرامج بنجاح.",
+                error_title="❌ فشل رفع ملف البرامج",
+                redirect_to='departments_management'
+            )
+        else:
+            messages.error(request, "إجراء غير معروف.")
+            return redirect('departments_management')
+class DepartmentCreateView(View):
+    def get(self, request):
+        return render(request, 'departments/add_edit.html', {"page_title": "إضافة قسم"})
+
+    def post(self, request):
+        name = request.POST.get("department_name", "").strip()
+        desc = request.POST.get("description", "").strip()
+
+        if not name:
+            messages.error(request, "اسم القسم مطلوب.")
+            return redirect('add_department')
+
         try:
-            action = request.POST.get('form_type')
-
-            if action == 'add':
-                name = request.POST.get("department_name", "").strip()
-                desc = request.POST.get("description", "").strip()
-
-                if not name:
-                    messages.error(request, "اسم القسم مطلوب.")
-                    return redirect('departments_management')
-
-                new_dept_data = {"name": name, "description": desc}
-                api_post(Endpoints.departments, new_dept_data)
-                messages.success(request, "تم إضافة قسم بنجاح.")
-            
-            elif action == 'upload_departments':
-                handle_file_upload_generic(
-                    request,
-                    file_field_name='data_file',
-                    endpoint_url=f"{BASE_API_URL}{Endpoints.departmentsUpload}",
-                    success_title="✅ تم رفع ملف الأقسام بنجاح.",
-                    error_title="❌ فشل رفع ملف الأقسام"
-                )
-
-            elif action == 'upload_programs':
-                handle_file_upload_generic(
-                    request,
-                    file_field_name='data_file',
-                    endpoint_url=f"{BASE_API_URL}{Endpoints.programsUpload}",
-                    success_title="✅ تم رفع ملف البرامج بنجاح.",
-                    error_title="❌ فشل رفع ملف البرامج"
-                )
-
-            elif action == 'edit':
-                dept_id = request.POST.get("dept_id")
-                name = request.POST.get("department_name", "").strip()
-                desc = request.POST.get("description", "").strip()
-
-                if not (dept_id and name):
-                    messages.error(request, "يجب توفير رقم القسم واسم القسم.")
-                    return redirect('departments_management')
-
-                updated_dept_data = {"name": name, "description": desc}
-                api_put(f"{Endpoints.departments}{dept_id}/", updated_dept_data)
-                messages.success(request, "تم تحديث بيانات القسم بنجاح.")
-
-
-            elif action == 'delete':
-                if not id:
-                    messages.error(request, "رقم القسم غير موجود.")
-                    return redirect('departments_management')
-
-                api_delete(f"{Endpoints.departments}{id}/")
-                messages.success(request, "تم حذف القسم بنجاح.")
-
-            else:
-                messages.error(request, "إجراء غير معروف.")
-
+            new_dept_data = {"name": name, "description": desc}
+            api_post(Endpoints.departments, new_dept_data)
+            messages.success(request, "تم إضافة قسم بنجاح.")
         except RuntimeError as e:
-            messages.error(request, f"خطأ في التواصل مع الخادم: {e}")
-        except Exception as e:
-            messages.error(request, f"حدث خطأ غير متوقع: {e}")
+            messages.error(request, f"خطأ في إضافة القسم: {e}")
 
         return redirect('departments_management')
 
-class AddAndEditProgramView(View):
-    def get(self, request, id=None):
-        if id:
-            program = api_get(f"{Endpoints.programs}{id}/")
-            programs = api_get(f"{Endpoints.programs}")
-            levels = api_get(f"{Endpoints.levels}")
-            departments = api_get(f"{Endpoints.departments}")
-            return render(request, 'programs/add_edit.html', {
-                "program": program,
-                "programs": programs,
-                "levels": levels,
-                "departments": departments,
-                "page_title": "تعديل"
-            })
+class DepartmentUpdateView(View):
+    def get(self, request, id):
+        dept = api_get(f"{Endpoints.departments}{id}/")
+        return render(request, 'departments/add_edit.html', {"department": dept, "page_title": "تعديل قسم"})
 
-        elif "add" in request.GET:
-            programs = api_get(f"{Endpoints.programs}")
-            levels = api_get(f"{Endpoints.levels}")
-            departments = api_get(f"{Endpoints.departments}")
-            return render(request, 'programs/add_edit.html', {
-                "levels": levels,
-                "programs": programs,
-                "departments": departments,
-                "page_title": "إضافة"
-            })
-        else:
-            programs = api_get(f"{Endpoints.programs}")
-            levels = api_get(f"{Endpoints.levels}")
-            departments = api_get(f"{Endpoints.departments}")
-            return render(request, 'programs/add_edit.html', {
-                "levels": levels,
-                "programs": programs,
-                "departments": departments,
-                "page_title": "إضافة"
-            })
-            
-    def post(self, request, id=None):
+    def post(self, request, id):
+        name = request.POST.get("department_name", "").strip()
+        desc = request.POST.get("description", "").strip()
+
+        if not name:
+            messages.error(request, "اسم القسم مطلوب.")
+            return redirect('edit_department', id=id)
+
+        try:
+            updated_dept_data = {"name": name, "description": desc}
+            api_put(f"{Endpoints.departments}{id}/", updated_dept_data)
+            messages.success(request, "تم تحديث بيانات القسم بنجاح.")
+        except RuntimeError as e:
+            messages.error(request, f"خطأ في تحديث القسم: {e}")
+
+        return redirect('departments_management')
+
+class DepartmentDeleteView(View):
+    def post(self, request, id):
+        try:
+            api_delete(f"{Endpoints.departments}{id}/")
+            messages.success(request, "تم حذف القسم بنجاح.")
+        except RuntimeError as e:
+            messages.error(request, f"خطأ في حذف القسم: {e}")
+        return redirect('departments_management')
+
+class AddProgramLevelView(View):
+    def get(self, request):
+        programs = api_get(Endpoints.programs)
+        levels = api_get(Endpoints.levels)
+        departments = api_get(Endpoints.departments)
+        return render(request, 'programs/add_edit.html', {
+            "programs": programs,
+            "levels": levels,
+            "departments": departments,
+            "page_title": "إضافة"
+        })
+
+    def post(self, request):
         form_type = request.POST.get('form_type')
+
         if form_type == "program_form_submit":
-            program_id = request.POST.get('program_id')
             program_name = request.POST.get('program_name')
             fk_department_id = request.POST.get('fk_department')
             data = {
@@ -603,16 +548,65 @@ class AddAndEditProgramView(View):
                 'department_id': fk_department_id,
             }
             try:
-                if program_id:
-                    api_put(f"{Endpoints.programs}{program_id}/", data)
-                    messages.success(request, "تم تحديث البرنامج بنجاح!")
-                else:
-                    api_post(f"{Endpoints.programs}", data)
-                    messages.success(request, "تم إضافة البرنامج بنجاح!")
+                api_post(Endpoints.programs, data)
+                messages.success(request, "✅ تم إضافة البرنامج بنجاح!")
             except Exception as e:
-                handle_exception(request, f"فشل حفظ البرنامج {data}", e)
+                handle_exception(request, f"❌ فشل حفظ البرنامج {data}", e)
 
-            return redirect(request.path_info)
+        elif form_type == "level_form_submit":
+            level_name = request.POST.get('level_name')
+            number_students = request.POST.get('number_students')
+            fk_program_id = request.POST.get('fk_program')
+            level_data = {
+                "level_name": level_name,
+                "number_students": number_students,
+                "fk_program_id": fk_program_id
+            }
+            try:
+                api_post(Endpoints.levels, level_data)
+                messages.success(request, "✅ تم إضافة المستوى بنجاح!")
+            except Exception as e:
+                handle_exception(request, f"❌ فشل حفظ المستوى {level_data}", e)
+
+        elif form_type == 'upload_levels':
+            handle_file_upload_generic(
+                request,
+                file_field_name='data_file',
+                endpoint_url=f"{BASE_API_URL}{Endpoints.levelsUpload}",
+                success_title="✅ تم رفع ملف المستويات بنجاح.",
+                error_title="❌ فشل رفع ملف المستويات"
+            )
+
+        return redirect(request.path_info)
+class EditProgramLevelView(View):
+    def get(self, request, id):
+        program = api_get(f"{Endpoints.programs}{id}/")
+        programs = api_get(Endpoints.programs)
+        levels = api_get(Endpoints.levels)
+        departments = api_get(Endpoints.departments)
+        return render(request, 'programs/add_edit.html', {
+            "program": program,
+            "programs": programs,
+            "levels": levels,
+            "departments": departments,
+            "page_title": "تعديل"
+        })
+
+    def post(self, request, id):
+        form_type = request.POST.get('form_type')
+
+        if form_type == "program_form_submit":
+            program_name = request.POST.get('program_name')
+            fk_department_id = request.POST.get('fk_department')
+            data = {
+                'program_name': program_name,
+                'department_id': fk_department_id,
+            }
+            try:
+                api_put(f"{Endpoints.programs}{id}/", data)
+                messages.success(request, "✅ تم تعديل البرنامج بنجاح!")
+            except Exception as e:
+                handle_exception(request, f"❌ فشل تعديل البرنامج {data}", e)
 
         elif form_type == "level_form_submit":
             level_id = request.POST.get('level_id')
@@ -625,42 +619,32 @@ class AddAndEditProgramView(View):
                 "fk_program_id": fk_program_id
             }
             try:
-                if level_id:
-                    api_put(f"{Endpoints.levels}{level_id}/", level_data)
-                    messages.success(request, "تم تحديث المستوى بنجاح!")
-                else:
-                    api_post(f"{Endpoints.levels}", level_data)
-                    messages.success(request, "تم إضافة المستوى بنجاح!")
+                api_put(f"{Endpoints.levels}{level_id}/", level_data)
+                messages.success(request, "✅ تم تعديل المستوى بنجاح!")
             except Exception as e:
-                handle_exception(request, f"فشل حفظ المستوى {level_data}", e)
-            return redirect(request.path_info)
-        
-        elif form_type == 'upload_levels':
-                handle_file_upload_generic(
-                    request,
-                    file_field_name='data_file',
-                    endpoint_url=f"{BASE_API_URL}{Endpoints.levelsUpload}",
-                    success_title="✅ تم رفع ملف البرامج بنجاح.",
-                    error_title="❌ فشل رفع ملف البرامج"
-                )
-        if form_type =='delete':
-            item_id = request.POST.get('item_id')
-            item_type = request.POST.get('selected_level_or_program')
-            try:
-                if item_type == 'program':
-                    api_delete(f"{Endpoints.programs}{item_id}/")
-                    messages.success(request, f"تم حذف البرنامج '{item_type}' بنجاح.")
-                elif item_type == 'level':
-                    api_delete(f"{Endpoints.levels}{item_id}/")
-                    messages.success(request, f"تم حذف المستوى '{item_type}' بنجاح.")
-                    
-            except Exception as e:
-                messages.error(request, f"حدث خطأ أثناء الحذف: {e}")
-                print(f"Error deleting item of type {item_type} with ID {item_id}: {e}")
-            # return redirect(request.path_info) # ✅ تأكد من وجود redirect هنا أيضًا
+                handle_exception(request, f"❌ فشل تعديل المستوى {level_data}", e)
 
-        messages.error(request, "نوع النموذج غير معروف.")
+        return redirect(request.path_info)
+class DeleteProgramLevelView(View):
+    def post(self, request,id=None):
+        item_id = request.POST.get('item_id')
+        item_type = request.POST.get('selected_level_or_program')
+
+        try:
+            if item_type == 'program':
+                api_delete(f"{Endpoints.programs}{item_id}/")
+                messages.success(request, "✅ تم حذف البرنامج بنجاح.")
+            elif item_type == 'level':
+                api_delete(f"{Endpoints.levels}{item_id}/")
+                messages.success(request, "✅ تم حذف المستوى بنجاح.")
+            else:
+                messages.error(request, "❌ نوع العنصر غير معروف.")
+        except Exception as e:
+            messages.error(request, f"❌ حدث خطأ أثناء الحذف: {e}")
+            print(f"Error deleting item {item_type} with ID {item_id}: {e}")
+
         return redirect('add_program')
+
 
 class TimeTableSettingsView(View):
     def get(self, request, id=None):

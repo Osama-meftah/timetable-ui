@@ -44,37 +44,56 @@
 
     {# Simple Teachers List Section #}
     <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6 mb-8">
-        <div class="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
-            <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100">
-                قائمة المدرسين (مبسطة)
-            </h2>
-            <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
-                <div class="relative w-full sm:w-64">
-                    <input type="text" class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-white 
-                      dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 
-                      focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors 
-                      duration-200" data-type="teacher" data-title="البحث عن مدرس" placeholder="البحث باسم المدرس..."
-                        aria-label="البحث عن مدرس" />
-
-                    <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
-                        <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
-                    </div>
-                </div>
-
-
-                <button type="button"
-                    class="upload-trigger bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md"
-                    data-type="teachers" data-title="رفع ملف بيانات المدرسين"
-                    data-description="يجب أن يحتوي الملف على الأعمدة: teacher_name, teacher_email,teacher_phone,teacher_address,teacher_status.">
-                    <i class="fas fa-upload ml-2"></i> رفع ملف بيانات المدرسين
-                </button>
-                <a href="{% url 'add_teacher' %}?add=1"
-                    class="bg-indigo-600 hover:bg-indigo-700 dark:text-gray-200 text-white font-bold py-2 px-4 rounded-md flex items-center shadow-md transition-colors duration-200 w-full sm:w-auto justify-center">
-                    <i class="fas fa-plus-circle ml-2"></i>
-                    إضافة مدرس
-                </a>
+        <div class="flex flex-col gap-4 lg:flex-row sm:items-center sm:justify-between mb-8">
+          <!-- العنوان -->
+          <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap text-center lg:text-right">
+            قائمة المدرسين (مبسطة)
+          </h2>
+        
+          <!-- أدوات التحكم -->
+          <div class="flex flex-col lg:flex-row flex-wrap gap-3 sm:gap-4 w-full lg:w-auto justify-center lg:justify-end">
+        
+            <!-- حقل البحث -->
+            <div class="relative w-full sm:w-64">
+              <input
+                type="text"
+                class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-gray-200
+                dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400
+                focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
+                data-type="teacher"
+                data-title="البحث عن مدرس"
+                placeholder="البحث باسم المدرس..."
+                aria-label="البحث عن مدرس"
+              />
+              <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
+                <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
+              </div>
             </div>
+        
+            <!-- زر رفع الملف -->
+            <button
+              type="button"
+              class="upload-trigger flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md w-full sm:w-auto transition-all duration-200"
+              data-type="teachers"
+              data-title="رفع ملف بيانات المدرسين"
+              data-description="يجب أن يحتوي الملف على الأعمدة: teacher_name, teacher_email, teacher_phone, teacher_address, teacher_status."
+            >
+              <i class="fas fa-upload ml-2"></i>
+              <span class="ml-1">رفع ملف</span>
+            </button>
+        
+            <!-- زر إضافة مدرس -->
+            <a
+              href="{% url 'add_teacher' %}?add=1"
+              class="flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 w-full sm:w-auto group"
+            >
+              <i class="fas fa-plus-circle ml-2"></i>
+              <span class="group-hover:rotate-6 transition-transform duration-200">إضافة مدرس</span>
+            </a>
+        
+          </div>
         </div>
+
         <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
@@ -181,31 +200,45 @@
 
     {# Detailed Teachers List Section (teachers_with_data) #}
     <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6">
-        <div class="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
-            <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 whitespace-nowrap">
-                إدارة المدرسين (تفصيلي)
-            </h2>
-            <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
-                <div class="relative w-full sm:w-64">
-                    <input type="text" class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-white 
-                      dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 
-                      focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors 
-                      duration-200" data-type="teacherdetails" data-title="البحث عن مدرس"
-                        placeholder="البحث باسم المدرس..." aria-label="البحث عن مدرس" />
-                    <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
-                        <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
-                    </div>
-                </div>
-
-                <a href="{% url 'add_edit_teacher_with_courses' %}"
-                    {# Changed from 'add_teacher_with_courses' for consistency with views #}
-                    class="bg-indigo-600 dark:text-gray-200 hover:bg-indigo-700 hover:text-gray-200
-                     text-white font-bold py-2 px-4 rounded-md flex items-center shadow-md transition-colors duration-200 w-full sm:w-auto justify-center">
-                    <i class="fas fa-plus-circle ml-2"></i>
-                    ربط مدرس جديد بالمقررات والوقت
-                </a>
+        <div class="flex flex-col center-title gap-4 lg:flex-row sm:items-center sm:justify-between mb-6">
+          <!-- العنوان -->
+          <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 whitespace-nowrap text-center sm:text-right">
+            إدارة المدرسين (تفصيلي)
+          </h2>
+        
+          <!-- أدوات التحكم -->
+          <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
+        
+            <!-- حقل البحث -->
+            <div class="relative w-full sm:w-64">
+              <input
+                type="text"
+                class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-gray-200
+                dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400
+                focus:outline-none center-title focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
+                data-type="teacherdetails"
+                data-title="البحث عن مدرس"
+                placeholder="البحث باسم المدرس..."
+                aria-label="البحث عن مدرس"
+              />
+              <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
+                <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
+              </div>
             </div>
+        
+            <!-- زر ربط مدرس جديد -->
+            <a
+              href="{% url 'add_edit_teacher_with_courses' %}"
+              class="bg-indigo-600 dark:text-gray-200 hover:bg-indigo-700 hover:text-gray-200
+                     text-white font-bold py-2 px-4 rounded-md flex items-center shadow-md transition-colors duration-200 w-full sm:w-auto justify-center"
+            >
+              <i class="fas fa-plus-circle ml-2"></i>
+              ربط مدرس جديد بالمقررات والوقت
+            </a>
+        
+          </div>
         </div>
+
         <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">

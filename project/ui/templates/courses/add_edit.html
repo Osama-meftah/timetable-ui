@@ -6,6 +6,7 @@
 {% endblock %}
 
 {% block content %}
+{% include "message.html" %}
 <div class="container mx-auto px-4 py-10 sm:px-6 lg:px-8">
     <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-xl p-8 sm:p-10 max-w-2xl mx-auto border border-gray-100 dark:border-gray-700">
         <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-gray-100 mb-6 text-center leading-tight">
@@ -17,9 +18,9 @@
             {% if subject %}
             
             {% comment %} {% else %} {% endcomment %}
-            <input type="hidden" name="form_type" value="{{ edit }}">
+            <input type="hidden" name="form_type" value="edit">
             {% else %}
-            <input type="hidden" name="form_type" value="{{ add }}">
+            <input type="hidden" name="form_type" value="add">
             {% endif %}
 
             {# عرض الرسائل الخطأ #}
@@ -64,8 +65,8 @@
                         required
                     >
                         <option value="" disabled {% if not subject.term %}selected{% endif %}>اختر الفصل الدراسي</option>
-                        <option value="الأول" {% if subject.term == "الأول" %}selected{% endif %}>الأول</option>
-                        <option value="الثاني" {% if subject.term == "الثاني" %}selected{% endif %}>الثاني</option>
+                        <option value="term1" {% if subject.term == "term1" %}selected{% endif %}>الأول</option>
+                        <option value="term2" {% if subject.term == "term2" %}selected{% endif %}>الثاني</option>
                     </select>
                 </div>
             </div>
