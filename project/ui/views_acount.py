@@ -1,19 +1,12 @@
 import requests
 from django.contrib import messages
 from .utils import *
-from django.middleware.csrf import get_token
-from collections import Counter
 from django.shortcuts import render, redirect
-import json
+from .utils import api_post,Endpoints
 
-
-BASE_API_URL = "http://127.0.0.1:8001/api/"
 
 def LoginView(request):
     if request.method == "GET":
-        access_token = request.session.get('token')
-        if access_token:
-            return redirect('dashboard')
         return render(request, 'login.html')
     if request.method == "POST":
         username = request.POST.get("username")
@@ -22,17 +15,22 @@ def LoginView(request):
             "username": username,
             "password": password
         }
-        response = requests.post(f"{BASE_API_URL}login/", json=data)
-        
-        if response.status_code == 200:
-            print(response.json())
-            tokens = response.json().get("tokens")
-            token = tokens.get("access")
-            refresh_token = tokens.get("refresh")
-            request.session['token'] = token
-            request.session['refresh_token'] = refresh_token
+        response = api_post(Endpoints.login, data)
+        tokens = response.get("tokens")
+        # print(tokens)
+
+        if tokens:
+            # refresh_token = tokens.get("refresh")
+            # token=api_post("token/refresh/",{"refresh":refresh_token})
+            # print(token)
+            request.session['token'] = tokens['access']
+            request.session['refresh_token'] = tokens['refresh']
             messages.success(request, "Login successful!")
             return redirect('dashboard')  # Redirect to a home page or dashboard
         else:
             messages.error(request, "Invalid credentials. Please try again.")
-    
+
+def logout_view(request):
+        request.session.flush()  # Clear the session
+        messages.success(request, "Logged out successfully!")
+        return redirect('login')  # Redirect to the login page

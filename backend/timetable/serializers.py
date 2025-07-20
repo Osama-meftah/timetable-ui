@@ -3,6 +3,7 @@ from .models import (
     Program, Hall, Level, Group, Subject, Teacher,
     Today, Period, TeacherTime, Distribution, Table, Lecture,Department
 )
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 class DepartmentSerializer(serializers.ModelSerializer):
@@ -214,3 +215,15 @@ class TeacherWithDetailsSerializer(serializers.Serializer):
     teacher = TeacherSerializer()
     courses = TeacherCourseInfoSerializer(many=True)
     availability = AvailabilityInfoSerializer(many=True)
+
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        # أضف بيانات مخصصة هنا
+        token['is_staff']=user.is_staff
+        token['is_superuser']=user.is_superuser
+
+
+        return token
