@@ -5,6 +5,9 @@ from django.contrib import messages
 from .utils import *
 from django.middleware.csrf import get_token
 from collections import Counter
+from django.contrib.auth.models import User
+from rest_framework_simplejwt.tokens import AccessToken
+
 
 
 BASE_API_URL = "http://127.0.0.1:8001/api/"
@@ -23,6 +26,13 @@ def dashboard(request):
     عرض لوحة التحكم.
     """
     return render(request, 'dashboard.html')
+
+def teacher_dashboard_view(request):
+    user=request.session.get('user')
+    print(user)
+    # user=User.objects.get(id=user_id)
+    return render(request, 'dashboard_teatcher.html', {'teacher': user})
+
 
 class TeacherManagementView(View):
     def get(self, request, id=None):

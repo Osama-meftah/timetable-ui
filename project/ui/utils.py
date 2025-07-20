@@ -7,6 +7,9 @@ BASE_API_URL = "http://127.0.0.1:8001/api/"
 class Endpoints:
     login = "login/"
     logout = "logout/"
+    user="user/"
+    send_reseat_email="send_reseat_email"
+    reseat_teacheer_password="reset-password/"
     departments = "departments/"
     departmentsUpload ="uploadDepartments/"
     programsUpload="uploadPrograms/"
@@ -27,6 +30,27 @@ class Endpoints:
     distributions = "distributions/"
     lectures = "lectures/"
 
+
+def handle_response(request, response):
+    """
+    يعالج الاستجابة القادمة من API ويعرض الرسائل المناسبة، ويعيد البيانات عند الحاجة.
+    """
+    status = response.get("status")
+    message = response.get("message", "")
+    data = response.get("data", None)  # يمكن أن تكون None إذا لم توجد بيانات
+
+    if status == "success":
+        if message:
+            messages.success(request, message)
+        return True, data  # success, مع البيانات
+    elif status == "error":
+        if message:
+            messages.error(request, message)
+        return False, None  # فشل، لا يوجد بيانات
+    else:
+        messages.warning(request, "تنسيق استجابه غير متوقع")
+        return False, None
+
 def api_get(endpoint):
     try:
         
@@ -40,6 +64,20 @@ def api_post(endpoint, data):
     try:
         print(f"{BASE_API_URL}{endpoint}", data)
         response = requests.post(f"{BASE_API_URL}{endpoint}", json=data)
+        # response.raise_for_status()
+
+        return response.json()
+    
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"POST request failed: {e}")
+
+def api_get_with_token(endpoint,token):
+    try:
+        header={
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+        }
+        response = requests.get(f"{BASE_API_URL}{endpoint}", headers=header)
         response.raise_for_status()
 
         return response.json()
