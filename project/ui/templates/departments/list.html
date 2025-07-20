@@ -8,7 +8,6 @@
 
 {% block content %}
 
-
 <div class="bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-gray-900 dark:to-gray-800 text-white py-16 px-4 sm:px-6 lg:px-8 shadow-lg">
     <div class="container mx-auto text-center">
         <h1 class="text-4xl sm:text-5xl font-extrabold mb-4 animate-fade-in-down">نظرة عامة على الإدارة الأكاديمية</h1>
@@ -22,7 +21,6 @@
                 <p class="text-4xl font-bold text-purple-900 dark:text-purple-100">{{ stats.total_departments }}</p>
             </div>
 
-            {# Total Students Card #}
             <div class="bg-white dark:bg-gray-700 p-8 rounded-xl shadow-xl flex flex-col items-center justify-center transform hover:scale-105 transition-transform duration-300 group">
                 <div class="p-4 bg-teal-200 dark:bg-teal-800 rounded-full mb-4 group-hover:rotate-6 transition-transform">
                     <i class="fas fa-users text-teal-700 dark:text-teal-300 text-3xl"></i>
@@ -31,7 +29,6 @@
                 <p class="text-4xl font-bold text-teal-900 dark:text-teal-100">{{ stats.overall_total_programs }}</p>
             </div>
 
-            {# Total Courses Card #}
             <div class="bg-white dark:bg-gray-700 p-8 rounded-xl shadow-xl flex flex-col items-center justify-center transform hover:scale-105 transition-transform duration-300 group">
                 <div class="p-4 bg-orange-200 dark:bg-orange-800 rounded-full mb-4 group-hover:rotate-6 transition-transform">
                     <i class="fas fa-book-open text-orange-700 dark:text-orange-300 text-3xl"></i>
@@ -43,51 +40,49 @@
     </div>
 </div>
 
+---
 
-{# --- Departments List Section (First Main Section) --- #}
 <div class="bg-white dark:bg-gray-800 py-12 px-4 sm:px-6 lg:px-8 shadow-xl mt-10">
     {% include "message.html" %}
     <div class="container mx-auto">
-        <div class="flex flex-col md:flex-row justify-between items-center mb-8 border-b pb-6 border-gray-200 dark:border-gray-700">
-            <h2 class="text-3xl font-extrabold text-gray-800 dark:text-gray-100 mb-4 md:mb-0">قائمة الأقسام</h2>
-            <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+        <div class="flex flex-col gap-4 lg:flex-row sm:items-center sm:justify-between mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap text-center lg:text-right">
+                قائمة الأقسام
+            </h2>
+            
+            <div class="flex flex-col lg:flex-row flex-wrap gap-3 sm:gap-4 w-full lg:w-auto justify-center lg:justify-end">
                 <div class="relative w-full sm:w-64">
                     <input
-                      type="text"
-                      class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-white 
-                      dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 
-                      focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors 
-                      duration-200"
-                      data-type="department"
-                      data-title="البحث عن قسم"
-                      placeholder="البحث باسم القسم..."
-                      aria-label="البحث عن قسم"
+                        type="text"
+                        class="search-input bg-gray-200 w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-white 
+                        dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 
+                        focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
+                        data-type="departments"
+                        data-title="البحث عن قسم"
+                        placeholder="البحث باسم القسم..."
+                        aria-label="البحث عن قسم"
                     />
                     <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
-                      <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
+                        <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
                     </div>
-                  </div>
-                {# NEW Button to trigger Department file upload modal #}
-                <!-- زر رفع ملف الأقسام -->
-                <button type="button"
-                        class="upload-trigger bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md"
-                        data-type="departments"
-                        data-title="رفع ملف بيانات الأقسام"
-                        data-description="يجب أن يحتوي الملف على الأعمدة: name, description.">
-                    <i class="fas fa-upload ml-2"></i> رفع ملف بيانات الأقسام
+                </div>
+            
+                <button
+                    type="button"
+                    class="upload-trigger flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md w-full sm:w-auto transition-all duration-200"
+                    data-type="departments"
+                    data-title="رفع ملف بيانات الأقسام"
+                    data-description="يجب أن يحتوي الملف على الأعمدة: name, description.">
+                    <i class="fas fa-upload ml-2"></i>
+                    <span class="ml-1">رفع ملف</span>
                 </button>
+            
                 <a 
-                href="{% url 'add_department' %}?add=1" 
-                class="inline-flex items-center px-4 py-2 border
-                border-transparent rounded-md 
-                shadow-md block text-base font-bold dark:text-gray-200 text-white bg-indigo-600
-                hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all 
-                duration-200 transform hover:scale-[1.03] active:scale-[0.98] w-full sm:w-auto justify-center group
-                ">
-                <i class="fas fa-plus ml-3  group-hover:rotate-90 transition-transform"></i>
-
-                إضافة قسم جديد
-            </a>
+                    href="{% url 'add_department' %}?add=1" 
+                    class="flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 w-full sm:w-auto group">
+                    <i class="fas fa-plus-circle ml-2"></i>
+                    <span class="group-hover:rotate-6 transition-transform duration-200">إضافة قسم جديد</span>
+                </a>
             </div>
         </div>
 
@@ -120,25 +115,23 @@
                             {% if dept.description %}{{ dept.description }}{% else %}لا يوجد وصف{% endif %}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
-                            {{ dept.programs|length }} <i class="fas fa-sitemap text-indigo-400 ml-1"></i>
-
+                            {{ dept.programs|length }} <i class="fas fa-sitemap text-indigo-400 mr-1"></i>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-
+                        <td class="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
                             <a href="{% url 'edit_department' dept.id %}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 
-                           dark:hover:text-indigo-300 p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-700 transition-colors duration-150" title="تعديل">
+                            dark:hover:text-indigo-300 p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-700 transition-colors duration-150" title="تعديل">
                                <i class="fas fa-edit text-lg ml-4"></i>
-                           </a>
+                            </a>
                            <button
                            type="button"
                            class="delete-btn group text-red-600 hover:text-red-800 dark:text-red-400 
-                           dark:hover:text-red-300"
+                           dark:hover:text-red-300 p-2 rounded-full hover:bg-red-100 dark:hover:bg-gray-700 transition-colors duration-150"
                            data-id="{{ dept.id }}"
                            data-name="{{ dept.name }}"
                            data-type="القسم" 
                            data-url="{% url 'delete_department' 0 %}"
                            data-form-type="delete"
-                           >
+                           title="حذف">
                            <i class="fas fa-trash-alt text-lg group-hover:scale-110 transition-transform"></i>
                            </button>
                         </td>
@@ -159,53 +152,53 @@
             <p class="text-xl font-medium text-gray-500 dark:text-gray-400">لا توجد أقسام لعرضها حالياً.</p>
             <p class="text-md text-gray-400 dark:text-gray-500 mt-2">ابدأ بإضافة قسم جديد لإدارة بياناتك الأكاديمية.</p>
             <a href="{% url 'add_department' %}?add=1" class="mt-6 inline-flex items-center px-6 py-3 border border-transparent rounded-full shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
-                <i class="fas fa-plus ml-3"></i> إضافة قسم جديد
+                <i class="fas fa-plus mr-3"></i> إضافة قسم جديد
             </a>
         </div>
         {% endif %}
     </div>
 </div>
 
-<div class="bg-white dark:bg-gray-800 py-12 px-4 sm:px-6 lg:px-8 shadow-xl mt-8"> {# Added mt-8 for spacing between sections #}
+---
+
+<div class="bg-white dark:bg-gray-800 py-12 px-4 sm:px-6 lg:px-8 shadow-xl mt-8">
     <div class="container mx-auto">
-        <div class="flex flex-col md:flex-row justify-between items-center mb-8 border-b pb-6 border-gray-200 dark:border-gray-700">
-            <h2 class="text-3xl font-extrabold text-gray-800 dark:text-gray-100 mb-4 md:mb-0">قائمة البرامج والمستويات</h2>
-            <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-                {# Search Input Field for Programs #}
+        <div class="flex flex-col gap-4 lg:flex-row sm:items-center sm:justify-between mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap text-center lg:text-right">
+                قائمة البرامج والمستويات
+            </h2>
+            <div class="flex flex-col lg:flex-row flex-wrap gap-3 sm:gap-4 w-full lg:w-auto justify-center lg:justify-end">
                 <div class="relative w-full sm:w-64">
                     <input
-                      type="text"
-                      class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-white 
-                      dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 
-                      focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors 
-                      duration-200"
-                      data-type="programs"
-                      data-title="البحث عن برنامج"
-                      placeholder="البحث باسم برنامج..."
-                      aria-label="البحث عن برنامج"
+                        type="text"
+                        class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-gray-200
+                        dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 
+                        focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
+                        data-type="programs"
+                        data-title="البحث عن برنامج"
+                        placeholder="البحث باسم برنامج..."
+                        aria-label="البحث عن برنامج"
                     />
                     <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
-                      <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
+                        <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
                     </div>
-                  </div>
-                <button type="button"
-                        class="upload-trigger bg-blue-600 hover:bg-blue-700 text-white font-bold 
-                        py-2 px-4 rounded-md shadow-md"
-                        data-type="programs"
-                        data-title="رفع ملف بيانات البرامج"
-                        data-description="يجب أن يحتوي الملف على الأعمدة: program_name, department_id.">
-                    <i class="fas fa-upload ml-2"></i> رفع ملف بيانات البرامج
+                </div>
+            
+                <button
+                    type="button"
+                    class="upload-trigger flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md w-full sm:w-auto transition-all duration-200"
+                    data-type="programs"
+                    data-title="رفع ملف بيانات البرامج"
+                    data-description="يجب أن يحتوي الملف على الأعمدة: program_name, department_id.">
+                    <i class="fas fa-upload ml-2"></i>
+                    <span class="ml-1">رفع ملف</span>
                 </button>
-                <a 
-                href="{% url 'add_program' %}?add=1" 
-                class="inline-flex items-center px-4 py-2 border
-                border-transparent rounded-md 
-                shadow-md block text-base font-bold dark:text-gray-200 text-white bg-indigo-600
-                hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all 
-                duration-200 transform hover:scale-[1.03] active:scale-[0.98] w-full sm:w-auto justify-center group
-                ">
-                <i class="fas fa-plus ml-3  group-hover:rotate-90 transition-transform"></i>
-                إضافة برنامج جديد
+            
+                <a
+                    href="{% url 'add_program' %}?add=1"
+                    class="flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 w-full sm:w-auto group">
+                    <i class="fas fa-plus-circle ml-2"></i>
+                    <span class="group-hover:rotate-6 transition-transform duration-200">إضافة برنامج</span>
                 </a>
             </div>
         </div>
@@ -230,10 +223,9 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-
                     {% for program in programs %}
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 program-rw search-row" data-type="programs">
-                        <td class="search-name px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-gray-100 program-">
+                        <td class="search-name px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-gray-100">
                             {{ program.program.program_name }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
@@ -256,7 +248,7 @@
                                 class="text-green-600 hover:underline text-xs block mt-1">إضافة مستوى</a>
                             {% endif %}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <td class="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
                             <a href="{% url 'edit_program' program.program.id %}"
                             class="inline-flex items-center justify-center
                                     w-10 h-10 rounded-full
@@ -287,12 +279,13 @@
             <p class="text-md text-gray-400 dark:text-gray-500 mt-2">ابدأ بإضافة برنامج جديد لإدارة بياناتك الأكاديمية.</p>
             <a 
             class="mt-6 inline-flex items-center px-6 py-3 border border-transparent rounded-full shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
-                <i class="fas fa-plus ml-3"></i> إضافة برنامج جديد
+                <i class="fas fa-plus mr-3"></i> إضافة برنامج جديد
             </a>
         </div>
         {% endif %}
     </div>
 </div>
+
 {% include "upload_modal.html" %}
 {% include "delete_modal.html" %}
 

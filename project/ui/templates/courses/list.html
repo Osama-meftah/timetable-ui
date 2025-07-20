@@ -7,7 +7,7 @@
 
 {% block content %}
 
-<div class="container mx-auto py-6 sm:py-8">
+<div class="container mx-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
         <div class="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-700 dark:to-blue-800 rounded-xl shadow-lg p-6 text-white flex items-center justify-between transition-transform transform hover:scale-105 duration-300">
             <div>
@@ -34,43 +34,50 @@
 
     <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6 sm:p-8">
         {% include "message.html" %}
-        <div class="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap">إدارة المقررات الدراسية</h2>
-            <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
-                <div class="relative w-full sm:w-64">
-                    <input
-                      type="text"
-                      class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-white 
-                      dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 
-                      focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors 
-                      duration-200"
-                      data-type="courses"
-                      data-title="البحث عن مقرر"
-                      placeholder="البحث باسم المقرر..."
-                      aria-label="البحث عن مقرر"
-                    />
-                    <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
-                      <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
-                    </div>
-                  </div>
-                {# Button to trigger file upload modal #}
-                <button type="button"
-                        class="upload-trigger bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md"
-                        data-type="subjects"
-                        data-title="رفع ملف بيانات المقررات"
-                        data-description="يجب أن يحتوي الملف على الأعمدة: name, description.">
-                    <i class="fas fa-upload ml-2"></i> رفع ملف بيانات المقررات
-                </button>
-                <a
-                href="{% url 'add_course' %}?add=1"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white dark:text-gray-200 font-bold
-                  py-2 px-5 rounded-md flex items-center shadow-md transition-all duration-200 transform
-                hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto justify-center group">
-                    <i class="fas fa-plus-circle ml-2 group-hover:rotate-6 transition-transform duration-200"></i>
-                    إضافة مقرر جديد
-                </a>
+        <div class="flex flex-col center-title gap-4 lg:flex-row sm:items-center sm:justify-between mb-8">
+          <!-- العنوان -->
+          <h2 class="text-2xl  font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap text-center sm:text-right">
+            إدارة المقررات الدراسية
+          </h2>
+        
+          <!-- أدوات التحكم -->
+          <div class="flex flex-col lg:flex-row flex-wrap gap-3 sm:gap-4 w-full lg:w-auto justify-center sm:justify-end">
+            
+            <!-- حقل البحث -->
+            <div class="relative md:w-1/3 lg:w-64 search sm:w-full">
+              <input
+                type="text"
+                class="search-input w-full pl-10 pr-4 py-2 border border-gray-500 dark:border-gray-600 rounded-full shadow-sm bg-gray-100 
+                dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 
+                focus:outline-none center-title focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
+                data-type="courses"
+                data-title="البحث عن مقرر"
+                placeholder="البحث باسم المقرر..."
+                aria-label="البحث عن مقرر"
+              />
+              <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
+                <i class="fas fa-search text-gray-600 dark:text-gray-400"></i>
+              </div>
             </div>
+        
+            <!-- زر رفع الملف -->
+            <button
+              type="button"
+              class="upload-trigger center-title flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md w-full sm:w-auto transition-all duration-200">
+              <i class="fas fa-upload"></i>
+              <span class="mr-2 "> رفع ملف</span>
+            </button>
+        
+            <!-- زر إضافة مقرر -->
+            <a
+              href="{% url 'add_course' %}?add=1"
+              class="flex items-center justify-center center-title bg-indigo-600 hover:bg-indigo-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 w-full sm:w-auto group">
+              <i class="fas fa-plus-circle"></i>
+              <span class="mr-2  group-hover:rotate-6 transition-transform duration-200">إضافة مقرر</span>
+            </a>
+          </div>
         </div>
+
 
         <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-md">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -83,9 +90,9 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700" data-type="courses">
-                    {% for course in courses %} {# <-- Correct opening of the for loop #}
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150  search-row" >
-                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">  {{ forloop.counter }}</td>
+                    {% for course in courses %}
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row" >
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200"> {{ forloop.counter }}</td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200 search-name" >{{ course.subject_name }}</td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
                             {% if course.term == 'term1' %}
@@ -113,11 +120,11 @@
                             </button>
                         </td>
                     </tr>
-                    {% empty %} {# <-- Correct usage of the empty tag, directly within the for loop #}
+                    {% empty %}
                     <tr>
-                        <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">لا يوجد مقررات لعرضها.</td> {# colspan updated to 6 #}
+                        <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">لا يوجد مقررات لعرضها.</td>
                     </tr>
-                    {% endfor %} {# <-- Correct closing of the for loop #}
+                    {% endfor %}
                 </tbody>
                 <div class="no-results-message hidden text-center py-8 bg-gray-50 dark:bg-gray-700 
                 rounded-b-lg border-t border-gray-200 dark:border-gray-700" data-type="courses">
@@ -177,4 +184,3 @@
 </script>
 
 {% endblock %}
-
