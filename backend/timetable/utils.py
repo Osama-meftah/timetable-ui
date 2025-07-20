@@ -8,7 +8,6 @@ import random
 import string
 from django.core.mail import send_mail
 
-
 def create_random_password():
     length = 8  # طول كلمة المرور
     characters = string.ascii_letters + string.digits + string.punctuation
@@ -26,7 +25,8 @@ def send_password_email(user, password):
     from_email = 'abubaker773880@gmail.com'
     recipient_list = [user.email]
     send_mail(subject,message,from_email,recipient_list)
-    
+
+
 
 def read_file_to_dataframe(file):
     file_content = io.BytesIO(file.read())

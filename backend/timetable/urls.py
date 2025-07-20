@@ -6,7 +6,7 @@ from .views_algorithms import run_scheduler_view
 from .views_search import *
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from .views_accounts import Login,MyTokenObtainPairView
+from .views_accounts import *
 
 router = DefaultRouter()
 router.register('departments',DepartmentViewSet )  
@@ -43,6 +43,10 @@ urlpatterns =[
     # get token
     path('token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    path('reset-password/', reset_passowrd, name='reset-password'),
+    path("send_reseat_email/",send_reset_email,name="send_reseat_email"),
+    path("user/",getuseer,name="user")
 
 ]
  

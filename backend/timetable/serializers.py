@@ -4,6 +4,7 @@ from .models import (
     Today, Period, TeacherTime, Distribution, Table, Lecture,Department
 )
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.auth.models import User
 
 
 class DepartmentSerializer(serializers.ModelSerializer):
@@ -58,12 +59,17 @@ class SubjectSerializer(serializers.ModelSerializer):
         model = Subject
         fields = ['id', 'subject_name', 'term']
 
-
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email','is_staff']
+        
 class TeacherSerializer(serializers.ModelSerializer):
     teacher_status_display = serializers.CharField(source='get_teacher_status_display', read_only=True)
+    user=UserSerializer()
     class Meta:
         model = Teacher
-        fields = ['id', 'teacher_name', 'teacher_phone', 'teacher_email', 'teacher_status','teacher_status_display', 'teacher_address']
+        fields = ['id', 'teacher_name', 'teacher_phone', 'teacher_email', 'teacher_status','teacher_status_display', 'teacher_address','user']
 
 
 class TodaySerializer(serializers.ModelSerializer):
@@ -158,9 +164,14 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
+        # teacher=Teacher.objects.get(user=user)
         # أضف بيانات مخصصة هنا
-        token['is_staff']=user.is_staff
-        token['is_superuser']=user.is_superuser
-
-
+        # token['is_staff']=user.is_staff
+        # token['is_superuser']=user.is_superuser
+        # token['teacher_username']=user.username
+        # token['teacher_email']=teacher.teacher_email
+        # token['id']=teacher.pk
+        # token['user_id']=user.pk
         return token
+    
+
