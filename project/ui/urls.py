@@ -6,6 +6,10 @@ urlpatterns = [
     path('login/', LoginView, name='login'),
     path('logout/', logout_view, name='logout'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    # path()
+    
+    path('teachers/availability/', views.TeachersAvailableView.as_view(), name='teachers_availability'),
+
     path('teacher_dashboard/',views.teacher_dashboard_view,name="teacher_dashboard"),
     path('send_reseat_mail/',send_reseat_mail,name='send_reseat_mail'),
     path('reset-password/<uidb64>/<token>/', reseat_teacheer_password, name='reset-password'),
