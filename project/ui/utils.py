@@ -1,28 +1,18 @@
 import requests
 from django.contrib import messages
 from django.core.paginator import Paginator
-<<<<<<< HEAD
 from django.shortcuts import redirect, render
 
-=======
->>>>>>> origin/recovery-branch2
 BASE_API_URL = "http://127.0.0.1:8001/api/"
 
 class Endpoints:
     login = "login/"
     logout = "logout/"
     departments = "departments/"
-<<<<<<< HEAD
-    departmentsUpload = "uploadDepartments/"
-    programsUpload = "uploadPrograms/"
-    levelsUpload = "uploadLevels/"
-    todays = "todays/"
-=======
     departmentsUpload ="uploadDepartments/"
     programsUpload="uploadPrograms/"
     levelsUpload="uploadLevels/"
     todays: str = "todays/"
->>>>>>> origin/recovery-branch2
     periods = "periods/"
     halls = "halls/"
     uploadHalls = "uploadHalls/"
@@ -47,7 +37,6 @@ def show_backend_messages(request, response_json, default_success=""):
         else:
             messages.success(request, default_success)
 
-<<<<<<< HEAD
         if "warnings" in response_json and isinstance(response_json["warnings"], list):
             for warning in response_json["warnings"]:
                 messages.warning(request, f"⚠️ {warning}")
@@ -58,35 +47,7 @@ def show_backend_messages(request, response_json, default_success=""):
             messages.error(request, f"❌ {response_json['detail']}")
     else:
         messages.success(request, default_success)
-=======
-def api_post(endpoint, data):
-    try:
-        print(f"{BASE_API_URL}{endpoint}", data)
-        response = requests.post(f"{BASE_API_URL}{endpoint}", json=data)
-        response.raise_for_status()
-
-        return response.json()
-    
-    except requests.exceptions.RequestException as e:
-        raise RuntimeError(f"POST request failed: {e}")
-
-def api_put(endpoint, data):
-    try:
-        response = requests.put(f"{BASE_API_URL}{endpoint}", json=data)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        raise RuntimeError(f"PUT request failed: {e}")
-
-def api_delete(endpoint):
-    try:
-        response = requests.delete(f"{BASE_API_URL}{endpoint}")
-        response.raise_for_status()
-        return True
-    except requests.exceptions.RequestException as e:
-        raise RuntimeError(f"DELETE request failed: {e}")
->>>>>>> origin/recovery-branch2
-
+        
 def handle_exception(request, message, exception):
     full_message = f"{message}"
     if hasattr(exception, "response") and exception.response is not None:

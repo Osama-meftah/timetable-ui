@@ -52,7 +52,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 
-    "ui.middleware.IsLoginMiddleware",
+    # "ui.middleware.IsLoginMiddleware",
     # "ui.middleware.IsAdminMiddleware"
 ]
 

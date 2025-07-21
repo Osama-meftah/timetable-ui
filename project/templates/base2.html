@@ -1,3 +1,5 @@
+
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" class="light">
@@ -5,7 +7,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}لوحة التحكم{% endblock %} - ScheduleEase</title>
-
+    
     {# Tailwind CSS CDN #}
     <script src="https://cdn.tailwindcss.com"></script>
     {# Font Awesome 5.15.3 CDN #}
@@ -36,18 +38,37 @@
             transition: margin-right 0.5s ease;
         }
     </style>
-        {% comment %} <style>
-        .top-main {
-            margin-right: 256px; /* Default margin for the top main navbar */
-        }
-    </style> {% endcomment %}
 </head>
 <body class="flex flex-col min-h-screen">
-    {% include "header.html" %}
-
+    {# Header Section - Added as requested #}
+    <header class="bg-white dark:bg-gray-900 shadow-md py-4 px-4 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-50 w-full">
+        <div class="flex items-center gap-4">
+            <a href="/" class="flex items-center">
+                <img src="{% static 'images/ScheduleEase1.png' %}" alt="ScheduleEase Logo" class="h-10 w-auto object-contain">
+                <h1 class="text-xl font-bold text-gray-900 dark:text-white ml-3">ScheduleEase</h1>
+            </a>
+        </div>
+        <nav>
+            {# You might add navigation links here, e.g., for logout or other main sections #}
+            <a 
+            {% comment %} href="{% url 'logout' %}"  {% endcomment %}
+                class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors duration-200">
+                <i class="fas fa-sign-out-alt ml-2"></i> تسجيل الخروج
+            </a>
+            <label class="relative inline-block w-14 h-8 cursor-pointer">
+                <input type="checkbox" id="darkModeToggle" class="sr-only peer">
+                <div class="w-full h-full bg-gray-300 rounded-full peer-checked:bg-gray-700 transition-colors"></div>
+                <div class="absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md flex items-center justify-center transition-all peer-checked:translate-x-6">
+                    <i class="fas fa-moon text-gray-700 text-sm dark:hidden"></i>
+                    <i class="fas fa-sun text-yellow-400 text-sm hidden dark:inline"></i>
+                </div>
+            </label>
+        </nav>
+    </header>
+    {# End Header Section #}
+    
     <div class="flex flex-grow flex-col md:flex-row">
-        {% include "sidebar.html" %}
-
+        
         <div id="mainContent" class="flex-grow main-content flex flex-col">
             <main class="flex-1 p-8 overflow-y-auto mt-4">
                 {% block content %}
@@ -58,9 +79,7 @@
         </div>
     </div>
     <script src="{% static 'src/js/mode.js' %}"></script>
-    <script src="{% static 'src/js/upload_file.js' %}"></script>
-    <script src="{% static 'src/js/delete.js' %}"></script>
-    <script src="{% static 'src/js/sidebar.js' %}"></script>
+
     {% block extra_js %}
     {% endblock %}
 </body>

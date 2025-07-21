@@ -183,7 +183,7 @@ class Subject(models.Model):
     
 # الدكتور (Teacher)
 class Teacher(models.Model):
-    user=models.OneToOneField(User,on_delete=models.CASCADE,default=None)
+    user=models.OneToOneField(User,on_delete=models.CASCADE, null=True, blank=True)
     STATUS_CHOICES: list[tuple[str, str]] = [
         ('active', 'نشط'),
         ('vacation', 'إجازة')

@@ -12,17 +12,24 @@ BASE_API_URL = "http://127.0.0.1:8001/api/"
 def page_notfoun_view(reqest):
     return render(reqest,'notFoune.html')
 
-def login(request):
-    """
-    عرض صفحة تسجيل الدخول.
-    """
-    return render(request, 'login.html')
+# def login(request):
+#     """
+#     عرض صفحة تسجيل الدخول.
+#     """
+#     return render(request, 'login.html')
 
 def dashboard(request):
     """
     عرض لوحة التحكم.
     """
     return render(request, 'dashboard.html')
+
+class TeachersAvailableView(View):
+    def get(self, request,id=None):
+        return render(request, 'teachers_available/list.html')
+    
+    def post(self, request,id=None):
+        return render(request, 'teachers_available/list.html')
 
 class TeacherManagementView(View):
     def get(self, request, id=None):

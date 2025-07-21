@@ -4,7 +4,12 @@ from .utils import *
 from django.shortcuts import render, redirect
 from .utils import api_post,Endpoints
 
+# from rest_framework_simplejwt.views import TokenObtainPairView
+# from .serializers import MyTokenObtainPairSerializer
 
+# class MyTokenObtainPairView(TokenObtainPairView):
+#     serializer_class = MyTokenObtainPairSerializer
+    
 def LoginView(request):
     if request.method == "GET":
         return render(request, 'login.html')
