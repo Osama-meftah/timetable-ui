@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from .utils import *
+from .serializers import *
 
 
 class DepartmentUploadView(APIView):
@@ -20,6 +21,9 @@ class DepartmentUploadView(APIView):
             },
             success_message_singular="قسم"
         )
+        
+        
+# في view الخاص برفع البرامج
 class ProgramUploadView(APIView):
     parser_classes = [MultiPartParser]
 
@@ -28,20 +32,18 @@ class ProgramUploadView(APIView):
             request=request,
             model=Program,
             serializer_class=ProgramSerializer,
-            required_fields=["program_name", "department_id"],
+            required_fields=["program_name", "department_name"],
             get_existing=lambda data: Program.objects.filter(
                 program_name=data["program_name"],
-                fk_department_id=data["department_id"]  # ✅ التصحيح هنا
+                fk_department__name__iexact=data["department_name"]
             ).first(),
-            prepare_data=lambda row: prepare_data_with_fk(
-                row=row,
-                fk_field="fk_department",
-                lookup_field="department_id",
-                model=Department,
-                display_name="program_name"
-            ),
+            prepare_data=lambda row: {
+                "program_name": row.get("program_name", "").strip(),
+                "department_name": row.get("department_name", "").strip()
+            },
             success_message_singular="برنامج"
         )
+
 
 
 class LevelUploadView(APIView):
@@ -52,17 +54,39 @@ class LevelUploadView(APIView):
             request=request,
             model=Level,
             serializer_class=LevelSerializer,
-            required_fields=["level_name", "fk_program_id", "number_students"],
+            required_fields=["level_name", "program_name", "number_students"],
             get_existing=lambda data: Level.objects.filter(
-                level_name=data["level_name"], fk_program_id=data["fk_program_id"]
+                level_name=data["level_name"],
+                fk_program__program_name__iexact=data["program_name"]
             ).first(),
             prepare_data=lambda row: {
                 "level_name": row.get("level_name", "").strip(),
-                "fk_program_id": int(row.get("fk_program_id")),
-                "number_students": int(row.get("number_students"))
+                "program_name": row.get("program_name", "").strip(),
+                "number_students": int(row.get("number_students", 0))
             },
             success_message_singular="مستوى"
         )
+
+
+# class LevelUploadView(APIView):
+#     parser_classes = [MultiPartParser]
+
+#     def post(self, request):
+#         return handle_upload(
+#             request=request,
+#             model=Level,
+#             serializer_class=LevelSerializer,
+#             required_fields=["level_name", "fk_program_id", "number_students"],
+#             get_existing=lambda data: Level.objects.filter(
+#                 level_name=data["level_name"], fk_program_id=data["fk_program_id"]
+#             ).first(),
+#             prepare_data=lambda row: {
+#                 "level_name": row.get("level_name", "").strip(),
+#                 "fk_program_id": int(row.get("fk_program_id")),
+#                 "number_students": int(row.get("number_students"))
+#             },
+#             success_message_singular="مستوى"
+#         )
 
 # class TeacherUploadView(APIView):
 #     parser_classes = [MultiPartParser]
@@ -113,8 +137,12 @@ class SubjectUploadView(APIView):
             ).first(),  # البحث بناءً على الاسم والفصل فقط
             prepare_data=lambda row: {
                 "subject_name": row.get("subject_name", "").strip(),
-                "term": row.get("term", "").strip(),
+                "term": {
+                    "الأول": "term1",
+                    "الثاني": "term2"
+                }.get(row.get("term", "").strip(), "")
             },
+
             success_message_singular="مادة"
         )
 
@@ -133,7 +161,7 @@ class HallUploadView(APIView):
             prepare_data=lambda row: {
                 "hall_name": row.get("hall_name", "").strip(),
                 "capacity_hall": int(row.get("capacity_hall", 0)),
-                "hall_status": row.get("hall_status", "متاحة").strip(),
+                "hall_status": row.get("hall_status", "").strip(),
             },
             success_message_singular="قاعة"
         )

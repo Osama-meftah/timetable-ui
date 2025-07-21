@@ -6,7 +6,12 @@ from .utils import api_post,Endpoints,api_get_with_token
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+# from rest_framework_simplejwt.views import TokenObtainPairView
+# from .serializers import MyTokenObtainPairSerializer
 
+# class MyTokenObtainPairView(TokenObtainPairView):
+#     serializer_class = MyTokenObtainPairSerializer
+    
 def LoginView(request):
     if request.method == "GET":
         return render(request, 'login.html')

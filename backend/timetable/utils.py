@@ -111,40 +111,71 @@ def handle_upload(request, model, serializer_class, required_fields, get_existin
     except Exception as e:
         return Response({"error": f"❌ حدث خطأ أثناء معالجة الملف: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-def prepare_data_with_fk(row, fk_field, lookup_field, model, display_name=None, extra_fields=None):
+
+def prepare_data_with_fk(row, fk_field, lookup_field, model, output_fk_field=None, display_name=None, extra_fields=None):
     extra_fields = extra_fields or []
 
-    # جلب قيمة المفتاح الأجنبي من الصف
     lookup_value = row.get(lookup_field)
+    if not lookup_value:
+        raise ValueError(f"⚠️ لم يتم العثور على قيمة لـ '{lookup_field}' في الصف.")
 
-    # محاولة جلب الكائن المرتبط بالمفتاح (أو الاسم لو لم يكن رقمياً)
     related_instance = None
-    if lookup_value:
-        if str(lookup_value).isdigit():
-            related_instance = model.objects.filter(id=int(lookup_value)).first()
-        if not related_instance:
-            related_instance = model.objects.filter(name=str(lookup_value).strip()).first()
+    if str(lookup_value).isdigit():
+        related_instance = model.objects.filter(id=int(lookup_value)).first()
+    if not related_instance:
+        related_instance = model.objects.filter(name__iexact=str(lookup_value).strip()).first()
 
     if not related_instance:
-        raise ValueError(f"⚠️ {display_name or fk_field}: لم يتم العثور على {model.__name__} بالمعرف أو الاسم '{lookup_value}'.")
+        raise ValueError(f"⚠️ لم يتم العثور على {model.__name__} بالمعرف أو الاسم '{lookup_value}'.")
 
     data = {}
 
-    # جلب باقي الحقول الإضافية
     for field in extra_fields:
         data[field] = row.get(field)
 
-    # إضافة display_name لو معرف
     if display_name:
         data[display_name] = row.get(display_name)
 
-    # ✅ إضافة المفتاح الأصلي للتأكد من اكتمال البيانات
-    data[lookup_field] = lookup_value
-
-    # ✅ إضافة المفتاح الأجنبي الفعلي
-    data[fk_field] = related_instance.pk
+    output_fk_field = output_fk_field or fk_field
+    data[output_fk_field] = related_instance.pk
 
     return data
+
+
+def prepare_data_with_fk_name_to_id(row, fk_field, name_column, model, display_name=None, extra_fields=None):
+    extra_fields = extra_fields or []
+
+    name_value = row.get(name_column)
+    if not name_value:
+        raise ValueError(f"⚠️ العمود '{name_column}' فارغ.")
+
+    # البحث عن الكائن المرتبط بالاسم
+    related_instance = model.objects.filter(name__iexact=name_value.strip()).first()
+    if not related_instance:
+        raise ValueError(f"⚠️ لم يتم العثور على {model.__name__} بالاسم '{name_value}'.")
+
+    data = {
+        fk_field: related_instance.id
+    }
+
+    # إضافة الحقول الإضافية
+    for field in extra_fields:
+        data[field] = row.get(field)
+
+    # display name = program_name مثلاً
+    if display_name:
+        data[display_name] = row.get(display_name)
+
+    return data
+
+def get_existing_by_name_and_fk_name(data, model, name_field, fk_field):
+    return model.objects.filter(
+        **{
+            name_field: data.get(name_field),
+            fk_field: data.get(fk_field)
+        }
+    ).first()
+
 
 # def generate_email(name):
 #     normalized = re.sub(r'[^a-zA-Z0-9]+', '', name.lower())
@@ -176,5 +207,5 @@ def prepare_data_with_fk(row, fk_field, lookup_field, model, display_name=None, 
 #         "teacher_email": email,
 #         "teacher_phone": row.get("teacher_phone", "").strip(),
 #         "teacher_address": row.get("teacher_address", "").strip(),
-#         "teacher_status": row.get("teacher_status", "نشط").strip()
+#         "teacher_status": row.get("teacher_status", "active").strip()
 #     }

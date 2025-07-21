@@ -8,7 +8,7 @@
 {% block content %}
 <div class="relative min-h-[50vh] bg-gray-50 dark:bg-gray-900 flex items-center justify-center py-12
  px-4 sm:px-6 lg:px-8 mt-[-24px]">
-
+ {% include "message.html" %}
     <div
         class="relative z-0 max-w-2xl w-full mx-auto p-8 md:p-10 bg-white dark:bg-gray-800 rounded-lg shadow-2xl transform transition-all duration-500 ease-out scale-95 opacity-0 animate-in">
 
@@ -71,7 +71,7 @@
                         class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-base text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 ease-in-out appearance-none pr-10">
                         <option value="" disabled {% if not room.hall_status %}selected{% endif %}
                             class="text-gray-500 dark:text-gray-400">اختر حالة القاعة...</option>
-                        <option value="available" {% if room.hall_status == 'available' %}selected{% endif %}>available
+                        <option value="available" {% if room.hall_status == 'available' %}selected{% endif %}>متاحة
                         </option>
                         <option value="under_maintenance"
                             {% if room.hall_status == 'under_maintenance' %}selected{% endif %}>تحت
@@ -81,15 +81,15 @@
             </div>
 
             <!-- أزرار -->
-            <div class="flex flex-col sm:flex-row justify-end gap-4 pt-6">
-                <a href="{% url 'rooms_management' %}"
-                    class="inline-flex items-center justify-center px-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-base font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200 ease-in-out transform hover:scale-98 animate-fade-in-up delay-300">
-                    إلغاء
-                </a>
+            <div class="flex flex-col sm:flex-row justify-start gap-4 pt-6">
                 <button type="submit"
                     class="inline-flex justify-center items-center px-6 py-2.5 border border-transparent shadow-md text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200 ease-in-out transform hover:scale-98 animate-fade-in-up delay-400">
                     {% if room %}تحديث القاعة{% else %}حفظ القاعة{% endif %}
                 </button>
+                <a href="{% url 'rooms_management' %}"
+                    class="inline-flex items-center justify-center px-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-base font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200 ease-in-out transform hover:scale-98 animate-fade-in-up delay-300">
+                    إلغاء
+                </a>
             </div>
         </form>
 

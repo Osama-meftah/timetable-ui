@@ -1,5 +1,5 @@
 from django.urls import path,include
-from .views import *
+from .views2 import *
 from rest_framework.routers import DefaultRouter
 from .views_upload_files import  *
 from .views_algorithms import run_scheduler_view

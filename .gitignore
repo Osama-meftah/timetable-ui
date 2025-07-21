@@ -27,7 +27,7 @@ __pycache__/
 
 # ملفات البرامج المساعدة
 *.log
-
+.gitignore
 # ملفات الأنظمة و IDE
 .vscode/
 .idea/

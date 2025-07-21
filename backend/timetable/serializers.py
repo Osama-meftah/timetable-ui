@@ -13,15 +13,51 @@ class DepartmentSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'description']
         
         
+# class ProgramSerializer(serializers.ModelSerializer):
+#     fk_department = DepartmentSerializer(read_only=True) 
+#     department_id = serializers.PrimaryKeyRelatedField(
+#         queryset=Department.objects.all(), write_only=True, source='fk_department'
+#     )
+
+#     class Meta:
+#         model = Program
+#         fields = ['id', 'program_name', 'fk_department', 'department_id']
 class ProgramSerializer(serializers.ModelSerializer):
-    fk_department = DepartmentSerializer(read_only=True) 
+    # عرض القسم كمعلومة فقط (قراءة)
+    fk_department = DepartmentSerializer(read_only=True)
+
+    # دعم إدخال القسم إما بالمعرف أو الاسم
     department_id = serializers.PrimaryKeyRelatedField(
-        queryset=Department.objects.all(), write_only=True, source='fk_department'
+        queryset=Department.objects.all(), write_only=True, required=False, source='fk_department'
     )
+    department_name = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Program
-        fields = ['id', 'program_name', 'fk_department', 'department_id']
+        fields = ['id', 'program_name', 'fk_department', 'department_id', 'department_name']
+
+    def validate(self, data):
+        # نحاول ربط fk_department إما بالـ ID أو بالاسم
+        dept_id = data.get('fk_department', None)
+        dept_name = data.pop('department_name', None)
+
+        if not dept_id and dept_name:
+            department = Department.objects.filter(name__iexact=dept_name.strip()).first()
+            if not department:
+                raise serializers.ValidationError({"department_name": f"القسم '{dept_name}' غير موجود."})
+            data['fk_department'] = department
+
+        if not data.get('fk_department'):
+            raise serializers.ValidationError("يجب تحديد القسم إما بـ department_id أو department_name.")
+
+        return data
+
+    def create(self, validated_data):
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        return super().update(instance, validated_data)
+
 
 class HallSerializer(serializers.ModelSerializer):
     hall_status_display = serializers.CharField(source='get_hall_status_display', read_only=True)
@@ -31,15 +67,42 @@ class HallSerializer(serializers.ModelSerializer):
         
 
 # Serializer للنموذج Level
+# class LevelSerializer(serializers.ModelSerializer):
+#     fk_program = ProgramSerializer(read_only=True)  # للعرض
+#     fk_program_id = serializers.PrimaryKeyRelatedField(
+#         queryset=Program.objects.all(), write_only=True, source='fk_program'
+#     )
+
+#     class Meta:
+#         model = Level
+#         fields = '__all__'
 class LevelSerializer(serializers.ModelSerializer):
-    fk_program = ProgramSerializer(read_only=True)  # للعرض
-    fk_program_id = serializers.PrimaryKeyRelatedField(
-        queryset=Program.objects.all(), write_only=True, source='fk_program'
-    )
+    fk_program = ProgramSerializer(read_only=True)
+    program_name = serializers.CharField(write_only=True)  # استلام اسم البرنامج بدلاً من المعرف
 
     class Meta:
         model = Level
         fields = '__all__'
+
+    def create(self, validated_data):
+        program_name = validated_data.pop('program_name', None)
+        if program_name:
+            program = Program.objects.filter(program_name__iexact=program_name.strip()).first()
+            if not program:
+                raise serializers.ValidationError({'program_name': f"البرنامج '{program_name}' غير موجود."})
+            validated_data['fk_program'] = program
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        program_name = validated_data.pop('program_name', None)
+        if program_name:
+            program = Program.objects.filter(program_name__iexact=program_name.strip()).first()
+            if not program:
+                raise serializers.ValidationError({'program_name': f"البرنامج '{program_name}' غير موجود."})
+            validated_data['fk_program'] = program
+        return super().update(instance, validated_data)
+
+
 
 # Serializer للنموذج Group
 class GroupSerializer(serializers.ModelSerializer):
