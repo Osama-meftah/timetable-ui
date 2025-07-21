@@ -26,19 +26,16 @@ def Login(request):
         data= {
             "username": username,
             "password": password
-        }
-        print(data)
-        
+        }        
         response=requests.post("http://127.0.0.1:8001/api/token/", json=data)
-
         if response.status_code == 200:
             tokens = response.json()
             return Response({"status":"success", "message": "تم تسجيل الدخول بنجاح", "data": {"tokens":tokens}}, status=200)
         else:
             return Response({ "status":"error" ,"message": "خطأ في البريد او كلمة المرور"}, status=status.HTTP_401_UNAUTHORIZED)
+
 @api_view(['POST'])       
 def reset_passowrd(request):
-    
     try:
         data=request.data
         uidb64=data['uidb64']
@@ -53,11 +50,8 @@ def reset_passowrd(request):
             password = data["password"]
             user.set_password(password)
             user.save()
-            # messages.success(request, "تم تغيير كلمة المرور بنجاح.")
             return Response({"status":"success","message":"تم تغيير كلمة المرور بنجاح"},status=status.HTTP_200_OK)
-        # return render(request, "reset_password.html")
     else:
-        # messages.error(request, "الرابط غير صالح أو منتهي الصلاحية.")
         return Response({"status":"error","message":"الرابط منتهي"},status=status.HTTP_404_NOT_FOUND)
     
 @api_view(['GET'])
@@ -65,12 +59,10 @@ def reset_passowrd(request):
 def send_reset_email(request):
     try:
         user=request.user
-        # teacher = api_get(f"{Endpoints.teachers}{pk}/")
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
-        from_email = 'abubaker773880@gmail.com'
+        from_email = settings.DEFAULT_FROM_EMAIL
         relative_link = f"/reset-password/{uid}/{token}/"
-        # reset_url = request.build_absolute_uri(relative_link)
         reset_url = f"{settings.FRONT_END_HOST}{relative_link}"
         subject = "إعادة تعيين كلمة المرور"
         message = f"انقر على الرابط التالي لتعيين كلمة مرور جديدة:\n{reset_url}"
@@ -78,7 +70,26 @@ def send_reset_email(request):
         return Response({"status":"success","message":"تم ارسال رابط تغيير كلمة المرور الى بريدك الالكتروني"})
     except Exception as e:
         return Response({"status":"error","message":f"{e}"})
-
+    
+@api_view(['POST'])
+def send_forget_password_email(request):
+    try:
+        data=request.data
+        email=data.get("email")
+        user=User.objects.filter(email=email).first()
+        if user:
+            uid=urlsafe_base64_encode(force_bytes(user.pk))
+            token=default_token_generator.make_token(user)
+            relative_link = f"/reset-password/{uid}/{token}/"
+            reset_url = f"{settings.FRONT_END_HOST}{relative_link}"
+            from_email = settings.DEFAULT_FROM_EMAIL
+            subject = "إعادة تعيين كلمة المرور"
+            message = f"انقر على الرابط التالي لتعيين كلمة مرور جديدة:\n{reset_url}"
+            send_mail(subject, message, from_email, [user.email])
+            return Response({"status":"success","message":"تم ارسال رابط تغيير كلمة المرور الى بريدك الالكتروني"})
+        return Response({"status":"error","message":"لا يوجد مستخدم بهذا البريد"})
+    except Exception as e:
+        return Response({"status":"error","message":f"{e}"})
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

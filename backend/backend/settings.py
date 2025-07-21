@@ -29,6 +29,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 FRONT_END_HOST="http://127.0.0.1:8000"
+DEFAULT_FROM_EMAIL="abubaker773880@gmail.com"
 
 
 # Application definition

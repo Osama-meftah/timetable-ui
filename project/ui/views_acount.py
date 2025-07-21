@@ -22,7 +22,10 @@ def LoginView(request):
 
         if succes and data is not None:
             tokens = data.get("tokens")
-            request.session['token'] = tokens['access']
+            token=tokens['access']
+            user=api_get_with_token(Endpoints.user,token=token)
+            request.session['user']=user
+            request.session['token'] = token
             request.session['refresh_token'] = tokens['refresh']
             return redirect('dashboard')  # Redirect to a home page or dashboard
         
@@ -33,11 +36,26 @@ def send_reseat_mail(request):
     token = request.session.get('token')
     if not token:
         return Response({"error": "Token not found in session"})
-
     # استدعاء دالة خارجية مع التوكن
     response= api_get_with_token(Endpoints.send_reseat_email, token=token)
     handle_response(request,response)
     return redirect('login') # من اجل الرجوع لنفس الصفحة لن يرجع الى login بسبب midleware
+
+@api_view(['POST','GET'])
+def send_forget_password_mail(request):
+    if request.method=="POST":
+        email=request.POST.get("email")
+        data={
+        "email":email
+        }
+        response= api_post(Endpoints.send_forget_password_email,data=data)
+        success,_= handle_response(request,response)
+         # من اجل الرجوع لنفس الصفحة لن يرجع الى login بسبب midlewar
+        if success:
+           return redirect('login')
+        return redirect(request.path)
+
+    return render(request,'forget_password.html')
 
 @api_view(['POST','GET'])       
 def reseat_teacheer_password(request, uidb64, token):

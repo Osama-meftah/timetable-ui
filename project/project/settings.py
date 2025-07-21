@@ -53,7 +53,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 
     "ui.middleware.IsLoginMiddleware",
-    # "ui.middleware.IsAdminMiddleware"
+    "ui.middleware.IsAdminMiddleware"
 ]
 
 ROOT_URLCONF = "project.urls"

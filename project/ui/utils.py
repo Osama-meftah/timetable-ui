@@ -8,7 +8,8 @@ class Endpoints:
     login = "login/"
     logout = "logout/"
     user="user/"
-    send_reseat_email="send_reseat_email"
+    send_reseat_email="send_reseat_email/"
+    send_forget_password_email="send_forget_password_email/"
     reseat_teacheer_password="reset-password/"
     departments = "departments/"
     departmentsUpload ="uploadDepartments/"
@@ -65,7 +66,6 @@ def api_post(endpoint, data):
         print(f"{BASE_API_URL}{endpoint}", data)
         response = requests.post(f"{BASE_API_URL}{endpoint}", json=data)
         # response.raise_for_status()
-
         return response.json()
     
     except requests.exceptions.RequestException as e:
@@ -78,10 +78,8 @@ def api_get_with_token(endpoint,token):
         "Content-Type": "application/json"
         }
         response = requests.get(f"{BASE_API_URL}{endpoint}", headers=header)
-        response.raise_for_status()
-
+        # response.raise_for_status()
         return response.json()
-    
     except requests.exceptions.RequestException as e:
         raise RuntimeError(f"POST request failed: {e}")
 
