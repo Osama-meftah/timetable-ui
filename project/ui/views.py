@@ -15,12 +15,6 @@ BASE_API_URL = "http://127.0.0.1:8001/api/"
 def page_notfoun_view(reqest):
     return render(reqest,'notFoune.html')
 
-# def login(request):
-#     """
-#     عرض صفحة تسجيل الدخول.
-#     """
-#     return render(request, 'login.html')
-
 def dashboard(request):
     """
     عرض لوحة التحكم.
@@ -29,19 +23,25 @@ def dashboard(request):
 
 class TeachersAvailableView(View):
     def get(self, request,id=None):
-        return render(request, 'teachers_available/list.html')
+        return render(request, 'teachers_management/list.html')
     
     def post(self, request,id=None):
-        return render(request, 'teachers_available/list.html')
+        return render(request, 'teachers_management/list.html')
 
 def teacher_dashboard_view(request):
     user=request.session.get('user')
     print(user)
     # user=User.objects.get(id=user_id)
-    return render(request, 'dashboard_teatcher.html', {'teacher': user})
+    return render(request, 'teachers_management/dashboard_teatcher.html', {'teacher': user})
 
 class TeacherManagementView(View):
+    
     def get(self, request, id=None):
+        user = request.session.get("user")
+        print(user)
+        # if not user or not user.get("is_staff", False):
+        #     # messages.error(request, "❌ لا تملك صلاحية الوصول إلى هذه الصفحة.")
+        #     return redirect("teacher_dashboard")
         try:
             if id:
                 # استخدم api_get مع إعادة عرض القالب مباشرة
@@ -117,9 +117,9 @@ class TeacherManagementView(View):
         teacher_data = {
             # "id": id,
             "teacher_name": request.POST.get("teacher_name", "").strip(),
-            # "teacher_phone": request.POST.get("teacher_phone", "").strip(),
+            "teacher_phone": request.POST.get("teacher_phone", "").strip(),
             "teacher_email": request.POST.get("teacher_email", "").strip(),
-            # "teacher_address": request.POST.get("teacher_address", "").strip(),
+            "teacher_address": request.POST.get("teacher_address", "").strip(),
             "teacher_status": request.POST.get("teacher_status", "").strip(),
         }
         print(teacher_data)
@@ -159,7 +159,7 @@ class TeacherDeleteView(View):
             messages.success(request, "تم حذف المدرس بنجاح.")
         except Exception as e:
             handle_exception(request, "حدث خطأ أثناء حذف المدرس", e)
-        # return redirect("teachers_management")
+        return redirect("teachers_management")
 
 
 class TeacherAvailabilityAndCoursesView(View):

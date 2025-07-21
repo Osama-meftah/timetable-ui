@@ -31,7 +31,7 @@ class Endpoints:
     distributions = "distributions/"
     lectures = "lectures/"
 
-<<<<<<< HEAD
+
 def show_backend_messages(request, response_json, default_success=""):
     if not request:
         return
@@ -52,19 +52,17 @@ def show_backend_messages(request, response_json, default_success=""):
     else:
         messages.success(request, default_success)
         
-=======
+
 
 def handle_response(request, response):
     """
     يعالج الاستجابة القادمة من API ويعرض الرسائل المناسبة، ويعيد البيانات عند الحاجة.
-    """
+    """ 
     status = response.get("status")
     message = response.get("message", "")
     data = response.get("data", None)  # يمكن أن تكون None إذا لم توجد بيانات
-
+    # print(data)
     if status == "success":
-        if message:
-            messages.success(request, message)
         return True, data  # success, مع البيانات
     elif status == "error":
         if message:
@@ -73,26 +71,6 @@ def handle_response(request, response):
     else:
         messages.warning(request, "تنسيق استجابه غير متوقع")
         return False, None
-
-def api_get(endpoint):
-    try:
-        
-        response = requests.get(f"{BASE_API_URL}{endpoint}")
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        raise RuntimeError(f"GET request failed: {e}")
-
-def api_post(endpoint, data):
-    try:
-        print(f"{BASE_API_URL}{endpoint}", data)
-        response = requests.post(f"{BASE_API_URL}{endpoint}", json=data)
-        # response.raise_for_status()
-
-        return response.json()
-    
-    except requests.exceptions.RequestException as e:
-        raise RuntimeError(f"POST request failed: {e}")
 
 def api_get_with_token(endpoint,token):
     try:
@@ -108,23 +86,6 @@ def api_get_with_token(endpoint,token):
     except requests.exceptions.RequestException as e:
         raise RuntimeError(f"POST request failed: {e}")
 
-def api_put(endpoint, data):
-    try:
-        response = requests.put(f"{BASE_API_URL}{endpoint}", json=data)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        raise RuntimeError(f"PUT request failed: {e}")
-
-def api_delete(endpoint):
-    try:
-        response = requests.delete(f"{BASE_API_URL}{endpoint}")
-        response.raise_for_status()
-        return True
-    except requests.exceptions.RequestException as e:
-        raise RuntimeError(f"DELETE request failed: {e}")
-
->>>>>>> origin/recovery-branch2
 def handle_exception(request, message, exception):
     full_message = f"{message}"
     if hasattr(exception, "response") and exception.response is not None:
@@ -207,11 +168,13 @@ def api_get(endpoint, request=None, timeout=10, redirect_to=None, render_templat
 
 def api_post(endpoint, data, request=None,success_message=None, timeout=10, redirect_to=None, render_template=None, render_context=None):
     try:
+        # print(data)
         response = requests.post(f"{BASE_API_URL}{endpoint}", json=data, timeout=timeout)
+        print(response.status_code)
         response.raise_for_status()
-
         try:
             data = response.json()
+            print(data)
         except ValueError:
             msg = f"رد غير متوقع من الخادم: {response.text[:200]}"
             if request:

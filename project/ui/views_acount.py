@@ -22,7 +22,7 @@ def LoginView(request):
             "username": username,
             "password": password
         }
-        response = api_post(Endpoints.login, data)
+        response = api_post(Endpoints.login, data,request)
         succes,data=handle_response(request,response)
 
         if succes and data is not None:
@@ -30,8 +30,9 @@ def LoginView(request):
             request.session['token'] = tokens['access']
             request.session['refresh_token'] = tokens['refresh']
             return redirect('dashboard')  # Redirect to a home page or dashboard
-        
-        return render(request,'login.html')
+        else:
+            messages.error(request, "Invalid username or password")
+            return render(request,'login.html')
 
 @api_view(['GET'])
 def send_reseat_mail(request):
@@ -57,7 +58,7 @@ def reseat_teacheer_password(request, uidb64, token):
             response=api_post(Endpoints.reseat_teacheer_password,data=data)
             handle_response(request,response)
             return redirect('logout')
-    return render(request, "reset_password.html")
+    return render(request, "teacher_management/reset_password.html")
      
 def logout_view(request):
         request.session.flush()  # Clear the session

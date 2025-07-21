@@ -88,20 +88,6 @@ class LevelUploadView(APIView):
 #             success_message_singular="مستوى"
 #         )
 
-# class TeacherUploadView(APIView):
-#     parser_classes = [MultiPartParser]
-
-#     def post(self, request):
-#         return handle_upload(
-#             request=request,
-#             model=Teacher,
-#             serializer_class=TeacherSerializer,
-#             required_fields=["teacher_name"],  # فقط الاسم هنا
-#             get_existing=lambda data: Teacher.objects.filter(teacher_email=data["teacher_email"]).first(),
-#             prepare_data=lambda row: prepare_teacher_data(row),
-#             success_message_singular="مدرس"
-#         )
-
 class TeacherUploadView(APIView):
     parser_classes = [MultiPartParser]
 
@@ -110,17 +96,31 @@ class TeacherUploadView(APIView):
             request=request,
             model=Teacher,
             serializer_class=TeacherSerializer,
-            required_fields=["teacher_name", "teacher_email"],
+            required_fields=["teacher_name"],  # فقط الاسم هنا
             get_existing=lambda data: Teacher.objects.filter(teacher_email=data["teacher_email"]).first(),
-            prepare_data=lambda row: {
-                "teacher_name": row.get("teacher_name", "").strip(),
-                "teacher_email": row.get("teacher_email", "").strip(),
-                "teacher_phone": row.get("teacher_phone", "").strip(),
-                "teacher_address": row.get("teacher_address", "").strip(),
-                "teacher_status": row.get("teacher_status", "نشط").strip()
-            },
+            prepare_data=lambda row: prepare_teacher_data(row),
             success_message_singular="مدرس"
         )
+
+# class TeacherUploadView(APIView):
+#     parser_classes = [MultiPartParser]
+
+#     def post(self, request):
+#         return handle_upload(
+#             request=request,
+#             model=Teacher,
+#             serializer_class=TeacherSerializer,
+#             required_fields=["teacher_name", "teacher_email"],
+#             get_existing=lambda data: Teacher.objects.filter(teacher_email=data["teacher_email"]).first(),
+#             prepare_data=lambda row: {
+#                 "teacher_name": row.get("teacher_name", "").strip(),
+#                 "teacher_email": row.get("teacher_email", "").strip(),
+#                 "teacher_phone": row.get("teacher_phone", "").strip(),
+#                 "teacher_address": row.get("teacher_address", "").strip(),
+#                 "teacher_status": row.get("teacher_status", "نشط").strip()
+#             },
+#             success_message_singular="مدرس"
+#         )
         
 class SubjectUploadView(APIView):
     parser_classes = [MultiPartParser]

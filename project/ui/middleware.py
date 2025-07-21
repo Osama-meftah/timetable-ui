@@ -1,7 +1,7 @@
 from django.shortcuts import redirect, render
 from rest_framework_simplejwt.tokens import AccessToken
 from django.contrib.auth.models import User
-from .utils import api_post,api_get_with_token,Endpoints
+from .utils import *
 class IsLoginMiddleware:
     def __init__(self,get_response):
         self.get_response= get_response

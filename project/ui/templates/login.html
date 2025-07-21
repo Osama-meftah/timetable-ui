@@ -75,6 +75,7 @@
           class="absolute top-0 h-full w-1/2 right-0 opacity-0 z-[1] transition-all duration-600 ease-in-out group-[.right-panel-active]:-translate-x-full group-[.right-panel-active]:opacity-100 group-[.right-panel-active]:z-[5] group-[.right-panel-active]:animate-show"
         >
           <form
+          method="post"
             action="#"
             class="bg-white flex items-center justify-center flex-col px-12 h-full text-center"
           >
@@ -124,13 +125,12 @@
           class="absolute top-0 h-full w-1/2 right-0 z-[2] transition-all duration-600 ease-in-out group-[.right-panel-active]:-translate-x-full"
         >
           <form
-          method="get"
-          action="{% url 'teachers_availability' %}"
+          method="post"
+          action="{% url 'login' %}"
           class="bg-white flex items-center justify-center flex-col px-12 h-full text-center"
           >
-          {% comment %} action="{% url 'login' %}" {% endcomment %}
-            {% csrf_token %}
-            <h1 class="font-bold text-3xl">تسجيل الدخول</h1>
+          {% csrf_token %}
+          <h1 class="font-bold text-3xl">تسجيل الدخول</h1>
             <div class="my-5">
               <a
                 href="#"
