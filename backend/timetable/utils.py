@@ -20,11 +20,14 @@ def extract_username_from_email(email):
     return email
 
 def send_password_email(user, password):
-    subject = 'Welcome to the Timetable System'
-    message = f'Your account has been created successfully.\nUsername: {user.username}\nPassword: {password}'
-    from_email = 'abubaker773880@gmail.com'
-    recipient_list = [user.email]
-    send_mail(subject,message,from_email,recipient_list)
+    try:
+        subject = 'Welcome to the Timetable System'
+        message = f'Your account has been created successfully.\nUsername: {user.username}\nPassword: {password}'
+        from_email = 'abubaker773880@gmail.com'
+        recipient_list = [user.email]
+        send_mail(subject,message,from_email,recipient_list)
+    except Exception as e:
+            return Response({"status":"error","message":"البريد الالكتروني غير صالح","details":f"{e}"})
 
 
 

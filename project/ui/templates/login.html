@@ -37,19 +37,14 @@
       .animate-show {
         animation: show 0.6s;
       }
-      header {
-        height: 95px;
-      }
-      footer {
-        margin-top:-60px;
-      }
     </style>
     {% comment %} <link rel="stylesheet" href="{% static '/dist/style.css' %}" /> {% endcomment %}
   </head>
-  <body class="bg-slate-50">
-    <header 
-    class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e7edf3] 
-      px-10 py-5 w-full absolute top-0 left-0 bg-white shadow-sm">
+  <body class="bg-slate-50 flex justify-center items-center flex-col h-screen">
+    <header
+      class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e7edf3] 
+      px-10 py-5 w-full absolute top-0 left-0 bg-white shadow-sm"
+    >
       <div class="flex items-center gap-4 text-[#0e141b] h-[40px]">
         <div class="size-28">
           <img
@@ -65,146 +60,142 @@
         </h2>
       </div>
     </header>
-    <div class='flex justify-center items-center flex-col h-screen mt-4'>
+    <div
+      class="group relative overflow-hidden rounded-lg bg-white shadow-2xl w-full max-w-4xl min-h-[480px]"
+      id="container"
+    >
+      <div
+        class="absolute top-0 h-full w-1/2 right-0 opacity-0 z-[1] transition-all duration-600 ease-in-out group-[.right-panel-active]:-translate-x-full group-[.right-panel-active]:opacity-100 group-[.right-panel-active]:z-[5] group-[.right-panel-active]:animate-show"
+      >
+        <form
+          action="#"
+          class="bg-white flex items-center justify-center flex-col px-12 h-full text-center"
+        >
+          <h1 class="font-bold text-3xl">إنشاء حساب</h1>
+          <div class="my-5">
+            <a
+              href="#"
+              class="inline-flex justify-center items-center mx-1 h-10 w-10 border border-gray-300 rounded-full"
+              ><i class="fab fa-facebook-f"></i
+            ></a>
+            <a
+              href="#"
+              class="inline-flex justify-center items-center mx-1 h-10 w-10 border border-gray-300 rounded-full"
+              ><i class="fab fa-google-plus-g"></i
+            ></a>
+            <a
+              href="#"
+              class="inline-flex justify-center items-center mx-1 h-10 w-10 border border-gray-300 rounded-full"
+              ><i class="fab fa-linkedin-in"></i
+            ></a>
+          </div>
+          <span class="text-xs">أو استخدم بريدك الإلكتروني للتسجيل</span>
+          <input
+            type="text"
+            placeholder="الاسم"
+            class="bg-gray-200 border-none p-3 my-2 w-full"
+          />
+          <input
+            type="email"
+            placeholder="البريد الإلكتروني"
+            class="bg-gray-200 border-none p-3 my-2 w-full"
+          />
+          <input
+            type="password"
+            placeholder="كلمة المرور"
+            class="bg-gray-200 border-none p-3 my-2 w-full"
+          />
+          <button
+            class="mt-4 rounded-full border border-[#2c3e50] bg-[#2c3e50] text-white text-xs font-bold py-3 px-11 uppercase tracking-wider transition-transform duration-75 ease-in active:scale-95 focus:outline-none"
+          >
+            تسجيل اشتراك
+          </button>
+        </form>
+      </div>
 
       <div
-        class="group relative overflow-hidden rounded-lg bg-white shadow-2xl w-full max-w-4xl min-h-[480px]"
-        id="container"
+        class="absolute top-0 h-full w-1/2 right-0 z-[2] transition-all duration-600 ease-in-out group-[.right-panel-active]:-translate-x-full"
+      >
+        <form
+        method="post"
+          action="{% url 'login' %}"
+          class="bg-white flex items-center justify-center flex-col px-12 h-full text-center"
+        >
+          {% csrf_token %}
+          <h1 class="font-bold text-3xl">تسجيل الدخول</h1>
+          <div class="my-5">
+            <a
+              href="#"
+              class="inline-flex justify-center items-center mx-1 h-10 w-10 border border-gray-300 rounded-full"
+              ><i class="fab fa-facebook-f"></i
+            ></a>
+            <a
+              href="#"
+              class="inline-flex justify-center items-center mx-1 h-10 w-10 border border-gray-300 rounded-full"
+              ><i class="fab fa-google-plus-g"></i
+            ></a>
+            <a
+              href="#"
+              class="inline-flex justify-center items-center mx-1 h-10 w-10 border border-gray-300 rounded-full"
+              ><i class="fab fa-linkedin-in"></i
+            ></a>
+          </div>
+          <span class="text-xs">أو استخدم حسابك</span>
+          <input
+            type="username"
+            placeholder="البريد الإلكتروني"
+            class="bg-gray-200 border-none p-3 my-2 w-full"
+            name="username"
+          />
+          <input
+            type="password"
+            placeholder="كلمة المرور"
+            class="bg-gray-200 border-none p-3 my-2 w-full"
+            name="password"
+          />
+          <a href="{% url 'send_forget_email' %}" class="text-sm my-4">هل نسيت كلمة المرور؟</a>
+          <button
+            class="rounded-full border border-[#2c3e50] bg-[#2c3e50] text-white text-xs font-bold py-3 px-11 uppercase tracking-wider transition-transform duration-75 ease-in active:scale-95 focus:outline-none"
+          >
+            تسجيل الدخول
+          </button>
+        </form>
+      </div>
+
+      <div
+        class="absolute top-0 right-1/2 w-1/2 h-full overflow-hidden z-[100] transition-transform duration-600 ease-in-out group-[.right-panel-active]:translate-x-full"
       >
         <div
-          class="absolute top-0 h-full w-1/2 right-0 opacity-0 z-[1] transition-all duration-600 ease-in-out group-[.right-panel-active]:-translate-x-full group-[.right-panel-active]:opacity-100 group-[.right-panel-active]:z-[5] group-[.right-panel-active]:animate-show"
+          class="relative right-[-100%] h-full w-[200%] bg-gradient-to-r from-[#2c3e50] to-[#1f577d] text-white transition-transform duration-600 ease-in-out group-[.right-panel-active]:-translate-x-1/2"
         >
-          <form
-            action="#"
-            class="bg-white flex items-center justify-center flex-col px-12 h-full text-center"
+          <div
+            class="absolute flex items-center justify-center flex-col px-10 text-center top-0 h-full w-1/2 transform translate-x-[20%] transition-transform duration-600 ease-in-out group-[.right-panel-active]:translate-x-0"
           >
-            <h1 class="font-bold text-3xl">إنشاء حساب</h1>
-            <div class="my-5">
-              <a
-                href="#"
-                class="inline-flex justify-center items-center mx-1 h-10 w-10 border border-gray-300 rounded-full"
-                ><i class="fab fa-facebook-f"></i
-              ></a>
-              <a
-                href="#"
-                class="inline-flex justify-center items-center mx-1 h-10 w-10 border border-gray-300 rounded-full"
-                ><i class="fab fa-google-plus-g"></i
-              ></a>
-              <a
-                href="#"
-                class="inline-flex justify-center items-center mx-1 h-10 w-10 border border-gray-300 rounded-full"
-                ><i class="fab fa-linkedin-in"></i
-              ></a>
-            </div>
-            <span class="text-xs">أو استخدم بريدك الإلكتروني للتسجيل</span>
-            <input
-              type="text"
-              placeholder="الاسم"
-              class="bg-gray-200 border-none p-3 my-2 w-full"
-            />
-            <input
-              type="email"
-              placeholder="البريد الإلكتروني"
-              class="bg-gray-200 border-none p-3 my-2 w-full"
-            />
-            <input
-              type="password"
-              placeholder="كلمة المرور"
-              class="bg-gray-200 border-none p-3 my-2 w-full"
-            />
+            <h1 class="font-bold text-3xl">أهلاً بك مرة أخرى!</h1>
+            <p class="text-sm font-thin leading-5 tracking-wider my-5">
+              للبقاء على اتصال معنا، يرجى تسجيل الدخول بمعلوماتك الشخصية
+            </p>
             <button
-              class="mt-4 rounded-full border border-[#2c3e50] bg-[#2c3e50] text-white text-xs font-bold py-3 px-11 uppercase tracking-wider transition-transform duration-75 ease-in active:scale-95 focus:outline-none"
-            >
-              تسجيل اشتراك
-            </button>
-          </form>
-        </div>
-  
-        <div
-          class="absolute top-0 h-full w-1/2 right-0 z-[2] transition-all duration-600 ease-in-out group-[.right-panel-active]:-translate-x-full"
-        >
-          <form
-          method="get"
-          action="{% url 'teachers_availability' %}"
-          class="bg-white flex items-center justify-center flex-col px-12 h-full text-center"
-          >
-          {% comment %} action="{% url 'login' %}" {% endcomment %}
-            {% csrf_token %}
-            <h1 class="font-bold text-3xl">تسجيل الدخول</h1>
-            <div class="my-5">
-              <a
-                href="#"
-                class="inline-flex justify-center items-center mx-1 h-10 w-10 border border-gray-300 rounded-full"
-                ><i class="fab fa-facebook-f"></i
-              ></a>
-              <a
-                href="#"
-                class="inline-flex justify-center items-center mx-1 h-10 w-10 border border-gray-300 rounded-full"
-                ><i class="fab fa-google-plus-g"></i
-              ></a>
-              <a
-                href="#"
-                class="inline-flex justify-center items-center mx-1 h-10 w-10 border border-gray-300 rounded-full"
-                ><i class="fab fa-linkedin-in"></i
-              ></a>
-            </div>
-            <span class="text-xs">أو استخدم حسابك</span>
-            <input
-              type="username"
-              placeholder="البريد الإلكتروني"
-              class="bg-gray-200 border-none p-3 my-2 w-full"
-              name="username"
-            />
-            <input
-              type="password"
-              placeholder="كلمة المرور"
-              class="bg-gray-200 border-none p-3 my-2 w-full"
-              name="password"
-            />
-            <a href="#" class="text-sm my-4">هل نسيت كلمة المرور؟</a>
-            <button
-              class="rounded-full border border-[#2c3e50] bg-[#2c3e50] text-white text-xs font-bold py-3 px-11 uppercase tracking-wider transition-transform duration-75 ease-in active:scale-95 focus:outline-none"
+              class="ghost bg-transparent border-white border rounded-full text-xs font-bold py-3 px-11 uppercase tracking-wider transition-transform duration-75 ease-in active:scale-95 focus:outline-none"
+              id="signIn"
             >
               تسجيل الدخول
             </button>
-          </form>
-        </div>
-  
-        <div
-          class="absolute top-0 right-1/2 w-1/2 h-full overflow-hidden z-[100] transition-transform duration-600 ease-in-out group-[.right-panel-active]:translate-x-full"
-        >
+          </div>
+
           <div
-            class="relative right-[-100%] h-full w-[200%] bg-gradient-to-r from-[#2c3e50] to-[#1f577d] text-white transition-transform duration-600 ease-in-out group-[.right-panel-active]:-translate-x-1/2"
+            class="absolute flex items-center justify-center flex-col px-10 text-center top-0 h-full w-1/2 transform translate-x-0 transition-transform duration-600 ease-in-out left-0 group-[.right-panel-active]:-translate-x-[20%]"
           >
-            <div
-              class="absolute flex items-center justify-center flex-col px-10 text-center top-0 h-full w-1/2 transform translate-x-[20%] transition-transform duration-600 ease-in-out group-[.right-panel-active]:translate-x-0"
+            <h1 class="font-bold text-3xl">أهلاً، صديقي!</h1>
+            <p class="text-sm font-thin leading-5 tracking-wider my-5">
+              أدخل تفاصيلك الشخصية وابدأ رحلتك معنا
+            </p>
+            <button
+              class="ghost bg-transparent border-white border rounded-full text-xs font-bold py-3 px-11 uppercase tracking-wider transition-transform duration-75 ease-in active:scale-95 focus:outline-none"
+              id="signUp"
             >
-              <h1 class="font-bold text-3xl">أهلاً بك مرة أخرى!</h1>
-              <p class="text-sm font-thin leading-5 tracking-wider my-5">
-                للبقاء على اتصال معنا، يرجى تسجيل الدخول بمعلوماتك الشخصية
-              </p>
-              <button
-                class="ghost bg-transparent border-white border rounded-full text-xs font-bold py-3 px-11 uppercase tracking-wider transition-transform duration-75 ease-in active:scale-95 focus:outline-none"
-                id="signIn"
-              >
-                تسجيل الدخول
-              </button>
-            </div>
-  
-            <div
-              class="absolute flex items-center justify-center flex-col px-10 text-center top-0 h-full w-1/2 transform translate-x-0 transition-transform duration-600 ease-in-out left-0 group-[.right-panel-active]:-translate-x-[20%]"
-            >
-              <h1 class="font-bold text-3xl">أهلاً، صديقي!</h1>
-              <p class="text-sm font-thin leading-5 tracking-wider my-5">
-                أدخل تفاصيلك الشخصية وابدأ رحلتك معنا
-              </p>
-              <button
-                class="ghost bg-transparent border-white border rounded-full text-xs font-bold py-3 px-11 uppercase tracking-wider transition-transform duration-75 ease-in active:scale-95 focus:outline-none"
-                id="signUp"
-              >
-                تسجيل اشتراك
-              </button>
-            </div>
+              تسجيل اشتراك
+            </button>
           </div>
         </div>
       </div>
@@ -223,6 +214,5 @@
         container.classList.remove("right-panel-active");
       });
     </script>
-    {% include "footer.html" %}
   </body>
 </html>
