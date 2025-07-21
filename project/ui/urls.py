@@ -1,13 +1,14 @@
 from django.urls import path
 from . import views
-from .views_acount import LoginView
+from .views_acount import LoginView, logout_view
 
 urlpatterns = [
-    path('', LoginView, name='login'),
+    path('login/', LoginView, name='login'),
+    path('logout/', logout_view, name='logout'),
     path('dashboard/', views.dashboard, name='dashboard'),
     # path()
     
-    
+    path('teachers/availability/', views.TeachersAvailableView.as_view(), name='teachers_availability'),
     path('teachers/', views.TeacherManagementView.as_view(), name='teachers_management'),
     path('teachers/add/', views.TeacherManagementView.as_view(), name='add_teacher'),
     path('teachers/edit/<int:id>/', views.TeacherManagementView.as_view(), name='edit_teacher'),

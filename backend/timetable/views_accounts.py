@@ -5,6 +5,8 @@ from django.http import JsonResponse
 from django.core.mail import send_mail
 from django.contrib import messages
 from django.shortcuts import redirect
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import MyTokenObtainPairSerializer
 import requests
 
 @api_view(['POST'])
@@ -25,3 +27,7 @@ def Login(request):
             return JsonResponse({'message': 'Login successful', 'tokens': tokens}, status=200)
         else:
             return JsonResponse({'error': 'Invalid credentials'}, status=400)
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
+

@@ -64,9 +64,12 @@ class TeacherViewSet(ModelViewSet):
             teacher_id=request.data.get('id', None)
         
             if not email:
-                return JsonResponse({'status': 'error', 'message': 'البريد الإلكتروني واسم المستخدم مطلوبان.'}, status=400)
+                return Response({'status': 'error', 'message': 'البريد الإلكتروني واسم المستخدم مطلوبان.'}, status=400)
+            
             username= extract_username_from_email(email)
             user = User.objects.create_user(username=username, email=email, is_staff=is_staff)
+            if User.objects.filter(email=email).exists():
+                return Response({"status": "error","message": "البريد الذي ادخلته موجود مسبقا"}, status=status.HTTP_400_BAD_REQUEST)
             user.set_password(password)
             user.save()
 
@@ -84,8 +87,9 @@ class TeacherViewSet(ModelViewSet):
             # if Teacher.objects.filter(username=username).exists():
                 # return Response({"error": "User with this username already exists."}, status=status.HTTP_400_BAD_REQUEST)
             return Response({
+                "status": "success",
                 "message": "Teacher created successfully.",
-                "teacher": serializer.data
+                "data": serializer.data
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

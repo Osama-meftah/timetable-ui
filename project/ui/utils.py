@@ -6,11 +6,13 @@ from django.shortcuts import redirect, render
 BASE_API_URL = "http://127.0.0.1:8001/api/"
 
 class Endpoints:
+    login = "login/"
+    logout = "logout/"
     departments = "departments/"
-    departmentsUpload = "uploadDepartments/"
-    programsUpload = "uploadPrograms/"
-    levelsUpload = "uploadLevels/"
-    todays = "todays/"
+    departmentsUpload ="uploadDepartments/"
+    programsUpload="uploadPrograms/"
+    levelsUpload="uploadLevels/"
+    todays: str = "todays/"
     periods = "periods/"
     halls = "halls/"
     uploadHalls = "uploadHalls/"
@@ -45,7 +47,7 @@ def show_backend_messages(request, response_json, default_success=""):
             messages.error(request, f"❌ {response_json['detail']}")
     else:
         messages.success(request, default_success)
-
+        
 def handle_exception(request, message, exception):
     full_message = f"{message}"
     if hasattr(exception, "response") and exception.response is not None:
