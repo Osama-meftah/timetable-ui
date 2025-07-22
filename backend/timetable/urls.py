@@ -2,10 +2,9 @@ from django.urls import path,include
 from .views2 import *
 from rest_framework.routers import DefaultRouter
 from .views_upload_files import  *
-from .views_algorithms import run_scheduler_view
+from .views_algorithms import TableViewSet
 from .views_search import *
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-
 from .views_accounts import *
 
 router = DefaultRouter()
@@ -21,7 +20,7 @@ router.register('periods',PeriodViewSet )  # تسجيل ViewSet
 router.register('teacherTimes',TeacherTimeViewSet )  
 router.register('distributions',DistributionViewSet )  
 router.register('lectures',LectureViewSet )  
-router.register('tables',TableViewSet )  
+router.register('tables',TableViewSet )
 
 urlpatterns =[
     path('',include(router.urls)),
@@ -35,7 +34,7 @@ urlpatterns =[
     path("searchteachersdistribution/", SearchTeacherDistributionAPIView.as_view()),
     path("searchcourses/", SearchCoursesAPIView.as_view()),
     path("searchhalls/", SearchHallsAPIView.as_view(),),
-    path('run-scheduler/', run_scheduler_view, name='run_scheduler'),
+    # path('run-scheduler/', run_scheduler_view, name='run_scheduler'),
 
     # urls acounts
     path('login/', Login, name='create_user'),

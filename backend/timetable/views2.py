@@ -130,12 +130,12 @@ class PeriodViewSet(BaseViewSet):
     success_delete_message = "تم حذف الفترة بنجاح."
 
 
-class TableViewSet(BaseViewSet):
-    queryset = Table.objects.all()
-    serializer_class = TableSerializer
-    success_create_message = "تم إنشاء الجدول بنجاح."
-    success_update_message = "تم تحديث الجدول بنجاح."
-    success_delete_message = "تم حذف الجدول بنجاح."
+# class TableViewSet(BaseViewSet):
+#     queryset = Table.objects.all()
+#     serializer_class = TableSerializer
+#     success_create_message = "تم إنشاء الجدول بنجاح."
+#     success_update_message = "تم تحديث الجدول بنجاح."
+#     success_delete_message = "تم حذف الجدول بنجاح."
 
 
 class LevelViewSet(BaseViewSet):

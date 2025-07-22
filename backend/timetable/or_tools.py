@@ -194,7 +194,7 @@ class TimeTableScheduler:
                 for day_a, times in available.items():
                     
                     # day_name = self.days['Day Name'].loc[int(day_a)]
-                    day_name = [d for d in self.days if d.id == day][0].day_name
+                    day_name = [d for d in self.days if d.id == day][0].get_day_name_display()
 
                     for time_idx in times:
                         time_slot = f"{day_name} {self.available_times[time_idx]}"
@@ -286,7 +286,7 @@ class TimeTableScheduler:
                 for day, times in course['available_times'].items():
                     # day_name = self.days['Day Name'].loc[int(day)]
                     # day_name= self.days[day].day_name
-                    day_name = [d for d in self.days if d.id == day][0].day_name
+                    day_name = [d for d in self.days if d.id == day][0].get_day_name_display()
                     for time_idx in times:
                         time_slot = f"{day_name} {self.available_times[time_idx]}"
                         if time_slot not in available_times_str:
@@ -406,7 +406,7 @@ class TimeTableScheduler:
                                 id = time.pk
                                 schedule.append({
                                     "course_id": course_id,
-                                    "day": day.day_name,
+                                    "day": day.get_day_name_display(),
                                     "time": self.available_times[id],
                                     "room": room_name,
                                     "room_id": room.pk,
