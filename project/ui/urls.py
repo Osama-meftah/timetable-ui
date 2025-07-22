@@ -6,15 +6,16 @@ urlpatterns = [
     path('login/', LoginView, name='login'),
     path('logout/', logout_view, name='logout'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    # path()
+    
+    path('teachers/availability/', views.TeachersAvailableView.as_view(), name='teachers_availability'),
+
     path('teacher_dashboard/',views.teacher_dashboard_view,name="teacher_dashboard"),
     path('send_reseat_mail/',send_reseat_mail,name='send_reseat_mail'),
     path('send_forget_email/',send_forget_password_mail,name='send_forget_email'),
 
     path('reset-password/<uidb64>/<token>/', reseat_teacheer_password, name='reset-password'),
 
-    # path()
-    
-    path('teachers/availability/', views.TeachersAvailableView.as_view(), name='teachers_availability'),
     path('teachers/', views.TeacherManagementView.as_view(), name='teachers_management'),
     path('teachers/add/', views.TeacherManagementView.as_view(), name='add_teacher'),
     path('teachers/edit/<int:id>/', views.TeacherManagementView.as_view(), name='edit_teacher'),

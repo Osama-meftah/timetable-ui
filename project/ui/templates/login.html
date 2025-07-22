@@ -6,9 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>نموذج تسجيل الدخول/الاشتراك (نسخة مصححة)</title>
 
-   
     <script src="https://cdn.tailwindcss.com"></script>
-    
 
     <link
       rel="stylesheet"
@@ -38,20 +36,17 @@
         animation: show 0.6s;
       }
     </style>
-    {% comment %} <link rel="stylesheet" href="{% static '/dist/style.css' %}" /> {% endcomment %}
+    {% comment %}
+    <link rel="stylesheet" href="{% static '/dist/style.css' %}" />
+    {% endcomment %}
   </head>
   <body class="bg-slate-50 flex justify-center items-center flex-col h-screen">
     <header
-      class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e7edf3] 
-      px-10 py-5 w-full absolute top-0 left-0 bg-white shadow-sm"
+      class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e7edf3] px-10 py-5 w-full absolute top-0 left-0 bg-white shadow-sm"
     >
       <div class="flex items-center gap-4 text-[#0e141b] h-[40px]">
         <div class="size-28">
-          <img
-            src="{% static 'images/ScheduleEase1.png' %}"
-            class=""
-            alt=""
-          />
+          <img src="{% static 'images/ScheduleEase1.png' %}" class="" alt="" />
         </div>
         <h2
           class="text-[#0e141b] text-lg font-bold leading-tight tracking-[-0.015em]"
@@ -117,7 +112,7 @@
         class="absolute top-0 h-full w-1/2 right-0 z-[2] transition-all duration-600 ease-in-out group-[.right-panel-active]:-translate-x-full"
       >
         <form
-        method="post"
+          method="post"
           action="{% url 'login' %}"
           class="bg-white flex items-center justify-center flex-col px-12 h-full text-center"
         >
@@ -153,7 +148,9 @@
             class="bg-gray-200 border-none p-3 my-2 w-full"
             name="password"
           />
-          <a href="{% url 'send_forget_email' %}" class="text-sm my-4">هل نسيت كلمة المرور؟</a>
+          <a href="{% url 'send_forget_email' %}" class="text-sm my-4"
+            >هل نسيت كلمة المرور؟</a
+          >
           <button
             class="rounded-full border border-[#2c3e50] bg-[#2c3e50] text-white text-xs font-bold py-3 px-11 uppercase tracking-wider transition-transform duration-75 ease-in active:scale-95 focus:outline-none"
           >

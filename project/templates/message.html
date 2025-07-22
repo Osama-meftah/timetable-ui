@@ -1,266 +1,93 @@
-{% comment %} {% if messages %}
-            <div class="mb-6 space-y-3">
-                {% for message in messages %}
-                    <div class="p-4 rounded-lg animate-fade-in flex items-start gap-3
-                        {% if message.tags == 'success' %}bg-green-50 dark:bg-green-900/30 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-700
-                        {% elif message.tags == 'error' %}bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-700
-                        {% elif message.tags == 'warning' %}bg-yellow-50 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border border-yellow-200 dark:border-yellow-700
-                        {% else %}bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700{% endif %}" role="alert">
-                        <i class="text-xl leading-none mt-0.5
-                            {% if message.tags == 'success' %}fas fa-check-circle text-green-500
-                            {% elif message.tags == 'error' %}fas fa-times-circle text-red-500
-                            {% elif message.tags == 'warning' %}fas fa-exclamation-triangle text-yellow-500
-                            {% else %}fas fa-info-circle text-blue-500{% endif %}
-                        "></i>
-                        <p class="text-sm font-medium flex-1">{{ message }}</p>
-                    </div>
-                {% endfor %}
-            </div>
-    {% endif %} {% endcomment %}
-
-    <style>
-    /* Modal overlay styles */
-    .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.6); /* Darker overlay for better contrast */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.4s ease-in-out, visibility 0.4s ease-in-out; /* Smoother transition */
-    }
-    .modal-overlay.show {
-        opacity: 1;
-        visibility: visible;
-    }
-    /* Modal content styles */
-    .modal-content {
-        background-color: #fff;
-        padding: 1.5rem; /* Slightly less padding to feel more compact */
-        border-radius: 1rem; /* More rounded corners */
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* Deeper shadow */
-        width: 90%;
-        max-width: 450px; /* Slightly wider */
-        transform: translateY(-30px) scale(0.9); /* Start further up and smaller */
-        opacity: 0;
-        transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); /* Custom cubic-bezier for more lively animation */
-        border: 1px solid rgba(0, 0, 0, 0.05); /* Subtle border */
-    }
-    .modal-overlay.show .modal-content {
-        transform: translateY(0) scale(1);
-        opacity: 1;
-    }
-
-    /* Dark mode adjustments for modal content */
-    .dark .modal-content {
-        background-color: #2d3748; /* dark gray */
-        border-color: rgba(255, 255, 255, 0.1); /* Lighter border in dark mode */
-        color: #e2e8f0; /* light gray text */
-    }
-
-    /* Specific styles for message types */
-    .modal-header {
-        padding: 1rem 1.5rem; /* Consistent padding */
-        border-radius: 0.75rem 0.75rem 0 0; /* Rounded top corners */
-        margin: -1.5rem -1.5rem 1.5rem -1.5rem; /* Negative margin to extend to edges */
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        font-weight: 600; /* Semi-bold title */
-        font-size: 1.125rem; /* text-lg */
-    }
-
-    .modal-header i {
-        margin-left: 0.75rem; /* Space between icon and text */
-        font-size: 1.3rem; /* Slightly larger icon */
-    }
-
-    .modal-header.success {
-        background-color: #d1fae5; /* green-100 */
-        color: #065f46; /* green-800 */
-    }
-    .dark .modal-header.success {
-        background-color: #10b981; /* green-500 */
-        color: #ecfdf5; /* green-50 */
-    }
-
-    .modal-header.error {
-        background-color: #fee2e2; /* red-100 */
-        color: #991b1b; /* red-800 */
-    }
-    .dark .modal-header.error {
-        background-color: #ef4444; /* red-500 */
-        color: #fef2f2; /* red-50 */
-    }
-
-    .modal-header.info {
-        background-color: #e0f2fe; /* blue-100 */
-        color: #1e40af; /* blue-800 */
-    }
-    .dark .modal-header.info {
-        background-color: #3b82f6; /* blue-500 */
-        color: #eff6ff; /* blue-50 */
-    }
-
-    .modal-header.warning {
-        background-color: #fff3e0; /* yellow-100 equivalent */
-        color: #e65100; /* orange-900 equivalent */
-    }
-    .dark .modal-header.warning {
-        background-color: #f59e0b; /* amber-500 */
-        color: #fffbeb; /* amber-50 */
-    }
-
-    /* Close button styling */
-    #closeModalBtn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 0.25rem;
-        border-radius: 0.375rem; /* rounded-md */
-        transition: background-color 0.2s ease, color 0.2s ease;
-    }
-    #closeModalBtn:hover {
-        background-color: rgba(0, 0, 0, 0.05);
-        color: #333;
-    }
-    .dark #closeModalBtn:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-        color: #fff;
-    }
-
-    /* Message paragraph style */
-    #modalMessage {
-        line-height: 1.6;
-        font-size: 1rem; /* text-base */
-        color: #4a5568; /* gray-700 */
-    }
-    .dark #modalMessage {
-        color: #cbd5e0; /* gray-300 */
-    }
-</style>
 
 
-<!-- Message Modal Structure -->
 <div id="messageModal" class="modal-overlay">
-    <div class="modal-content dark:bg-gray-800 dark:text-gray-200">
-        <div id="modalHeader" class="modal-header p-4 rounded-t-lg flex items-center justify-between">
-            <div class="flex items-center">
-                <i id="modalIcon" class="text-xl ml-2"></i>
-                <h2 id="modalTitle" class="text-lg font-semibold"></h2>
-            </div>
-            <button id="closeModalBtn" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 text-2xl leading-none">
-                &times;
-            </button>
-        </div>
-        <div class="p-4">
-            <p id="modalMessage" class="text-gray-700 dark:text-gray-300"></p>
-        </div>
+  <div class="modal-content dark:bg-gray-800 dark:text-gray-200">
+    <div id="modalHeader" class="modal-header p-4 rounded-t-lg flex items-center justify-between">
+      <div class="flex items-center">
+        <i id="modalIcon" class="text-xl ml-2"></i>
+        <h2 id="modalTitle" class="text-lg font-semibold"></h2>
+      </div>
+      <button id="closeModalBtn" class="text-2xl">&times;</button>
     </div>
+    <div class="p-4">
+      <pre id="modalMessage" class="whitespace-pre-line text-sm text-gray-800 dark:text-gray-200"></pre>
+    </div>
+  </div>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const messageModal = document.getElementById('messageModal');
+  const modalHeader = document.getElementById('modalHeader');
+  const modalIcon = document.getElementById('modalIcon');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalMessage = document.getElementById('modalMessage');
+  const closeModalBtn = document.getElementById('closeModalBtn');
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const messageModal = document.getElementById('messageModal');
-        const modalContent = messageModal.querySelector('.modal-content');
-        const modalHeader = document.getElementById('modalHeader');
-        const modalIcon = document.getElementById('modalIcon');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalMessage = document.getElementById('modalMessage');
-        const closeModalBtn = document.getElementById('closeModalBtn');
+  function showMessageModal(type, title, message) {
+    modalHeader.className = 'modal-header p-4 rounded-t-lg flex items-center justify-between';
+    modalIcon.className = 'text-xl ml-2';
+    modalIcon.classList.remove('fa-check-circle', 'fa-times-circle', 'fa-info-circle', 'fa-exclamation-triangle');
 
-        // وظيفة لإظهار نافذة الرسائل
-        function showMessageModal(type, title, message) {
-            // إعادة تعيين الفئات
-            modalHeader.className = 'modal-header p-4 rounded-t-lg flex items-center justify-between';
-            modalIcon.className = 'text-xl ml-2';
+    if (type === 'success') {
+      modalHeader.classList.add('bg-green-500', 'text-white');
+      modalIcon.classList.add('fas', 'fa-check-circle');
+      modalTitle.textContent = title || 'نجاح';
+    } else if (type === 'error') {
+      modalHeader.classList.add('bg-red-600', 'text-white');
+      modalIcon.classList.add('fas', 'fa-times-circle');
+      modalTitle.textContent = title || 'خطأ';
+    } else if (type === 'warning') {
+      modalHeader.classList.add('bg-yellow-500', 'text-white');
+      modalIcon.classList.add('fas', 'fa-exclamation-triangle');
+      modalTitle.textContent = title || 'تحذير';
+    } else {
+      modalHeader.classList.add('bg-blue-500', 'text-white');
+      modalIcon.classList.add('fas', 'fa-info-circle');
+      modalTitle.textContent = title || 'رسالة';
+    }
 
-            // تعيين الفئات والرموز بناءً على نوع الرسالة
-            if (type === 'success') {
-                modalHeader.classList.add('success');
-                modalIcon.classList.add('fas', 'fa-check-circle');
-                modalTitle.textContent = title || 'نجاح';
-            } else if (type === 'error') {
-                modalHeader.classList.add('error');
-                modalIcon.classList.add('fas', 'fa-times-circle');
-                modalTitle.textContent = title || 'خطأ';
-            } else if (type === 'info') {
-                modalHeader.classList.add('info');
-                modalIcon.classList.add('fas', 'fa-info-circle');
-                modalTitle.textContent = title || 'معلومات';
-            } else if (type === 'warning') {
-                modalHeader.classList.add('warning');
-                modalIcon.classList.add('fas', 'fa-exclamation-triangle');
-                modalTitle.textContent = title || 'تحذير';
-            }
-            else {
-                // نوع افتراضي إذا لم يتم تحديد نوع صالح
-                modalHeader.classList.add('info');
-                modalIcon.classList.add('fas', 'fa-bell');
-                modalTitle.textContent = title || 'رسالة';
-            }
+    modalMessage.textContent = message;
+    messageModal.classList.add('show');
+  }
 
-            modalMessage.textContent = message;
+  function hideMessageModal() {
+    messageModal.classList.remove('show');
+  }
 
-            messageModal.classList.add('show');
-        }
+  closeModalBtn.addEventListener('click', hideMessageModal);
+  messageModal.addEventListener('click', (e) => {
+    if (e.target === messageModal) hideMessageModal();
+  });
 
-        // وظيفة لإخفاء نافذة الرسائل
-        function hideMessageModal() {
-            messageModal.classList.remove('show');
-        }
+  const djangoMessages = [];
+  {% if messages %}
+    {% for message in messages %}
+      djangoMessages.push({
+        type: "{{ message.tags }}",
+        text: `{{ message|escapejs }}`
+      });
+    {% endfor %}
+  {% endif %}
 
-        // مستمعي الأحداث لإغلاق النافذة
-        closeModalBtn.addEventListener('click', hideMessageModal);
-        messageModal.addEventListener('click', function(e) {
-            if (e.target === messageModal) { // إغلاق عند النقر خارج المحتوى
-                hideMessageModal();
-            }
-        });
+  // ✅ نجمع كل الرسائل من نفس النوع في رسالة واحدة (مثلاً كل success، كل error...)
+  const grouped = {};
 
-        // 🚀 الجزء الذي يقوم بالتقاط رسائل Django وعرضها في المودال
-        const djangoMessages = [];
-        {% if messages %}
-            {% for message in messages %}
-                djangoMessages.push({
-                    type: "{{ message.tags }}",
-                    text: "{{ message|escapejs }}" // escapejs لضمان التعامل الصحيح مع الاقتباسات
-                });
-            {% endfor %}
-        {% endif %}
+  djangoMessages.forEach(msg => {
+    if (!grouped[msg.type]) grouped[msg.type] = [];
+    grouped[msg.type].push(msg.text);
+  });
 
-        // لوجيك لعرض الرسائل بالتتابع
-        let messageIndex = 0;
-        function displayNextMessage() {
-            if (messageIndex < djangoMessages.length) {
-                const msg = djangoMessages[messageIndex];
-                let title = '';
-                if (msg.type === 'success') title = 'نجاح';
-                else if (msg.type === 'error') title = 'خطأ';
-                else if (msg.type === 'warning') title = 'تحذير';
-                else if (msg.type === 'info') title = 'معلومات';
-                
-                showMessageModal(msg.type, title, msg.text);
-                messageIndex++;
-                
-                // إغلاق الرسالة تلقائيًا بعد 3 ثوانٍ وعرض التالية
-                setTimeout(function() {
-                    hideMessageModal();
-                    setTimeout(displayNextMessage, 500); // فاصل زمني بين الرسائل
-                }, 3000); 
-            }
-        }
+  for (const [type, msgs] of Object.entries(grouped)) {
+    const title = {
+      success: "نجاح",
+      error: "خطأ",
+      warning: "تحذير",
+      info: "معلومة"
+    }[type] || "رسالة";
 
-        // ابدأ عرض الرسائل إذا كانت موجودة
-        if (djangoMessages.length > 0) {
-            displayNextMessage();
-        }
-    });
+    showMessageModal(type, title, msgs.join("\n"));
+    break; // ❗ نعرض نوع واحد فقط مرة واحدة، إن كنت تريد عرض الأنواع الأخرى بالتتابع احذف هذا السطر
+  }
+});
 </script>

@@ -32,18 +32,51 @@ class Endpoints:
     distributions = "distributions/"
     lectures = "lectures/"
 
+def show_backend_messages(request, response_json, default_success=""):
+    if not request:
+        return
+
+    collected = {"success": [], "warning": [], "error": []}
+
+    def add(tag, msg):
+        if msg:
+            collected[tag].append(msg)
+
+    if isinstance(response_json, dict):
+        add("success", response_json.get("message", default_success))
+
+        for warning in response_json.get("warnings", []):
+            add("warning", f"⚠️ {warning}")
+
+        for error in response_json.get("errors", []):
+            add("error", f"❌ {error}")
+
+        if "detail" in response_json:
+            add("error", f"❌ {response_json['detail']}")
+    else:
+        add("success", default_success)
+
+    # إرسال الرسائل بعد التجميع
+    for tag, msgs in collected.items():
+        if msgs:
+            combined = "\n".join(msgs)
+            if tag == "success":
+                messages.success(request, combined)
+            elif tag == "warning":
+                messages.warning(request, combined)
+            elif tag == "error":
+                messages.error(request, combined)
+
 
 def handle_response(request, response):
     """
     يعالج الاستجابة القادمة من API ويعرض الرسائل المناسبة، ويعيد البيانات عند الحاجة.
-    """
+    """ 
     status = response.get("status")
     message = response.get("message", "")
     data = response.get("data", None)  # يمكن أن تكون None إذا لم توجد بيانات
-
+    # print(data)
     if status == "success":
-        if message:
-            messages.success(request, message)
         return True, data  # success, مع البيانات
     elif status == "error":
         if message:
@@ -202,11 +235,13 @@ def api_get(endpoint, request=None, timeout=10, redirect_to=None, render_templat
 
 def api_post(endpoint, data, request=None,success_message=None, timeout=10, redirect_to=None, render_template=None, render_context=None):
     try:
+        # print(data)
         response = requests.post(f"{BASE_API_URL}{endpoint}", json=data, timeout=timeout)
+        print(response.status_code)
         response.raise_for_status()
-
         try:
             data = response.json()
+            print(data)
         except ValueError:
             msg = f"رد غير متوقع من الخادم: {response.text[:200]}"
             if request:

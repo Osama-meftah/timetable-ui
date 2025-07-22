@@ -15,33 +15,29 @@ BASE_API_URL = "http://127.0.0.1:8001/api/"
 def page_notfoun_view(reqest):
     return render(reqest,'notFoune.html')
 
-# def login(request):
-#     """
-#     عرض صفحة تسجيل الدخول.
-#     """
-#     return render(request, 'login.html')
-
 def dashboard(request):
     """
     عرض لوحة التحكم.
     """
     return render(request, 'dashboard.html')
 
+class TeachersAvailableView(View):
+    def get(self, request,id=None):
+        return render(request, 'teachers_management/list.html')
+    
+    def post(self, request,id=None):
+        return render(request, 'teachers_management/list.html')
+
 def teacher_dashboard_view(request):
     user=request.session.get('user')
     print(user)
     # user=User.objects.get(id=user_id)
-    return render(request, 'dashboard_teatcher.html', {'teacher': user})
-
-class TeachersAvailableView(View):
-    def get(self, request,id=None):
-        return render(request, 'teachers_available/list.html')
-    
-    def post(self, request,id=None):
-        return render(request, 'teachers_available/list.html')
+    return render(request, 'teachers_management/dashboard_teatcher.html', {'teacher': user})
 
 class TeacherManagementView(View):
+    
     def get(self, request, id=None):
+        user = request.session.get("user")
         try:
             if id:
                 # استخدم api_get مع إعادة عرض القالب مباشرة
@@ -117,9 +113,9 @@ class TeacherManagementView(View):
         teacher_data = {
             # "id": id,
             "teacher_name": request.POST.get("teacher_name", "").strip(),
-            # "teacher_phone": request.POST.get("teacher_phone", "").strip(),
+            "teacher_phone": request.POST.get("teacher_phone", "").strip(),
             "teacher_email": request.POST.get("teacher_email", "").strip(),
-            # "teacher_address": request.POST.get("teacher_address", "").strip(),
+            "teacher_address": request.POST.get("teacher_address", "").strip(),
             "teacher_status": request.POST.get("teacher_status", "").strip(),
         }
         print(teacher_data)
@@ -144,7 +140,7 @@ class TeacherManagementView(View):
             else:
                 # إضافة باستخدام api_post مع إعادة توجيه بعد الإضافة
                 api_post(Endpoints.teachers, teacher_data, request=request)
-                messages.success(request, "✅ تم إضافة المدرس.")
+                # messages.success(request, "✅ تم إضافة المدرس.")
                 return redirect("teachers_management")
 
         except Exception as e:
@@ -159,7 +155,7 @@ class TeacherDeleteView(View):
             messages.success(request, "تم حذف المدرس بنجاح.")
         except Exception as e:
             handle_exception(request, "حدث خطأ أثناء حذف المدرس", e)
-        # return redirect("teachers_management")
+        return redirect("teachers_management")
 
 
 class TeacherAvailabilityAndCoursesView(View):
@@ -428,7 +424,7 @@ class RoomDeleteView(View):
     def post(self, request, id):
         try:
             api_delete(f"{Endpoints.halls}{id}/", request=request)
-            # messages.success(request, "✅ تم حذف القاعة بنجاح.")
+            messages.success(request, "✅ تم حذف القاعة بنجاح.")
         except RuntimeError as e:
             messages.error(request, f"❌ فشل حذف القاعة: {e}")
         return redirect('rooms_management')

@@ -1,0 +1,239 @@
+{% extends "base2.html" %}
+{% load static %}
+
+{% block page_header_title %}
+إدارة الاوقات
+{% endblock %}
+
+{% block content %}
+
+{% include 'message.html' %} 
+
+{# The main content container, now centered horizontally and vertically #}
+<div class="container mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8 flex flex-col flex-grow items-center justify-center"> {# Added flex flex-col flex-grow items-center justify-center #}
+
+    
+    <div class="w-full max-w-4xl"> {# Added a wrapper div to constrain width and allow centering of its children #}
+        <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6 sm:p-8 border border-gray-100 dark:border-gray-700 mt-8"> {# Added mt-8 for spacing between sections #}
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center sm:text-right">
+                <i class="fas fa-calendar-alt ml-2 text-teal-600"></i> إدارة أوقات التواجد
+            </h2>
+
+            {# زر إضافة وقت تواجد جديد #}
+            <div class="flex justify-end mb-6">
+                <button id="addAvailabilityBtn"
+                        class="inline-flex items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors duration-200">
+                    <i class="fas fa-plus ml-2"></i> إضافة وقت تواجد جديد
+                </button>
+            </div>
+
+            {# نموذج إضافة/تعديل وقت تواجد (مخفي مبدئياً) #}
+            <div id="availabilityFormContainer" class="hidden bg-gray-50 dark:bg-gray-700 p-6 rounded-lg mb-8 border border-gray-200 dark:border-gray-600">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4" id="availabilityFormTitle">إضافة وقت تواجد</h3>
+                {% comment %} action="{% url 'save_availability' %}"  {% endcomment %}
+                <form method="post" 
+                id="availabilityForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="availability_id" id="availabilityId">
+
+                    {# حقل اختيار اليوم #}
+                    <div>
+                        <label for="day" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">اليوم</label>
+                        <select id="day" name="day"
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                required>
+                            <option value="">اختر اليوم</option>
+                            <option value="الأحد">الأحد</option>
+                            <option value="الاثنين">الاثنين</option>
+                            <option value="الثلاثاء">الثلاثاء</option>
+                            <option value="الأربعاء">الأربعاء</option>
+                            <option value="الخميس">الخميس</option>
+                            <option value="الجمعة">الجمعة</option>
+                            <option value="السبت">السبت</option>
+                        </select>
+                    </div>
+
+                    {# حقل وقت البدء #}
+                    <div>
+                        <label for="start_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">وقت البدء</label>
+                        <input type="time" id="start_time" name="start_time"
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                               required>
+                    </div>
+
+                    {# حقل وقت الانتهاء #}
+                    <div>
+                        <label for="end_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">وقت الانتهاء</label>
+                        <input type="time" id="end_time" name="end_time"
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                               required>
+                    </div>
+
+                    {# زر حفظ وقت التواجد #}
+                    <div class="md:col-span-2 flex justify-end gap-3 mt-4">
+                        <button type="submit"
+                                class="inline-flex items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors duration-200">
+                            <i class="fas fa-check ml-2"></i> حفظ
+                        </button>
+                        <button type="button" id="cancelAvailabilityBtn"
+                                class="inline-flex items-center px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-base font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                            <i class="fas fa-times ml-2"></i> إلغاء
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            {# جدول عرض أوقات التواجد الحالية #}
+            {% if teacher.availability_set.all %} {# يفترض وجود علاقة Availability في نموذج Teacher #}
+            <div class="overflow-x-auto shadow-lg rounded-lg border border-gray-200 dark:border-gray-700">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                                اليوم
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                                وقت البدء
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                                وقت الانتهاء
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                                الإجراءات
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        {% for availability in teacher.availability_set.all %}
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                                {{ availability.day }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                                {{ availability.start_time|time:"H:i" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                                {{ availability.end_time|time:"H:i" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-left text-sm font-medium flex items-center gap-2">
+                                <button type="button" data-id="{{ availability.id }}"
+                                        data-day="{{ availability.day }}"
+                                        data-start-time="{{ availability.start_time|time:'H:i' }}"
+                                        data-end-time="{{ availability.end_time|time:'H:i' }}"
+                                        class="edit-availability-btn text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-2 rounded-full hover:bg-blue-100 dark:hover:bg-gray-700 transition-colors duration-150"
+                                        title="تعديل وقت التواجد">
+                                    <i class="fas fa-edit text-lg"></i>
+                                </button>
+                                <button type="button" data-id="{{ availability.id }}" data-type="وقت التواجد"
+                                        data-url="{% url 'delete_availability' 0 %}" data-form-type="delete"
+                                        class="delete-btn group text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 p-2 rounded-full hover:bg-red-100 dark:hover:bg-gray-700 transition-colors duration-150"
+                                        title="حذف وقت التواجد">
+                                    <i class="fas fa-trash-alt text-lg group-hover:scale-110 transition-transform"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-10 bg-gray-50 dark:bg-gray-700 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
+                <i class="fas fa-calendar-times text-gray-400 text-5xl mb-4"></i>
+                <p class="text-xl font-medium text-gray-500 dark:text-gray-400">لا توجد أوقات تواجد مسجلة حالياً.</p>
+                <p class="text-md text-gray-400 dark:text-gray-500 mt-2">اضغط على "إضافة وقت تواجد جديد" لتبدأ.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+{% include "delete_modal.html" %} {# تضمين نموذج الحذف #}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const addAvailabilityBtn = document.getElementById('addAvailabilityBtn');
+        const availabilityFormContainer = document.getElementById('availabilityFormContainer');
+        const availabilityFormTitle = document.getElementById('availabilityFormTitle');
+        const availabilityForm = document.getElementById('availabilityForm');
+        const availabilityIdInput = document.getElementById('availabilityId');
+        const dayInput = document.getElementById('day');
+        const startTimeInput = document.getElementById('start_time');
+        const endTimeInput = document.getElementById('end_time');
+        const cancelAvailabilityBtn = document.getElementById('cancelAvailabilityBtn');
+        const editAvailabilityButtons = document.querySelectorAll('.edit-availability-btn');
+        const deleteButtons = document.querySelectorAll('.delete-btn'); // لزر الحذف العام
+
+        // دالة لإظهار نموذج إضافة/تعديل وقت التواجد
+        function showAvailabilityForm(isEdit = false, availabilityData = {}) {
+            availabilityFormContainer.classList.remove('hidden');
+            // Scroll to the form for better UX on smaller screens
+            availabilityFormContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            if (isEdit) {
+                availabilityFormTitle.textContent = 'تعديل وقت التواجد';
+                // Ensure the action URL is correctly formed for update
+                availabilityForm.action = ''
+                availabilityIdInput.value = availabilityData.id;
+                dayInput.value = availabilityData.day;
+                startTimeInput.value = availabilityData.startTime;
+                endTimeInput.value = availabilityData.endTime;
+            } else {
+                availabilityFormTitle.textContent = 'إضافة وقت تواجد';
+                availabilityForm.action = ''
+                availabilityIdInput.value = '';
+                dayInput.value = '';
+                startTimeInput.value = '';
+                endTimeInput.value = '';
+            }
+        }
+
+        // دالة لإخفاء نموذج إضافة/تعديل وقت التواجد
+        function hideAvailabilityForm() {
+            availabilityFormContainer.classList.add('hidden');
+            availabilityForm.reset(); // إعادة تعيين حقول النموذج
+        }
+
+        // عند النقر على زر "إضافة وقت تواجد جديد"
+        if (addAvailabilityBtn) {
+            addAvailabilityBtn.addEventListener('click', () => showAvailabilityForm(false));
+        }
+
+        // عند النقر على زر "إلغاء" في نموذج وقت التواجد
+        if (cancelAvailabilityBtn) {
+            cancelAvailabilityBtn.addEventListener('click', hideAvailabilityForm);
+        }
+
+        // عند النقر على زر "تعديل" لوقت تواجد موجود
+        editAvailabilityButtons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                const id = event.currentTarget.dataset.id;
+                const day = event.currentTarget.dataset.day;
+                const startTime = event.currentTarget.dataset.startTime;
+                const endTime = event.currentTarget.dataset.endTime;
+                showAvailabilityForm(true, { id, day, startTime, endTime });
+            });
+        });
+
+        // منطق أزرار الحذف (يجب أن يتم التعامل معها بواسطة delete_modal.html و JS الخاص به)
+        // هذا الجزء يفترض أن لديك DeleteModalComponent أو منطق مشابه في ملف خارجي
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                const id = event.currentTarget.dataset.id;
+                const type = event.currentTarget.dataset.type;
+                const urlTemplate = event.currentTarget.dataset.url;
+                const deleteUrl = urlTemplate.replace('0', id); // استبدال 0 بالـ ID الفعلي
+
+                // هنا يمكنك فتح الـ modal الخاص بالحذف وتمرير deleteUrl إليه
+                // مثال (إذا كان لديك وظيفة لفتح المودال):
+                // openDeleteModal(deleteUrl, type);
+                // أو ببساطة:
+                 if (confirm(`هل أنت متأكد أنك تريد حذف ${type} هذا؟`)) {
+                     window.location.href = deleteUrl; // أو إرسال طلب AJAX
+                 }
+            });
+        });
+    });
+</script>
+{% endblock %}
