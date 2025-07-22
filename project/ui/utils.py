@@ -31,27 +31,40 @@ class Endpoints:
     distributions = "distributions/"
     lectures = "lectures/"
 
-
 def show_backend_messages(request, response_json, default_success=""):
     if not request:
         return
-    if isinstance(response_json, dict):
-        if "message" in response_json:
-            messages.success(request, response_json["message"])
-        else:
-            messages.success(request, default_success)
 
-        if "warnings" in response_json and isinstance(response_json["warnings"], list):
-            for warning in response_json["warnings"]:
-                messages.warning(request, f"⚠️ {warning}")
-        if "errors" in response_json and isinstance(response_json["errors"], list):
-            for error in response_json["errors"]:
-                messages.error(request, f"❌ {error}")
+    collected = {"success": [], "warning": [], "error": []}
+
+    def add(tag, msg):
+        if msg:
+            collected[tag].append(msg)
+
+    if isinstance(response_json, dict):
+        add("success", response_json.get("message", default_success))
+
+        for warning in response_json.get("warnings", []):
+            add("warning", f"⚠️ {warning}")
+
+        for error in response_json.get("errors", []):
+            add("error", f"❌ {error}")
+
         if "detail" in response_json:
-            messages.error(request, f"❌ {response_json['detail']}")
+            add("error", f"❌ {response_json['detail']}")
     else:
-        messages.success(request, default_success)
-        
+        add("success", default_success)
+
+    # إرسال الرسائل بعد التجميع
+    for tag, msgs in collected.items():
+        if msgs:
+            combined = "\n".join(msgs)
+            if tag == "success":
+                messages.success(request, combined)
+            elif tag == "warning":
+                messages.warning(request, combined)
+            elif tag == "error":
+                messages.error(request, combined)
 
 
 def handle_response(request, response):

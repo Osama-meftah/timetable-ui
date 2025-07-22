@@ -6,15 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}لوحة التحكم{% endblock %} - ScheduleEase</title>
     
-    {# Tailwind CSS CDN #}
     <script src="https://cdn.tailwindcss.com"></script>
-    {# Font Awesome 5.15.3 CDN #}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
 
-    {# رابط لملف CSS المخصص الخاص بنا #}
     <link rel="stylesheet" href="{% static '/src/css/style.css' %}" />
+    <link rel="stylesheet" href="{% static '/src/css/header2_style.css' %}" />
+    <link rel="stylesheet" href="{% static '/src/css/message_style.css' %}" />
 
-    {# إعداد Tailwind لـ Dark Mode #}
     <script>
         tailwind.config = {
             darkMode: 'class', 
@@ -31,74 +29,61 @@
             }
         };
     </script>
-    <style>
-        .top-main {
-            transition: margin-right 0.5s ease;
-        }
-    </style>
+    
 </head>
-<body class="flex flex-col min-h-screen">
-    {# Header Section #}
-    <header class="bg-white dark:bg-gray-900 shadow-md py-4 px-4 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-50 w-full">
-        <div class="flex items-center gap-4">
-            <a href="/" class="flex items-center">
-                <img src="{% static 'images/ScheduleEase1.png' %}" alt="ScheduleEase Logo" class="h-10 w-auto object-contain">
-                <h1 class="text-xl font-bold text-gray-900 dark:text-white ml-3">ScheduleEase</h1>
-            </a>
-            <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 dark:text-gray-100 mr-2 sm:mr-4" id="pageTitle">
-                {% block page_header_title %}لوحة التحكم{% endblock %}
-            </h1>
-        </div>
-        <nav class="flex items-center space-x-4 space-x-reverse md:space-x-6 md:space-x-reverse"> {# Added flex and space-x for navigation links #}
-            {# رابط لصفحة إعادة تعيين كلمة المرور #}
-            {% if uid and token %}
-            <a href="{% url 'reset-password' uidb64=uid token=token %}"
-                class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors duration-200 flex items-center">
-                <i class="fas fa-lock ml-2"></i>
-                إعادة تعيين كلمة المرور
-            </a>
-            {% else %}
-            <span class="text-gray-400">لا يمكن إعادة التعيين</span>
-            {% endif %}
-            
-            <a 
-                {% comment %} href="{% url 'teacher_profile' %}" {# تأكد من أن 'teacher_profile' هو اسم مسار URL الصحيح لصفحة المدرس #} {% endcomment %}
-                class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors duration-200 flex items-center">
-                <i class="fas fa-calendar-alt ml-2"></i> أوقاتي
-            </a>
-            {# رابط تسجيل الخروج #}
-            <a 
-                href="{% url 'logout' %}" 
-                class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors duration-200 flex items-center">
-                <i class="fas fa-sign-out-alt ml-2"></i> تسجيل الخروج
-            </a>
-            {# زر تبديل الوضع الليلي/النهاري #}
-            <label class="relative inline-block w-14 h-8 cursor-pointer">
-                <input type="checkbox" id="darkModeToggle" class="sr-only peer">
-                <div class="w-full h-full bg-gray-300 rounded-full peer-checked:bg-gray-700 transition-colors"></div>
-                <div class="absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md flex items-center justify-center transition-all peer-checked:translate-x-6">
-                    <i class="fas fa-moon text-gray-700 text-sm dark:hidden"></i>
-                    <i class="fas fa-sun text-yellow-400 text-sm hidden dark:inline"></i>
-                </div>
-            </label>
-        </nav>
-    </header>
-    {# End Header Section #}
+<body class="flex flex-col min-h-screen bg-gray-100 dark:bg-[#1f2937]"> 
+    
+    {% include "message.html" %}
+
+    {% include "header2.html" %}
     
     <div class="flex flex-grow flex-col md:flex-row">
         
-        <div id="mainContent" class="flex-grow main-content flex flex-col">
+        <div id="mainContent" class="flex-grow flex flex-col">
             <main class="flex-1 p-8 overflow-y-auto mt-4">
                 {% block content %}
-                {# Default content or leave empty #}
                 {% endblock %}
             </main>
         </div>
     </div>
-    {% include "footer.html" %}
+    {% include "footer.html" %} 
     <script src="{% static 'src/js/mode.js' %}"></script>
 
+    
     {% block extra_js %}
     {% endblock %}
 </body>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const mobileNavLinks = document.getElementById('mobileNavDesplay');
+            const mainContent = document.getElementById('mainContent');
+            if (mobileMenuToggle && mobileNavLinks) {
+                mobileMenuToggle.addEventListener('click', () => {
+                    const isExpanded = mobileNavLinks.classList.toggle('active');
+                    mainContent.style.marginTop = isExpanded ? '310px' : '0';
+                    mobileMenuToggle.setAttribute('aria-expanded', isExpanded); // تحديث حالة الوصولية
+                });
+
+                document.addEventListener('click', (event) => {
+                    console.log('Clicked outside:', event.target); // لتتبع النقرات
+                    if (!mobileMenuToggle.contains(event.target) && !mobileNavLinks.contains(event.target)) {
+                        if (mobileNavLinks.classList.contains('active')) {
+                            mobileNavLinks.classList.remove('active');
+                            mobileMenuToggle.setAttribute('aria-expanded', false);
+                        }
+                    }
+                });
+
+                // إغلاق القائمة عند تغيير حجم الشاشة إلى وضع سطح المكتب
+                window.addEventListener('resize', () => {
+                    if (window.innerWidth >= 768 && mobileNavLinks.classList.contains('active')) {
+                        mobileNavLinks.classList.remove('active');
+                        mobileMenuToggle.setAttribute('aria-expanded', false);
+
+                    }
+                });
+            }
+        });
+    </script>
 </html>

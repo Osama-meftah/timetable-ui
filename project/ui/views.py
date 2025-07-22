@@ -38,10 +38,6 @@ class TeacherManagementView(View):
     
     def get(self, request, id=None):
         user = request.session.get("user")
-        print(user)
-        # if not user or not user.get("is_staff", False):
-        #     # messages.error(request, "❌ لا تملك صلاحية الوصول إلى هذه الصفحة.")
-        #     return redirect("teacher_dashboard")
         try:
             if id:
                 # استخدم api_get مع إعادة عرض القالب مباشرة
@@ -144,7 +140,7 @@ class TeacherManagementView(View):
             else:
                 # إضافة باستخدام api_post مع إعادة توجيه بعد الإضافة
                 api_post(Endpoints.teachers, teacher_data, request=request)
-                messages.success(request, "✅ تم إضافة المدرس.")
+                # messages.success(request, "✅ تم إضافة المدرس.")
                 return redirect("teachers_management")
 
         except Exception as e:
@@ -428,7 +424,7 @@ class RoomDeleteView(View):
     def post(self, request, id):
         try:
             api_delete(f"{Endpoints.halls}{id}/", request=request)
-            # messages.success(request, "✅ تم حذف القاعة بنجاح.")
+            messages.success(request, "✅ تم حذف القاعة بنجاح.")
         except RuntimeError as e:
             messages.error(request, f"❌ فشل حذف القاعة: {e}")
         return redirect('rooms_management')

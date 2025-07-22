@@ -1,37 +1,54 @@
 {% extends "base2.html" %}
 {% load static %}
+
 {% block page_header_title %}
 إعادة تعيين كلمة المرور
 {% endblock %}
+
 {% block content %}
 {% include "message.html" %}
 
-    <!-- Content -->
-    <main class="container mx-auto px-4 mt-10">
-        <div class="bg-white rounded-2xl shadow-lg p-8 max-w-3xl mx-auto">
-            <h2 class="text-xl font-semibold mb-6 text-blue-700 border-b pb-2">البيانات الشخصية</h2>
+{# The main content container, centered horizontally and vertically #}
+<main class="container mx-auto px-4 py-8 sm:px-6 lg:px-8 flex-grow flex items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-xl w-full border border-gray-100 dark:border-gray-700">
+        <h2 class="text-2xl sm:text-3xl font-bold text-blue-700 dark:text-blue-400 mb-6 text-center border-b pb-4 border-gray-200 dark:border-gray-700">
+            <i class="fas fa-user-shield ml-3"></i> بيانات الحساب الشخصية
+        </h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-gray-700 font-medium">اسم المستخدم:</label>
-                    <p class="bg-gray-100 p-3 rounded-lg mt-1">{{ teacher.username }}</p>
-                </div>
-                <div>
-                    <label class="block text-gray-700 font-medium">البريد الإلكتروني:</label>
-                    <p class="bg-gray-100 p-3 rounded-lg mt-1">{{ teacher.email }}</p>
-                </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {# Username Display Field #}
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 font-medium text-sm mb-1">
+                    <i class="fas fa-user ml-2 text-gray-500 dark:text-gray-400"></i> اسم المستخدم:
+                </label>
+                <p class="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 p-3 rounded-lg mt-1 text-lg font-semibold border border-gray-200 dark:border-gray-600">
+                    {{ teacher.username }}
+                </p>
             </div>
-
-            <!-- Reset Password Button -->
-            <div class="mt-8 text-center">
-                <form method="get" action="{% url 'send_reseat_mail' %}">
-                    <!-- {% csrf_token %} -->
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition duration-200">
-                        🔑 إعادة تعيين كلمة المرور
-                    </button>
-                </form>
+            {# Email Display Field #}
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 font-medium text-sm mb-1">
+                    <i class="fas fa-envelope ml-2 text-gray-500 dark:text-gray-400"></i> البريد الإلكتروني:
+                </label>
+                <p class="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 p-3 rounded-lg mt-1 text-lg font-semibold border border-gray-200 dark:border-gray-600">
+                    {{ teacher.email }}
+                </p>
             </div>
         </div>
-    </main>
+
+        {# Reset Password Button Section #}
+        <div class="mt-8 text-center">
+            <form method="get" action="{% url 'send_reseat_mail' %}">
+                {# {% csrf_token %} #} {# CSRF token is not needed for GET requests #}
+                <button type="submit" 
+                        class="inline-flex items-center px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg rounded-xl shadow-lg 
+                               transform hover:scale-105 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-blue-300 
+                               dark:bg-blue-700 dark:hover:bg-blue-600 dark:focus:ring-blue-800">
+                    <i class="fas fa-key ml-3 text-xl"></i> إعادة تعيين كلمة المرور
+                </button>
+            </form>
+        </div>
+    </div>
+</main>
 
 {% endblock %}
