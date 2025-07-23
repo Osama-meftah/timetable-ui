@@ -41,10 +41,7 @@ urlpatterns = [
     path('departments/add/', views.DepartmentCreateView.as_view(), name='add_department'),
     path('departments/edit/<int:id>/', views.DepartmentUpdateView.as_view(), name='edit_department'),
     path('departments/delete/<int:id>/', views.DepartmentDeleteView.as_view(), name='delete_department'),
-    
-    # path('program/add/', views.AddAndEditProgramView.as_view(), name='add_program'),
-    # path('program/edit/<int:id>/', views.AddAndEditProgramView.as_view(), name='edit_program'),
-    
+   
     path('programs/add/', views.AddProgramLevelView.as_view(), name='add_program'),
     path('programs/edit/<int:id>/',views.EditProgramLevelView.as_view(), name='edit_program'),
     path('programs/delete/<int:id>/',views.DeleteProgramLevelView.as_view(), name='delete_program'),
