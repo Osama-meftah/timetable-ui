@@ -34,8 +34,8 @@ def LoginView(request):
             request.session['refresh_token'] = tokens['refresh']
             return redirect('dashboard')  # Redirect to a home page or dashboard
         else:
-            messages.error(request, "Invalid username or password")
-            return render(request,'login.html')
+            return render(request,'login.html',{"username":username})
+        
 
 @api_view(['GET'])
 def send_reseat_mail(request):

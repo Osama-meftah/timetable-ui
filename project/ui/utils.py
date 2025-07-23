@@ -238,7 +238,7 @@ def api_post(endpoint, data, request=None,success_message=None, timeout=10, redi
         # print(data)
         response = requests.post(f"{BASE_API_URL}{endpoint}", json=data, timeout=timeout)
         print(response.status_code)
-        response.raise_for_status()
+        # response.raise_for_status()
         try:
             data = response.json()
             print(data)

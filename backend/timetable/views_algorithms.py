@@ -63,12 +63,13 @@ class TableViewSet(ModelViewSet):
                     fk_distribution=Distribution.objects.get(pk=row['course_id']),
                     fk_table=table_instance
                 )
-
+            log=scheduler.log
             serializer = self.get_serializer(table_instance)
             return Response({
                 "status": "success",
                 "message": "تم إنشاء الجدول وتنفيذ الجدولة بنجاح ✅",
-                "data": serializer.data
+                "data": serializer.data,
+                "log":log
             }, status=status.HTTP_201_CREATED)
 
         except Exception as e:

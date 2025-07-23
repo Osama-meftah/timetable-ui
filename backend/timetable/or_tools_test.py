@@ -252,6 +252,34 @@ class TimeTableScheduler:
         professor_courses = {}
         # conflicts_room=[]
         max_capacity = max([c.capacity_hall for c in self.rooms])
+
+        # خريطة لتجميع أسماء الدكاترة الذين اختاروا نفس (اليوم, الوقت)
+        slot_professors = defaultdict(list)
+        time_slot_demand = defaultdict(int)
+
+        for course_id, course_info in self.lecture_times.items():
+            professor_name = course_info['teacher']['name']
+            available_times = course_info['teacher']['available']
+            for day_id, times in available_times.items():
+                for time_id in times:
+                    time_slot_demand[(day_id, time_id)] += 1
+                    if professor_name not in slot_professors[(day_id, time_id)]:
+                        slot_professors[(day_id, time_id)].append(professor_name)
+        
+        # عدد القاعات المتاحة
+        total_rooms = len(self.rooms)
+
+        # اكتشاف التعارضات حسب التكدس
+        for (day_id, time_id), demand_count in time_slot_demand.items():
+            if demand_count > total_rooms:
+                day_name = [d for d in self.days if d.id == day_id][0].get_day_name_display()
+                time_str = self.available_times[time_id]
+                professors_list = slot_professors[(day_id, time_id)]
+        
+                self.conflicts.append({
+            'نوع التعارض': 'تكدس في الطلب على القاعات',
+            'تفاصيل التعارض': f'اليوم: {day_name}, الوقت: {time_str}, عدد المحاضرات المطلوبة: {demand_count}, عدد القاعات المتاحة: {total_rooms}, الدكاترة: {", ".join(professors_list)}'
+        })
     
         dept_level_courses = defaultdict(list)
         for course_id, course_info in self.lecture_times.items():
