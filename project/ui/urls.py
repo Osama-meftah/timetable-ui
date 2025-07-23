@@ -53,4 +53,5 @@ urlpatterns = [
     path('periods/', views.PeriodsView.as_view(), name='management_periods'),
     
     path('groups/', views.GroupsView.as_view(), name='groups_management'),
+    path('groups/delete/<int:id>/', views.GroupDeleteView.as_view(), name='groups_delete'),
 ]

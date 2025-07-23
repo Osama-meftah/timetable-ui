@@ -40,11 +40,8 @@ class TeacherManagementView(View):
         user = request.session.get("user")
         try:
             if id:
-                # استخدم api_get مع إعادة عرض القالب مباشرة
                 return api_get(f"{Endpoints.teachers}{id}/", request=request, 
-                               render_template="teachers/add_edit.html",
-                               render_context={})
-            
+                               render_template="teachers/add_edit.html")
             elif "add" in request.GET:
                 return render(request, "teachers/add_edit.html", {"page_title": "إضافة مدرس"})
 
@@ -120,10 +117,11 @@ class TeacherManagementView(View):
         }
         print(teacher_data)
 
-        try:
+        try: 
             if id:
                 # تعديل باستخدام api_put مع إعادة عرض الصفحة بعد التعديل
                 return api_put(f"{Endpoints.teachers}{id}/", teacher_data, request=request,
+                               redirect_to='teachers_management',
                                render_template="teachers/add_edit.html",
                                render_context={"teacher": teacher_data})
             
@@ -300,7 +298,9 @@ class CoursesListView(View):
         })
     
     def post(self, request):
-        if request.POST.get("form_type") == "upload_subjects":
+        from_type = request.POST.get("form_type")
+        print(f"Received POST request with data: {from_type}")
+        if request.POST.get("form_type") == "upload_courses":
             return handle_file_upload(
                 request,
                 file_field_name='data_file',
@@ -680,9 +680,18 @@ class GroupsView(View):
         gropus_paginated = paginate_queryset(gropus, request, "page", "page_data_size",5)
 
         return render(request, 'groups/list.html', {"groups": gropus_paginated,"levels": levels, "page_title": "إدارة المجموعات"})
+class GroupDeleteView(View):
+    def post(self, request,id=None):
+        item_id = request.POST.get('item_id')
+        try:
+            api_delete(f"{Endpoints.groups}{item_id}/", request=request, redirect_to='groups_management')
+            messages.success(request, "✅ تم حذف المجموعة بنجاح.")
+        except Exception as e:
+            messages.error(request, f"❌ حدث خطأ أثناء حذف المجموعة: {e}")
+            # print(f"Error deleting group with ID {item_id}: {e}")
 
-
-
+        return redirect('groups_management')
+    
 
 # def timetable_settings_view(request):
 #     context = {

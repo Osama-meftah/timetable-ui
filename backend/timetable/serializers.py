@@ -104,13 +104,36 @@ class LevelSerializer(serializers.ModelSerializer):
 
 
 
-# Serializer للنموذج Group
+
 class GroupSerializer(serializers.ModelSerializer):
-    fk_level = LevelSerializer(read_only=True) # عرض بيانات المستوى بدلاً من ID فقط
+    fk_level = LevelSerializer(read_only=True)
+    fk_level_id = serializers.PrimaryKeyRelatedField(
+        queryset=Level.objects.all(),
+        write_only=True,
+        source='fk_level'
+    )
 
     class Meta:
         model = Group
-        fields = '__all__'
+        fields = ['id', 'group_name', 'number_students', 'fk_level', 'fk_level_id']
+
+    def validate(self, data):
+        group_name = data.get('group_name')
+        level = data.get('fk_level')
+
+        # الحصول على السجل الحالي إذا كان موجود (عند التحديث)
+        instance = getattr(self, 'instance', None)
+
+        queryset = Group.objects.filter(group_name=group_name, fk_level=level)
+        if instance:
+            # استبعاد السجل الحالي عند التحقق من التكرار
+            queryset = queryset.exclude(pk=instance.pk)
+        
+        # if queryset.exists():
+        #     raise serializers.ValidationError("هذه المجموعة موجودة مسبقًا لهذا المستوى.")
+        return data
+
+
 
 class SubjectSerializer(serializers.ModelSerializer):
     # fk_level = LevelSerializer(read_only=True)

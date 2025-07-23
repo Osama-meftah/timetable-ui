@@ -6,7 +6,7 @@
 {% endblock %}
 {% block content %}
     <div class="container mx-auto py-6 sm:py-8">
-        {% include "message.html" %}
+        
         <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6">
             <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6">
                 {{ page_title }}
@@ -256,9 +256,8 @@
       
         </div>
     </div>
-
-
-
+    <script src="{% static 'src/js/show_modal_message.js' %}"></script>
+    {% include "message.html" %}
     {% include "delete_modal.html" %}
 
     {# Custom Confirmation Modal #}
@@ -270,15 +269,13 @@
         document.addEventListener("DOMContentLoaded", function () {
             const input = document.getElementById("selected_teacher_input");
             const hiddenInput = document.getElementById("selected_teacher_id_hidden");
-            // ✅ الجديد: الحصول على الحقل المخفي لنموذج الأوقات
             const timesFormHiddenInput = document.getElementById("times_form_selected_teacher_id");
-        
-            // هذا الشرط يعالج حالة التعديل حيث يكون حقل اسم المدرس للقراءة فقط ومعرف المدرس موجود بالفعل
+
             if (!input || !hiddenInput) {
                 if (timesFormHiddenInput && "{{ teacher.id }}") {
                     timesFormHiddenInput.value = "{{ teacher.id }}";
                 }
-                return; // لا يوجد input قابل للتعديل (في وضع التعديل)، لذا لا داعي لتشغيل جزء الـ `change` listener.
+                return; 
             }
         
             const dataListOptions = document.querySelectorAll("#teachers_list option");
@@ -286,7 +283,7 @@
             input.addEventListener("change", function () {
                 const val = input.value.trim();
                 let matched = false;
-                let selectedId = ""; // لضمان تعيين قيمة افتراضية فارغة
+                let selectedId = ""; 
 
                 for (let option of dataListOptions) {
                     if (option.value.trim() === val) {
@@ -297,7 +294,7 @@
                 }
         
                 hiddenInput.value = selectedId;
-                // ✅ الجديد: تحديث الحقل المخفي في نموذج الأوقات أيضًا
+                
                 if (timesFormHiddenInput) {
                     timesFormHiddenInput.value = selectedId;
                 }
@@ -305,10 +302,7 @@
                 console.log("Selected teacher ID (courses form):", hiddenInput.value);
                 console.log("Selected teacher ID (times form):", timesFormHiddenInput ? timesFormHiddenInput.value : 'N/A');
             });
-
-            // ✅ الجديد: عند تحميل الصفحة، إذا كان هناك مدرس محدد بالفعل (في وضع التعديل)،
-            // تأكد من أن حقل المعرف المخفي لنموذج الأوقات لديه القيمة الصحيحة.
-            // هذا قد يكون مفيدًا إذا تم تحميل الصفحة في وضع التعديل ولم يتم لمس حقل اسم المدرس.
+            
             if (timesFormHiddenInput && hiddenInput && hiddenInput.value) {
                 timesFormHiddenInput.value = hiddenInput.value;
             }
@@ -318,25 +312,21 @@
     <script>
         let itemTypeToDelete = null;
         let itemIdToDelete = null;
-        let teacherId = "{{ teacher.id }}"; // من Django
-
-    
-        // --- JavaScript for Dynamic Add/Remove functionality (Existing Code, adjusted for clarity) ---
-
-        // For Distributed Courses
+        let teacherId = "{{ teacher.id }}"; 
+        
         let distributionCounter = {{ teacher_distributions|length|default:0 }};
         if (distributionCounter === 0) {
-            distributionCounter = 1; // Start from 1 if no items exist initially for correct naming
+            distributionCounter = 1; 
         } else {
-            // Ensure counter starts AFTER existing items for new additions
+            
             distributionCounter = {{ teacher_distributions|length }} + 1;
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // --- Utility Function to update indexes and names/IDs ---
+            
             function updateElementIndexes(containerId, itemClass, namePrefix) {
                 const container = document.getElementById(containerId);
-                if (!container) return; // Exit if container doesn't exist
+                if (!container) return; 
             
                 const items = container.querySelectorAll(`.${itemClass}`);
                 items.forEach((item, index) => {
@@ -347,26 +337,26 @@
                         const originalName = input.getAttribute('name');
                         if (originalName) {
                             let newName = '';
-                            // Handle existing IDs (e.g., distribution_id_1, availability_id_1)
+                            
                             if (originalName.startsWith('distribution_id_')) {
                                 newName = `distribution_id_${newIndex}`;
                             } else if (originalName.startsWith('availability_id_')) {
                                 newName = `availability_id_${newIndex}`;
                             }
-                            // Handle select names (e.g., dist_program_1, time_day_1)
+                            
                             else if (originalName.startsWith(namePrefix)) {
-                                // Extract the part after prefix (e.g., 'program', 'level', 'day', 'period')
+                                
                                 const parts = originalName.substring(namePrefix.length).split('_');
-                                const suffix = parts[0]; // The actual field name like 'program'
+                                const suffix = parts[0]; 
                                 newName = `${namePrefix}${suffix}_${newIndex}`;
                             }
             
                             if (newName) {
                                 input.setAttribute('name', newName);
-                                // Update ID if it follows the pattern (e.g., program-1, day-1)
+                                
                                 if (input.id) {
                                     const idParts = input.id.split('-');
-                                    if (idParts.length > 1) { // Ensure there's a numeric suffix
+                                    if (idParts.length > 1) { 
                                         input.id = `${idParts[0]}-${newIndex}`;
                                     }
                                 }
@@ -374,7 +364,7 @@
                         }
                     });
             
-                    // Update 'for' attributes of labels
+                    
                     item.querySelectorAll('label[for]').forEach(label => {
                         const originalFor = label.getAttribute('for');
                         if (originalFor) {
@@ -387,23 +377,23 @@
                 });
             }
             
-            // --- Dynamic Item Management Function ---
+            
             function setupDynamicItems(containerId, itemClass, addButtonId, namePrefix, getItemHtml) {
                 const container = document.getElementById(containerId);
                 const addButton = document.getElementById(addButtonId);
             
-                // Initialize counter based on existing items, or 0 if none
+                
                 let counter = container.querySelectorAll(`.${itemClass}`).length;
             
-                // If no items are rendered by the backend (Django), add one default empty item.
-                if (counter === 0 && !teacherId) { // ✅ أضف شرط !teacherId لكي لا يتم إضافة صف فارغ في وضع التعديل إذا كانت لا توجد قيم.
-                    addItem(); // This will increment counter to 1 and add the first item
+                
+                if (counter === 0 && !teacherId) { 
+                    addItem(); 
                 } else {
-                    // Ensure existing items have correct sequential indexing on load
+                    
                     updateElementIndexes(containerId, itemClass, namePrefix);
                 }
             
-                // Function to add a new item
+                
                 function addItem() {
                     counter++;
                     const newItemHtml = getItemHtml(counter);
@@ -411,7 +401,7 @@
                     updateElementIndexes(containerId, itemClass, namePrefix);
                 }
             
-                // Event listener for the add button
+                
                 if (addButton) {
                     addButton.addEventListener('click', addItem);
                 }
@@ -455,7 +445,7 @@
                 </div>
             `;
         
-            // Availability Item HTML
+            
             const getAvailabilityItemHtml = (counter) => `
                 <div class="availability-item relative flex flex-col sm:flex-row items-center gap-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600">
                     <input type="hidden" name="availability_id_${counter}" value="">
@@ -495,7 +485,7 @@
                 </div>
             `;
         
-            // --- Initialize Dynamic Item Sections ---
+            
             setupDynamicItems('distribution-container', 'distribution-item', 'add-distribution-btn', 'dist_', getDistributionItemHtml);
             setupDynamicItems('availability-container', 'availability-item', 'add-availability-btn', 'time_', getAvailabilityItemHtml);
         });

@@ -200,9 +200,10 @@ def api_get(endpoint, request=None, timeout=10, redirect_to=None, render_templat
                 messages.error(request, msg)
             if redirect_to:
                 return redirect(redirect_to)
-            if render_template:
-                return render(request, render_template, render_context or {})
-            return None
+            # if render_template:
+                
+            #     return render(request, render_template, render_context or {})
+            # return None
 
         show_backend_messages(request, data)
 
@@ -212,6 +213,7 @@ def api_get(endpoint, request=None, timeout=10, redirect_to=None, render_templat
         if render_template:
             context = render_context or {}
             context.update({'data': data})
+            print(context)
             return render(request, render_template, context)
 
         return data

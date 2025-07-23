@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load arabic_filters %}
 
 {% block page_header_title %}
 {{ page_title }} {# Assuming page_title is passed from views for the dashboard-like page #}
@@ -100,7 +101,7 @@
                     <tr>
                         <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-12">
-                            #</th>
+                            ID</th>
                         <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             اسم المدرس</th>
@@ -245,16 +246,17 @@
                     <tr>
                         <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-12">
-                            #</th>
+                         ID
+                        </th>
                         <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             المدرس</th>
                         <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">
                             البريد الإلكتروني</th>
-                        <th scope="col"
+                        {% comment %} <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden lg:table-cell">
-                            الهاتف</th>
+                            الهاتف</th> {% endcomment %}
                         <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden md:table-cell">
                             المقررات</th>
@@ -286,7 +288,12 @@
                                             {% if item.teacher.teacher_status == 'active' %}text-green-600 dark:text-green-400
                                             {% elif item.teacher.teacher_status == 'vacation' %}text-yellow-600 dark:text-yellow-400
                                             {% else %}text-gray-500 dark:text-gray-400{% endif %} font-semibold">
-                                            {{ item.teacher.teacher_status }}
+                                             {% if item.teacher.teacher_status == 'active' %}
+                                             نشط
+                                             {% elif item.teacher.teacher_status == 'vacation' %}
+                                             اجازة
+                                             {% comment %} {% else %} {% endcomment %}
+                                             {% endif %}
                                         </span>
                                     </div>
                                 </div>
@@ -296,15 +303,16 @@
                             class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
                             {{ item.teacher.teacher_email }}
                         </td>
-                        <td
+                        {% comment %} <td
                             class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden lg:table-cell">
                             {{ item.teacher.teacher_phone }}
-                        </td>
+                        </td> {% endcomment %}
                         <td
                             class="px-4 py-4 whitespace-normal text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
                             {% if item.courses %}
                             {% for course in item.courses %}
-                            <p>{{ course.subject_name }} ({{ course.level }} - {{ course.group }})</p>
+                            {% comment %} {{ level.level_name|arabic_level }} {% endcomment %}
+                            <p>{{ course.subject_name }} ({{ course.level|arabic_level }} - {{ course.group }})</p>
                             {% endfor %}
                             {% else %}
                             <span class="text-gray-400 dark:text-gray-500">غير محدد</span>
