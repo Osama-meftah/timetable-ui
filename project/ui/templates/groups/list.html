@@ -7,82 +7,89 @@
 {% endblock %}
 
 {% block content %}
-<!-- Tailwind CSS CDN for styling -->
-<script>
-    tailwind.config = {
-        theme: {
-            extend: {
-                colors: {
-                    customBlue: '#3B82F6', 
-                },
-                fontFamily: {
-                    sans: ['Inter', 'sans-serif'], 
-                }
-            }
-        }
+<style>
+    :root.dark .search-input {
+        background-color: #4a5568 !important; 
     }
-</script>
-<div class="container mx-auto p-6 bg-white dark:bg-gray-800 shadow-lg rounded-lg font-sans">
+    :root:not(.dark) .search-input {
+        background-color: #e5e7eb !important; 
+        color: #1f2937 !important;
+    }
+    td , th {
+        text-align: start;
+    }
+</style>
+
+<div class="container mx-auto p-6 bg-white shadow-lg rounded-lg font-sans">
     <div class="flex flex-col sm:flex-row justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4 sm:mb-0">قائمة المجموعات</h2>
-        <div class="relative w-full sm:w-64">
-            <input type="text" class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-white 
-              dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 
-              focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors 
-              duration-200" data-type="teacher" data-title="ابحث عن مجموعة بإسم التخصص"  placeholder="ابحث عن مجموعة بإسم التخصص..." 
-                aria-label="ابحث عن مجموعة بإسم التخصص" />
-    
-            <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
-                <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
-            </div>
-        </div>
-        <button id="addNewGroupBtn" class="bg-customBlue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out w-full sm:w-auto">
-            <i class="fas fa-plus-circle mr-2"></i> إضافة مجموعة جديدة
-        </button>
+        <div class="flex gap-4"> 
+            <div class="relative w-full sm:w-64">
+                <input type="text" class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 
+                dark:border-gray-600 rounded-full shadow-sm bg-white 
+                   text-black dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 
+                  focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors 
+                  duration-200" data-type="teacher" data-title="ابحث عن مجموعة بإسم التخصص"  placeholder="ابحث عن مجموعة بإسم التخصص..." 
+                aria-label="ابحث عن مجموعة بإسم التخصص"/>
         
+                <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
+                </div>
+            </div>
+            <button id="addNewGroupBtn" class="bg-customBlue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out w-full sm:w-auto">
+                <i class="fas fa-plus-circle mr-2"></i> إضافة مجموعة 
+            </button>
+        </div>
     </div>
 
     <div class="overflow-x-auto relative shadow-md rounded-lg">
         <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr class="">
+                    <th scope="col" class="py-3 px-6">المستوى</th>
                     <th scope="col" class="py-3 px-6">اسم المجموعة</th>
                     <th scope="col" class="py-3 px-6">عدد الطلاب</th>
-                    <th scope="col" class="py-3 px-6">المستوى</th>
                     <th scope="col" class="py-3 px-6 text-right">الإجراءات</th>
                 </tr>
             </thead>
             <tbody id="groupsTableBody">
-                {# Loop through groups passed from Django context for initial page load #}
                 {% if groups %}
                     {% for group in groups %}
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                            {{ group.fk_level.level_name|arabic_level }} [{{ group.fk_level.fk_program.program_name }}]
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">{{ group.group_name }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ group.number_students }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                            {# Perform comparison and display Arabic level name directly in template #}
-                            {{ group.fk_level.level_name|arabic_level }} [{{ group.fk_level.fk_program.program_name }}]
-                            
-                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button data-id="{{ group.id }}" class="edit-btn text-customBlue hover:text-blue-900 dark:text-customBlue dark:hover:text-blue-400 ml-2 py-1 px-2 rounded transition duration-200">
-                                <i class="fas fa-edit"></i> تعديل
+                            <button 
+                                data-id="{{ group.id }}" 
+                                data-fk-level="{{ group.fk_level.id }}" 
+                                class="edit-btn text-customBlue hover:text-blue-900 dark:text-customBlue dark:hover:text-blue-400 ml-2 py-1 px-2 rounded transition duration-200">
+                                <i class="fas fa-edit"></i> 
                             </button>
-                            <button data-id="{{ group.id }}" class="delete-btn text-red-600 hover:text-red-900 dark:text-red-500 dark:hover:text-red-400 py-1 px-2 rounded transition duration-200">
-                                <i class="fas fa-trash-alt"></i> حذف
+                            <button
+                               type="button"
+                               class="delete-btn group text-red-600 hover:text-red-800 dark:text-red-400 
+                               dark:hover:text-red-300 p-2 rounded-full hover:bg-red-100 dark:hover:bg-gray-700 transition-colors duration-150"
+                               data-id="{{ group.id }}"
+                               data-name="{{ group.group_name }}"
+                               data-type="المجموعة" 
+                               data-url="{% url 'groups_delete' 0 %}"
+                               data-form-type="delete"
+                               title="حذف">
+                               <i class="fas fa-trash-alt text-lg group-hover:scale-110 transition-transform"></i>
                             </button>
                         </td>
                     </tr>
                     {% endfor %}
                 {% else %}
-                {# Message if no groups are available from Django context on initial load #}
                 <tr id="noGroupsMessageInitial">
                     <td colspan="4" class="text-center py-4 text-gray-500 dark:text-gray-400">لا توجد مجموعات لعرضها.</td>
                 </tr>
                 {% endif %}
             </tbody>
         </table>
-        {# This message is now redundant for initial load but kept for JS dynamic updates if the table becomes empty #}
         <p id="noGroupsMessage" class="hidden text-center py-4 text-gray-500 dark:text-gray-400">لا توجد مجموعات لعرضها.</p>
         <div id="loadingIndicator" class="hidden text-center py-4 text-customBlue">
             <i class="fas fa-spinner fa-spin text-xl"></i> جارٍ التحميل...
@@ -91,19 +98,20 @@
     {% include "pagination.html" with page_obj=groups %}
 </div>
 
-
 <!-- Modal for Add/Edit Group -->
 <div id="groupModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50 hidden p-4">
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-md mx-auto transform transition-all duration-300 scale-95 opacity-0">
         <div class="flex justify-between items-center border-b pb-3 mb-4">
             <h3 id="modalTitle" class="text-xl font-semibold text-gray-900 dark:text-gray-100">إضافة مجموعة جديدة</h3>
-            <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition duration-200">
+            <button id="closeModalBtns" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition duration-200">
                 <i class="fas fa-times text-2xl"></i>
             </button>
         </div>
 
-        <form id="groupForm" class="space-y-4">
-            <input type="hidden" id="groupId">
+        <form id="groupForm" method="POST" action="{% url 'groups_management' %}" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" id="groupId" name="group_id" value=""> <!-- مخفي لتخزين ID المجموعة -->
+            <input type="hidden" id="actionType" name="form_type" value="">
             <div>
                 <label for="groupName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">اسم المجموعة:</label>
                 <input type="text" id="groupName" name="group_name" required 
@@ -115,7 +123,6 @@
                        class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-customBlue focus:border-customBlue dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
             </div>
             <div>
-                
                 <label for="fkLevel" class="block text-sm font-medium text-gray-700 dark:text-gray-300">المستوى:</label>
                 <select id="fkLevel" name="fk_level" required 
                         class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-customBlue focus:border-customBlue dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
@@ -126,194 +133,91 @@
                         </option>
                     {% endfor %}
                 </select>
-
             </div>
-            <div class="flex justify-end pt-4 border-t mt-4">
-                <button type="submit" class="bg-customBlue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out">
-                    حفظ
+            <div class="flex justify-start w-full pt-4 border-t mt-4">
+                <button type="submit" class="bg-customBlue hover:bg-blue-700 text-white font-bold py-2 px-4 w-full
+                rounded-lg shadow-md transition duration-300 ease-in-out">
+                حفظ
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Modal for Delete Confirmation -->
-<div id="deleteConfirmModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50 hidden p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-sm mx-auto text-center transform transition-all duration-300 scale-95 opacity-0">
-        <i class="fas fa-exclamation-triangle text-yellow-500 text-5xl mb-4"></i>
-        <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">تأكيد الحذف</h3>
-        <p class="text-gray-700 dark:text-gray-300 mb-6">هل أنت متأكد أنك تريد حذف هذه المجموعة؟ لا يمكن التراجع عن هذا الإجراء.</p>
-        <div class="flex justify-center space-x-4">
-            <button id="cancelDeleteBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out">
-                إلغاء
-            </button>
-            <button id="confirmDeleteBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out">
-                تأكيد الحذف
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Toast messages container -->
-<div id="messageContainer" class="fixed bottom-4 right-4 z-50 space-y-2">
-    <!-- Messages will be appended here by showMessage function -->
-</div>
-
+{% include "delete_modal.html" %}
+{% include "message.html" %}
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'src/js/api_form.js' %}"></script>
+<script src="{% static 'src/js/show_modal_message.js' %}"></script>
 <script>
-    function showMessage(message, type = 'success') {
-        const messageContainer = document.getElementById('messageContainer');
-        const messageElement = document.createElement('div');
-        messageElement.className = `p-4 rounded-lg shadow-md flex items-center space-x-3 transition-all duration-300 transform translate-x-full opacity-0
-                                    ${type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`;
-        messageElement.innerHTML = `
-            ${type === 'success' ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-exclamation-circle"></i>'}
-            <span>${message}</span>
-        `;
-        messageContainer.appendChild(messageElement);
-        setTimeout(() => {
-            messageElement.classList.remove('translate-x-full', 'opacity-0');
-            messageElement.classList.add('translate-x-0', 'opacity-100');
-        }, 10);
-        setTimeout(() => {
-            messageElement.classList.remove('translate-x-0', 'opacity-100');
-            messageElement.classList.add('translate-x-full', 'opacity-0');
-            messageElement.addEventListener('transitionend', () => messageElement.remove());
-        }, 3000); 
+document.addEventListener('DOMContentLoaded', function () {
+  const groupModal = document.getElementById('groupModal');
+  const modalTitleElement = document.getElementById('modalTitle');
+  const groupForm = document.getElementById('groupForm');
+  const actionTypeInput = document.getElementById('actionType'); // input مخفي لتخزين نوع العملية
+
+  const groupIdInput = document.getElementById('groupId'); // مخفي لتخزين ID المجموعة
+  const groupNameInput = document.getElementById('groupName');
+  const numberStudentsInput = document.getElementById('numberStudents');
+  const fkLevelSelect = document.getElementById('fkLevel');
+
+  const addNewGroupBtn = document.getElementById('addNewGroupBtn');
+  const closeModalBtn = document.getElementById('closeModalBtns');
+  const groupsTableBody = document.getElementById('groupsTableBody');
+
+  // فتح المودال مع تعيين نوع العملية والنص المناسب
+  function openModal(type, title) {
+    modalTitleElement.textContent = title;
+    actionTypeInput.value = type;  // "add" أو "edit"
+    groupModal.classList.remove('hidden');
+    setTimeout(() => {
+      groupModal.querySelector('.bg-white').classList.remove('scale-95', 'opacity-0');
+      groupModal.querySelector('.bg-white').classList.add('scale-100', 'opacity-100');
+    }, 10);
+  }
+
+  // إغلاق المودال
+  function closeModal() {
+    groupModal.querySelector('.bg-white').classList.remove('scale-100', 'opacity-100');
+    groupModal.querySelector('.bg-white').classList.add('scale-95', 'opacity-0');
+    groupModal.addEventListener('transitionend', () => {
+      groupModal.classList.add('hidden');
+    }, { once: true });
+  }
+
+  // زر الإضافة
+  addNewGroupBtn.addEventListener('click', () => {
+    groupForm.reset();
+    groupIdInput.value = ''; // لا يوجد id في الإضافة
+    openModal('add', 'إضافة مجموعة جديدة');
+  });
+
+  // زر الإغلاق
+  closeModalBtn.addEventListener('click', () => {
+    closeModal();
+  });
+
+  // زر التعديل داخل الجدول
+  groupsTableBody.addEventListener('click', (e) => {
+    const editBtn = e.target.closest('.edit-btn');
+    if (editBtn) {
+      const tr = editBtn.closest('tr');
+
+      const groupId = editBtn.dataset.id;
+      const fkLevel = editBtn.dataset.fkLevel;
+      const groupName = tr.cells[1].innerText.trim();
+      const numberStudents = tr.cells[2].innerText.trim();
+
+      groupIdInput.value = groupId;
+      groupNameInput.value = groupName;
+      numberStudentsInput.value = numberStudents;
+      fkLevelSelect.value = fkLevel || "";
+
+      openModal('edit', 'تعديل مجموعة');
     }
-
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const globalShowMessage = typeof showMessage === 'function' ? showMessage : console.log;
-        const groupModal = document.getElementById('groupModal');
-        const deleteConfirmModal = document.getElementById('deleteConfirmModal');
-        const modalTitleElement = document.getElementById('modalTitle');
-        const groupForm = document.getElementById('groupForm');
-        const groupIdInput = document.getElementById('groupId');
-        const groupsTableBody = document.getElementById('groupsTableBody'); 
-        const fkLevelSelect = document.getElementById('fkLevel'); 
-
-        function openAnyModal(modalElement, title = null, resetForm = false) {
-            if (resetForm) {
-                groupForm.reset();
-                groupIdInput.value = '';
-            }
-            if (title) {
-                modalTitleElement.textContent = title;
-            }
-            modalElement.classList.remove('hidden');
-            setTimeout(() => {
-                modalElement.querySelector('.bg-white').classList.remove('scale-95', 'opacity-0');
-                modalElement.querySelector('.bg-white').classList.add('scale-100', 'opacity-100');
-            }, 10);
-        }
-
-        function closeAnyModal(modalElement) {
-            modalElement.querySelector('.bg-white').classList.remove('scale-100', 'opacity-100');
-            modalElement.querySelector('.bg-white').classList.add('scale-95', 'opacity-0');
-            modalElement.addEventListener('transitionend', () => {
-                modalElement.classList.add('hidden');
-            }, { once: true });
-        }
-
-        const groupManager = new APIFormManager({
-            formId: 'groupForm',
-            apiBaseUrl: 'http://127.0.0.1:8001/api/groups/',
-            getFormData: () => {
-                const groupName = document.getElementById('groupName').value;
-                const numberStudents = parseInt(document.getElementById('numberStudents').value);
-                const fkLevelId = parseInt(document.getElementById('fkLevel').value);
-
-                if (!groupName.trim()) throw new Error("يرجى إدخال اسم المجموعة.");
-                if (isNaN(numberStudents) || numberStudents < 0) throw new Error("عدد الطلاب غير صحيح.");
-                if (isNaN(fkLevelId)) throw new Error("يرجى اختيار المستوى.");
-
-                return {
-                    group_name: groupName,
-                    number_students: numberStudents,
-                    fk_level: fkLevelId
-                };
-            }
-        });
-
-        async function fillFormForEditLocally(id) {
-            try {
-                const response = await fetch(`${groupManager.apiBaseUrl}${id}/`); 
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const item = await response.json();
-
-                document.getElementById('groupId').value = item.id;
-                document.getElementById('groupName').value = item.group_name;
-                document.getElementById('numberStudents').value = item.number_students;
-                fkLevelSelect.value = item.fk_level.id || item.fk_level; 
-            } catch (error) {
-                console.error('Error fetching item for edit locally:', error);
-                globalShowMessage('فشل في جلب بيانات المجموعة للتعديل.', 'error');
-                closeAnyModal(groupModal);
-            }
-        }
-
-        document.getElementById('addNewGroupBtn')?.addEventListener('click', () => {
-            groupManager.currentEditId = null; 
-            openAnyModal(groupModal, 'إضافة مجموعة جديدة', true); 
-        });
-
-        document.getElementById('closeModalBtn')?.addEventListener('click', () => {
-            closeAnyModal(groupModal);
-        });
-
-        groupsTableBody?.addEventListener('click', async (e) => {
-            const editBtn = e.target.closest('.edit-btn');
-            const deleteBtn = e.target.closest('.delete-btn');
-
-            if (editBtn) {
-                const id = editBtn.dataset.id;
-                groupManager.currentEditId = id; 
-                await fillFormForEditLocally(id); 
-                openAnyModal(groupModal, 'تعديل مجموعة', false); 
-            } else if (deleteBtn) {
-                const id = deleteBtn.dataset.id;
-                groupManager.currentDeleteId = id; 
-                openAnyModal(deleteConfirmModal); 
-            }
-        });
-
-        document.getElementById('cancelDeleteBtn')?.addEventListener('click', () => {
-            closeAnyModal(deleteConfirmModal);
-        });
-
-        document.getElementById('confirmDeleteBtn')?.addEventListener('click', async () => {
-            await groupManager.deleteItem(groupManager.currentDeleteId);
-            closeAnyModal(deleteConfirmModal); 
-        });
-
-        groupForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); 
-            try {
-                await groupManager.handleSubmit(e);
-                closeAnyModal(groupModal); 
-            } catch (error) {
-                console.error("Form submission error handled by APIFormManager:", error);
-            }
-        });
-    });
-
+  });
+});
 </script>
 {% endblock %}

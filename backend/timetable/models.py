@@ -157,7 +157,7 @@ class Group(models.Model):
     class Meta:
         verbose_name = "مجموعة"
         verbose_name_plural = "المجموعات"
-        ordering = ['fk_level__level_name', 'group_name'] # ترتيب حسب المستوى ثم اسم المجموعة
+        ordering = ['fk_level__id', 'group_name'] # ترتيب حسب المستوى ثم اسم المجموعة
         unique_together = ('group_name', 'fk_level')
 
     def __str__(self):

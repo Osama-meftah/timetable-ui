@@ -5,7 +5,7 @@ from .models import (
 )
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.models import User
-
+from django.db.models import Sum
 
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -65,17 +65,6 @@ class HallSerializer(serializers.ModelSerializer):
         model = Hall
         fields = '__all__'
         
-
-# Serializer للنموذج Level
-# class LevelSerializer(serializers.ModelSerializer):
-#     fk_program = ProgramSerializer(read_only=True)  # للعرض
-#     fk_program_id = serializers.PrimaryKeyRelatedField(
-#         queryset=Program.objects.all(), write_only=True, source='fk_program'
-#     )
-
-#     class Meta:
-#         model = Level
-#         fields = '__all__'
 class LevelSerializer(serializers.ModelSerializer):
     fk_program = ProgramSerializer(read_only=True)
     program_name = serializers.CharField(write_only=True)  # استلام اسم البرنامج بدلاً من المعرف
@@ -104,13 +93,52 @@ class LevelSerializer(serializers.ModelSerializer):
 
 
 
-# Serializer للنموذج Group
+
 class GroupSerializer(serializers.ModelSerializer):
-    fk_level = LevelSerializer(read_only=True) # عرض بيانات المستوى بدلاً من ID فقط
+    fk_level = LevelSerializer(read_only=True)
+    fk_level_id = serializers.PrimaryKeyRelatedField(
+        queryset=Level.objects.all(),
+        write_only=True,
+        source='fk_level'
+    )
 
     class Meta:
         model = Group
-        fields = '__all__'
+        fields = ['id', 'group_name', 'number_students', 'fk_level', 'fk_level_id']
+
+    def validate(self, data):
+        group_name = data.get('group_name')
+        level = data.get('fk_level')
+        number_students = data.get('number_students')
+
+        # الحصول على السجل الحالي إذا كان موجود (عند التحديث)
+        instance = getattr(self, 'instance', None)
+
+        # تحقق من تكرار اسم المجموعة لنفس المستوى
+        queryset = Group.objects.filter(group_name=group_name, fk_level=level)
+        if instance:
+            queryset = queryset.exclude(pk=instance.pk)
+        if queryset.exists():
+            raise serializers.ValidationError("هذه المجموعة موجودة مسبقًا لهذا المستوى.")
+
+        # حساب مجموع عدد الطلاب في المجموعات الأخرى لنفس المستوى
+        other_groups = Group.objects.filter(fk_level=level)
+        if instance:
+            other_groups = other_groups.exclude(pk=instance.pk)
+        total_students_other_groups = other_groups.aggregate(total=Sum('number_students'))['total'] or 0
+
+        # مجموع الطلاب بعد إضافة/تعديل هذه المجموعة
+        total_students_after = total_students_other_groups + number_students
+
+        # مقارنة مع عدد طلاب المستوى
+        if total_students_after > level.number_students:
+            raise serializers.ValidationError(
+                f"مجموع عدد طلاب المجموعات ({total_students_after}) أكبر من عدد طلاب المستوى ({level.number_students})."
+            )
+
+        return data
+
+
 
 class SubjectSerializer(serializers.ModelSerializer):
     # fk_level = LevelSerializer(read_only=True)
@@ -168,12 +196,10 @@ class TeacherTimeSerializer(serializers.ModelSerializer):
 
 # Serializer للنموذج Distribution
 class DistributionSerializer(serializers.ModelSerializer):
-    # عرض بيانات المجموعة، الأستاذ، المادة (للقراءة فقط)
     fk_group = GroupSerializer(read_only=True)
     fk_teacher = TeacherSerializer(read_only=True)
     fk_subject = SubjectSerializer(read_only=True)
 
-    # لإدخال البيانات (كتابة) تستخدم الحقول بالـ ID
     fk_group_id = serializers.PrimaryKeyRelatedField(
         queryset=Group.objects.all(), source='fk_group', write_only=True
     )

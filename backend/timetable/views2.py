@@ -18,7 +18,15 @@ class BaseViewSet(ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            instance = serializer.save()
+            try:
+                instance = serializer.save()
+            except Exception as e:
+                print("Error on save:", e)
+                return Response({
+                    "status": "error",
+                    "message": "خطأ داخلي أثناء الحفظ.",
+                    "detail": str(e)
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             return Response({
                 "status": "success",
                 "message": self.success_create_message,
