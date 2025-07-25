@@ -76,7 +76,7 @@ def reseat_teacheer_password(request, uidb64, token):
             response=api_post(Endpoints.reseat_teacheer_password,data=data)
             handle_response(request,response)
             return redirect('logout')
-    return render(request, "teacher_management/reset_password.html")
+    return render(request, "teachers_management/reset_password.html")
      
 def logout_view(request):
         request.session.flush()  # Clear the session

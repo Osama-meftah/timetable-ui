@@ -3,7 +3,7 @@
 <nav class="flex items-center justify-center pt-6">
     <div class="flex items-center gap-2">
         {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}" class="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 transition-colors duration-200">
+            <a href="?{{page_key}}={{ page_obj.previous_page_number }}#{{page_id}}" class="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 transition-colors duration-200">
                 السابق
             </a>
         {% else %}
@@ -14,7 +14,7 @@
 
         {% for i in page_obj.paginator.page_range %}
             {% if i == 1 or i == total %}
-                <a href="?page={{ i }}" class="relative dark:text-gray-200 inline-flex items-center px-4 py-2 text-sm font-medium rounded-md
+                <a href="?{{page_key}}={{ i }}#{{page_id}}" class="relative dark:text-gray-200 inline-flex items-center px-4 py-2 text-sm font-medium rounded-md
                     {% if page_obj.number == i %}
                         bg-indigo-600 text-white
                     {% else %}
@@ -24,7 +24,7 @@
                 </a>
             {% else %}
                 {% if i >= current|add:"-2" and i <= current|add:"2" %}
-                    <a href="?page={{ i }}" class="relative dark:text-gray-200 inline-flex items-center px-4 py-2 text-sm font-medium rounded-md
+                    <a href="?{{page_key}}={{ i }}#{{page_id}}" class="relative dark:text-gray-200 inline-flex items-center px-4 py-2 text-sm font-medium rounded-md
                         {% if page_obj.number == i %}
                             bg-indigo-600 text-white
                         {% else %}
@@ -39,7 +39,7 @@
         {% endfor %}
 
         {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}" class="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 transition-colors duration-200">
+            <a href="?{{page_key}}={{ page_obj.next_page_number }}#{{page_id}}" class="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 transition-colors duration-200">
                 التالي
             </a>
         {% else %}
