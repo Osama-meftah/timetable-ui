@@ -39,11 +39,11 @@ def api_search_items(endpoint, query, request):
 
     try:
         response = requests.get(url, headers=headers, timeout=10)
+        # print(response)
         response.raise_for_status()
         data = response.json()
-
-        if isinstance(data, dict) and "results" in data:
-            return data["results"]
+        if isinstance(data, dict) and 'results' in data:
+            return data['results']
         else:
             return []
 
@@ -57,30 +57,31 @@ class TeachersAvailableView(View):
         user = get_user_id(request)
         # user_id = user['id']
         teacher = user['teacher']
-        print(teacher)
-        teacher_id = teacher['teacher_name']
+        teacher_name = teacher['teacher_name']
+        # print(teacher_name)
         
-        availabilities = api_get(f"{Endpoints.teacher_times}", request=request)
-        print(availabilities)
-        # print("fjldsfjsdalfjaldsfjladsjf")
+        availabilities = api_search_items(Endpoints.searchteacherstimes, teacher_name, request=request)
+        # api_get(f"{Endpoints.teacher_times}", request=request)
+        # print(availabilities)
         days = api_get(Endpoints.todays, request=request) or []
         periods = api_get(Endpoints.periods, request=request) or []
         
         if isinstance(availabilities, dict):
             availabilities = [availabilities]
-        # print(teacher_id)
-        return render(request, 'teachers_management/list.html', {
+            
+        context = {
             "availabilities": availabilities,
             "days": days,
             "periods": periods,
-            "page_title": "أوقات التواجد"
-        })
+            "page_title": "أوقات التواجد",
+        }
+        return render(request, 'teachers_management/list.html',context)
     def post(self, request, id=None):
         availability_id = request.POST.get("availability_id")
         day_id = request.POST.get("day")
         period_id = request.POST.get("period")
         teacher_id = get_user_id(request)
-
+        print(teacher_id)
         if not teacher_id:
             messages.error(request, "❌ يجب تسجيل الدخول أولاً.")
             return redirect("login")
@@ -88,12 +89,12 @@ class TeachersAvailableView(View):
         if not day_id or not period_id:
             messages.error(request, "❌ جميع الحقول مطلوبة.")
             return redirect("teachers_availability")
-
         time_data = {
             "fk_today_id": day_id,
             "fk_period_id": period_id,
-            "fk_teacher_id": teacher_id,
+            "fk_teacher": teacher_id['teacher']['id'],
         }
+        print(time_data)
         api_post(f"{Endpoints.teacher_times}", time_data, request=request,redirect_to='teachers_availability')
 
         return redirect("teachers_availability")

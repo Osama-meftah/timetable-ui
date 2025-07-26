@@ -10,7 +10,8 @@
 
 {# The main content container, centered horizontally and vertically #}
 <main class="container mx-auto px-4 py-8 sm:px-6 lg:px-8 flex-grow flex items-center justify-center">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-xl w-full border border-gray-100 dark:border-gray-700">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 sm:p-8 w-[90%] border 
+    border-gray-100 dark:border-gray-700">
         <h2 class="text-2xl sm:text-3xl font-bold text-blue-700 dark:text-blue-400 mb-6 text-center border-b pb-4 border-gray-200 dark:border-gray-700">
             <i class="fas fa-user-shield ml-3"></i> بيانات الحساب الشخصية
         </h2>
@@ -21,18 +22,21 @@
                 <label class="block text-gray-700 dark:text-gray-300 font-medium text-sm mb-1">
                     <i class="fas fa-user ml-2 text-gray-500 dark:text-gray-400"></i> اسم المستخدم:
                 </label>
-                <p class="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 p-3 rounded-lg mt-1 text-lg font-semibold border border-gray-200 dark:border-gray-600">
-                    {{ teacher.username }}
-                </p>
+
+                <input type="text" readonly class="bg-gray-100 dark:bg-gray-700 text-gray-900 
+                dark:text-gray-100 p-3 rounded-lg mt-1 text-lg font-semibold border border-gray-200 
+                dark:border-gray-600 w-full" value="{{ teacher.username }}">
+
             </div>
             {# Email Display Field #}
             <div>
                 <label class="block text-gray-700 dark:text-gray-300 font-medium text-sm mb-1">
                     <i class="fas fa-envelope ml-2 text-gray-500 dark:text-gray-400"></i> البريد الإلكتروني:
                 </label>
-                <p class="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 p-3 rounded-lg mt-1 text-lg font-semibold border border-gray-200 dark:border-gray-600">
-                    {{ teacher.email }}
-                </p>
+                <input type="text" readonly class="bg-gray-100 dark:bg-gray-700 text-gray-900
+                dark:text-gray-100 p-3 rounded-lg mt-1 text-lg font-semibold border border-gray-200
+                dark:border-gray-600 w-full" value="{{ teacher.email }}">
+
             </div>
         </div>
 

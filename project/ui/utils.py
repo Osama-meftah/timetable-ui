@@ -27,6 +27,7 @@ class Endpoints:
     teachers = "teachers/"
     teachersUpload = "teachersUpload/"
     teacher_times = "teacherTimes/"
+    searchteacherstimes = "searchteacherstimes/"
     subjects = "subjects/"
     uploadSubjects = "uploadSubjects/"
     distributions = "distributions/"
@@ -74,24 +75,32 @@ def show_backend_messages(request, response_json, default_success=""):
             elif tag == "error":
                 messages.error(request, combined)
 
-
 def handle_response(request, response):
     """
     يعالج الاستجابة القادمة من API ويعرض الرسائل المناسبة، ويعيد البيانات عند الحاجة.
-    """ 
+    """
+    if response is None:
+        messages.error(request, "لم يتم الحصول على أي استجابة من الخادم")
+        return "none", None
+
+    if not isinstance(response, dict):
+        messages.error(request, "تنسيق استجابة غير صالح")
+        return "invalid", None
+
     status = response.get("status")
     message = response.get("message", "")
-    data = response.get("data", None)  # يمكن أن تكون None إذا لم توجد بيانات
-    # print(data)
+    data = response.get("data", None)
+
     if status == "success":
-        return True, data  # success, مع البيانات
+        return "success", data
     elif status == "error":
         if message:
             messages.error(request, message)
-        return False, None  # فشل، لا يوجد بيانات
+        return "error", None
     else:
-        messages.warning(request, "تنسيق استجابه غير متوقع")
-        return False, None
+        messages.warning(request, "تنسيق استجابة غير متوقع")
+        return "unexpected", None
+
 
 def show_backend_messages(request, response_json, default_success=""):
     if not request:

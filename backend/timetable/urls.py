@@ -17,7 +17,7 @@ router.register('teachers',TeacherViewSet )
 router.register('groups',GroupViewSet )  
 router.register('todays',TodayViewSet )  # تسجيل ViewSet
 router.register('periods',PeriodViewSet )  # تسجيل ViewSet
-router.register('teacherTimes',TeacherTimeViewSet, basename='teachertime') 
+router.register('teacherTimes',TeacherTimeViewSet) 
 router.register('distributions',DistributionViewSet )  
 router.register('lectures',LectureViewSet )  
 router.register('tables',TableViewSet )
@@ -33,7 +33,9 @@ urlpatterns =[
     path("searchteachers/", SearchTeacherAPIView.as_view(), name="search_teachers_api"),
     path("searchteachersdistribution/", SearchTeacherDistributionAPIView.as_view()),
     path("searchcourses/", SearchCoursesAPIView.as_view()),
+    path("searchteacherstimes/", SearchTeacherTimeAPIView.as_view()),
     path("searchhalls/", SearchHallsAPIView.as_view(),),
+    
     # path('run-scheduler/', run_scheduler_view, name='run_scheduler'),
 
     # urls acounts

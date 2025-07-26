@@ -51,6 +51,8 @@
 </head>
 <script src="{% static 'src/js/sidebar.js' %}"></script>
 <body class="flex flex-col min-h-screen">
+    <div class="overlay" onclick="document.getElementById('sidebar').classList.remove('open-mobile-sidebar'); document.querySelector('.overlay').classList.remove('show-overlay');"></div>
+
     {% include "header.html" %}
 
     <div class="flex flex-grow flex-col md:flex-row">
@@ -68,10 +70,8 @@
     <script src="{% static 'src/js/mode.js' %}"></script>
     <script src="{% static 'src/js/upload_file.js' %}"></script>
     <script src="{% static 'src/js/delete.js' %}"></script>
-
-    <script src="{% static 'src/js/sidebar.js' %}"></script>
+    {% comment %} <script src="{% static 'src/js/sidebar.js' %}"></script> {% endcomment %}
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
-
     {% block extra_js %}
     {% endblock %}
 </body>

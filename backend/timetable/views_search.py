@@ -23,6 +23,36 @@ class SearchTeacherAPIView(APIView):
                 "error": str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+class SearchTeacherTimeAPIView(APIView):
+    def get(self, request):
+        query = request.GET.get("q", "").strip().lower()
+
+        teacher_times = TeacherTime.objects.select_related("fk_teacher", "fk_today", "fk_period")
+
+        if query:
+            teacher_times = teacher_times.filter(Q(fk_teacher__teacher_name__icontains=query))
+
+        result = {}
+        for t in teacher_times:
+            teacher = t.fk_teacher
+            teacher_id = teacher.id
+
+            if teacher_id not in result:
+                serialized_teacher = TeacherSerializer(teacher).data
+                result[teacher_id] = {
+                    "teacher": serialized_teacher,
+                    "availability": []
+                }
+
+            result[teacher_id]["availability"].append({
+                "day": TodaySerializer(t.fk_today).data,
+                "period": PeriodSerializer(t.fk_period).data
+            })
+
+        return Response({"results": list(result.values())}, status=status.HTTP_200_OK)
+
+
+
 
 class SearchTeacherDistributionAPIView(APIView):
     def get(self, request):
