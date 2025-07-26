@@ -167,6 +167,11 @@ class TeacherSerializer(serializers.ModelSerializer):
         model = Teacher
         fields = ['id', 'teacher_name', 'teacher_phone', 'teacher_email', 'teacher_status','teacher_status_display','teacher_address']
 
+class TeacherSerializer2(serializers.ModelSerializer):
+    teacher_status_display = serializers.CharField(source='get_teacher_status_display', read_only=True)
+    class Meta:
+        model = Teacher
+        fields = ['id', 'teacher_name', 'teacher_status','teacher_status_display', 'teacher_address']
 
 class TodaySerializer(serializers.ModelSerializer):
     day_name_display = serializers.CharField(source='get_day_name_display', read_only=True)
@@ -183,7 +188,7 @@ class TeacherTimeSerializer(serializers.ModelSerializer):
     # للقراءة
     fk_today = TodaySerializer(read_only=True)
     fk_period = PeriodSerializer(read_only=True)
-    fk_teacher = TeacherSerializer(read_only=True)
+    # fk_teacher = TeacherSerializer(read_only=True)
 
     # للكتابة
     fk_today_id = serializers.PrimaryKeyRelatedField(
@@ -192,9 +197,8 @@ class TeacherTimeSerializer(serializers.ModelSerializer):
     fk_period_id = serializers.PrimaryKeyRelatedField(
         queryset=Period.objects.all(), source='fk_period', write_only=True
     )
-    fk_teacher_id = serializers.PrimaryKeyRelatedField(
-        queryset=Teacher.objects.all(), source='fk_teacher', write_only=True
-    )
+    fk_teacher = serializers.PrimaryKeyRelatedField(
+        queryset=Teacher.objects.all())
 
     class Meta:
         model = TeacherTime

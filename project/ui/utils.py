@@ -33,6 +33,12 @@ class Endpoints:
     lectures = "lectures/"
     searchteachers = "searchteachers/"
 
+class KeysCach:
+    timeout=3600
+    teachers_data="teachers_data"
+    teacher_times_data="teacher_times_data"
+    distributions_data="distributions_data"
+
 def show_backend_messages(request, response_json, default_success=""):
     if not request:
         return
@@ -209,6 +215,7 @@ def api_post(endpoint, data, request=None, success_message=None, timeout=60, red
         response.raise_for_status()
         try:
             data = response.json()
+
         except ValueError:
             msg = f"رد غير متوقع من الخادم: {response.text[:200]}"
             if request:
@@ -397,7 +404,7 @@ def handle_file_upload(request, file_field_name, endpoint_url, success_title, er
         messages.error(request, f"{error_title}: {e}")
         return redirect(redirect_to)
 
-def paginate_queryset(queryset, request, page_key="page", page_size_key="page_size", size=5):
+def paginate_queryset(queryset, request, page_key, page_size_key, size=5):
     try:
         page_number = request.GET.get(page_key, 1)
         page_size = int(request.GET.get(page_size_key, size))

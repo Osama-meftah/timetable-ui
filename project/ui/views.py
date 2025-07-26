@@ -7,7 +7,7 @@ from django.middleware.csrf import get_token
 from collections import Counter
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import AccessToken
-
+from django.core.cache import cache
 
 
 BASE_API_URL = "http://127.0.0.1:8001/api/"
@@ -107,6 +107,12 @@ def teacher_dashboard_view(request):
     return render(request, 'teachers_management/dashboard_teatcher.html', {'teacher': user})
 
 class TeacherManagementView(View):
+    def get_or_cache(self, key, endpoint, request, timeout=KeysCach.timeout):
+        data = cache.get(key)
+        if data is None:
+            data = api_get(endpoint, request=request) or []
+            cache.set(key, data, timeout)
+        return data
     def get(self, request, id=None):
         # user = request.session.get("user")
         try:
@@ -117,10 +123,14 @@ class TeacherManagementView(View):
                 return render(request, "teachers/add_edit.html", {"page_title": "إضافة مدرس"})
 
             # جلب البيانات
-            teachers_data = api_get(Endpoints.teachers, request=request) or []
-            teacher_times_data = api_get(Endpoints.teacher_times, request=request) or []
-            distributions_data = api_get(Endpoints.distributions, request=request) or []
-            # print(teachers_data)
+            teachers_data = self.get_or_cache(KeysCach.teachers_data, Endpoints.teachers, request)
+            teacher_times_data = self.get_or_cache(KeysCach.teacher_times_data, Endpoints.teacher_times, request)
+            distributions_data = self.get_or_cache(KeysCach.distributions_data, Endpoints.distributions, request)
+            
+            # teachers_data = api_get(Endpoints.teachers, request=request) or []
+            # teacher_times_data = api_get(Endpoints.teacher_times, request=request) or []
+            # distributions_data = api_get(Endpoints.distributions, request=request) or []
+
             teachers_with_data = []
             for teacher in teachers_data:
                 teacher_id = teacher["id"]
@@ -141,7 +151,7 @@ class TeacherManagementView(View):
                         "period": f"{t['fk_period']['period_from']} - {t['fk_period']['period_to']}"
                     }
                     for t in teacher_times_data
-                    if t["fk_teacher"]["id"] == teacher_id
+                    if t["fk_teacher"] == teacher_id
                 ]
 
                 if courses:
@@ -164,7 +174,7 @@ class TeacherManagementView(View):
                 "teachers_with_data": teachers_data_paginated,
                 "total_teachers": total_teachers,
                 "active_teachers": active_teachers,
-                "on_leave_teachers": on_leave_teachers,
+                "on_leave_teachers": on_leave_teachers
             }
             return render(request, "teachers/list.html", context)
 
@@ -230,6 +240,14 @@ class TeacherDeleteView(View):
 class TeacherAvailabilityAndCoursesView(View):
     def get(self, request, id=None):
         try:
+            teachers = cache.get(KeysCach.teachers_data)
+            # days = get_or_cache("days_data", Endpoints.todays, request)
+            # periods = get_or_cache("periods_data", Endpoints.periods, request)
+            # subjects = get_or_cache("subjects_data", Endpoints.subjects, request)
+            # levels = get_or_cache("levels_data", Endpoints.levels, request)
+            # programs = get_or_cache("programs_data", Endpoints.programs, request)
+            # groups = get_or_cache("groups_data", Endpoints.groups, request)
+
             teachers = api_get(Endpoints.teachers, request=request) or []
             days = api_get(Endpoints.todays, request=request) or []
             periods = api_get(Endpoints.periods, request=request) or []
@@ -246,7 +264,7 @@ class TeacherAvailabilityAndCoursesView(View):
                 teacher = api_get(f"{Endpoints.teachers}{id}/", request=request)
 
                 all_times = api_get(f"{Endpoints.teacher_times}", request=request) or []
-                teacher_times = [t for t in all_times if t["fk_teacher"]["id"] == int(id)]
+                teacher_times = [t for t in all_times if t["fk_teacher"] == int(id)]
 
                 all_distributions = api_get(f"{Endpoints.distributions}", request=request) or []
                 teacher_distributions = [d for d in all_distributions if d["fk_teacher"]["id"] == int(id)]
@@ -289,14 +307,27 @@ class TeacherAvailabilityAndCoursesView(View):
                             "fk_subject_id": subject_id,
                         }
                         try:
+                            distributions=cache.get(KeysCach.distributions_data)
                             if dist_id:
-                                api_put(f"{Endpoints.distributions}{dist_id}/", dist_data, request=request)
+                                response=api_put(f"{Endpoints.distributions}{dist_id}/", dist_data, request=request)
+                                for i,distribution in enumerate(distributions):
+                                    if str(distribution['id']) == str(dist_id):
+                                        if response.get('distribution'):
+                                            distributions[i].update(response['distribution'])
+                                            break
+                                cache.set(KeysCach.distributions_data, distributions, timeout=KeysCach.timeout)
+                                return redirect("add_edit_teacher_with_courses", id=teacher_id)
+
                             else:
-                                api_post(Endpoints.distributions, dist_data, request=request)
+                               response= api_post(Endpoints.distributions, dist_data, request=request)
+                               if response.get('distribution'):
+                                    distributions.append(response['distribution'])
+                                    cache.set(KeysCach.distributions_data, distributions, timeout=KeysCach.timeout)
+                               return redirect("add_edit_teacher_with_courses")
                         except Exception as e:
                             handle_exception(request, f"فشل حفظ توزيع رقم {i}", e)
 
-                return redirect("add_edit_teacher_with_courses", id=teacher_id)
+                
             
             elif form_type == "times_form":
                 for i in range(1, 100):
@@ -308,13 +339,23 @@ class TeacherAvailabilityAndCoursesView(View):
                         time_data = {
                             "fk_today_id": day_id,
                             "fk_period_id": period_id,
-                            "fk_teacher_id": teacher_id,
+                            "fk_teacher": teacher_id,
                         }
                         try:
+                            times = cache.get(KeysCach.teacher_times_data)
                             if availability_id:
-                                api_put(f"{Endpoints.teacher_times}{availability_id}/", time_data, request=request)
+                                response= api_put(f"{Endpoints.teacher_times}{availability_id}/", time_data, request=request)
+                                for j, time in enumerate(times):
+                                    if str(time['id']) == str(availability_id):
+                                        if response.get('teachertime'):
+                                            times[j].update(response['teachertime'])
+                                            break
                             else:
-                                api_post(Endpoints.teacher_times, time_data, request=request)
+                                response= api_post(Endpoints.teacher_times, time_data, request=request)
+                                if response.get('teachertime'):
+                                    times.append(response['teachertime'])
+                                    cache.set(KeysCach.teacher_times_data, times, timeout=KeysCach.timeout)
+                    
                                 messages.success(request, "تم حفظ الأوقات المتاحة بنجاح.")
                         except Exception as e:
                             handle_exception(request, f"فشل حفظ وقت رقم {i}", e)
@@ -328,6 +369,12 @@ class TeacherAvailabilityAndCoursesView(View):
                 if dist_id:
                     try:
                         api_delete(f"{Endpoints.distributions}{dist_id}/", request=request)
+                        distributions = cache.get(KeysCach.distributions_data)
+                        for i, distribution in enumerate(distributions):
+                            if str(distribution['id']) == str(dist_id):
+                                del distributions[i]
+                                break
+                        cache.set(KeysCach.distributions_data, distributions, timeout=KeysCach.timeout)
                         messages.success(request, "تم حذف توزيع المقرر بنجاح.")
                     except Exception as e:
                         handle_exception(request, "فشل في حذف توزيع المقرر", e)
@@ -338,6 +385,11 @@ class TeacherAvailabilityAndCoursesView(View):
                 if availability_id:
                     try:
                         api_delete(f"{Endpoints.teacher_times}{availability_id}/", request=request)
+                        times = cache.get(KeysCach.teacher_times_data)
+                        for i, time in enumerate(times):
+                            if str(time['id']) == str(availability_id):
+                                del times[i]
+                                break
                         messages.success(request, "تم حذف وقت التوفر بنجاح.")
                     except Exception as e:
                         handle_exception(request, "فشل في حذف وقت التوفر", e)

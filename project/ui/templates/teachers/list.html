@@ -96,27 +96,27 @@
         </div>
 
         <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700" >
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
                         <th scope="col"
-                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-12">
+                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-12" id"teachers-section">
                             ID</th>
                         <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             اسم المدرس</th>
-                        <th scope="col"
+                        {% comment %} <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            الهاتف</th>
+                            الهاتف</th> {% endcomment %}
                         <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">
                             البريد الإلكتروني</th>
                         <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">
                             حالة المدرس</th>
-                        <th scope="col"
+                        {% comment %} <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">
-                            العنوان</th>
+                            العنوان</th> {% endcomment %}
                         <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-32">
                             الإجراءات</th>
@@ -133,13 +133,13 @@
                         <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
                             {{ teacher.teacher_name }}
                         </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {% comment %} <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                             {% if teacher.teacher_phone %}
                             {{ teacher.teacher_phone }}
                             {% else %}
                             <span class="text-gray-400 dark:text-gray-500">غير محدد</span>
                             {% endif %}
-                        </td>
+                        </td> {% endcomment %}
                         <td
                             class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
 
@@ -156,14 +156,14 @@
                                 {{ teacher.teacher_status_display }}
                             </span>
                         </td>
-                        <td
+                        {% comment %} <td
                             class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
                             {% if teacher.teacher_address %}
                             {{ teacher.teacher_address }}
                             {% else %}
                             <span class="text-gray-400 dark:text-gray-500">غير محدد</span>
                             {% endif %}
-                        </td>
+                        </td> {% endcomment %}
                         <td
                             class="px-8 py-4 whitespace-nowrap text-right text-sm font-medium flex items-center justify-end gap-2">
                             <a href="{% url 'edit_teacher' teacher.id %}"
@@ -196,11 +196,11 @@
                 </p>
             </div>
         </div>
-        {% include "pagination.html" with page_obj=teachers %}
+        {% include "pagination.html" with page_obj=teachers page_key="page" page_id="teachers-section"%}
     </div>
 
     {# Detailed Teachers List Section (teachers_with_data) #}
-    <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6">
+    <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6" id="teachers-section_details">
         <div class="flex flex-col center-title gap-4 lg:flex-row sm:items-center sm:justify-between mb-6">
           <!-- العنوان -->
           <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 whitespace-nowrap text-center sm:text-right">
@@ -251,9 +251,9 @@
                         <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             المدرس</th>
-                        <th scope="col"
+                        {% comment %} <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">
-                            البريد الإلكتروني</th>
+                            البريد الإلكتروني</th> {% endcomment %}
                         {% comment %} <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden lg:table-cell">
                             الهاتف</th> {% endcomment %}
@@ -299,11 +299,11 @@
                                 </div>
                             </div>
                         </td>
-                        <td
+                        {% comment %} <td
                             class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
                             {{ item.teacher.teacher_email }}
-                        </td>
-                        {% comment %} <td
+                        </td> 
+                        <td
                             class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden lg:table-cell">
                             {{ item.teacher.teacher_phone }}
                         </td> {% endcomment %}
@@ -363,7 +363,7 @@
             </table>
         </div>
         {# Pagination for Detailed List (Updated) #}
-        {% include "pagination.html" with page_obj=teachers_with_data %}
+        {% include "pagination.html" with page_obj=teachers_with_data page_key="page_detailed" page_id="teachers-section_details" %}
     </div>
 </div>
 
@@ -439,12 +439,12 @@
                     </div>
                   </div>
                 </td>
-                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
+                {% comment %} <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
                   ${teacher.teacher_email}
                 </td>
                 <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden lg:table-cell">
                   ${teacher.teacher_phone}
-                </td>
+                </td> {% endcomment %}
                 <td class="px-4 py-4 whitespace-normal text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
                   ${coursesHTML}
                 </td>
