@@ -296,7 +296,7 @@ class Distribution(models.Model):
     class Meta:
         verbose_name = "توزيع"
         verbose_name_plural = "التوزيعات"
-        unique_together = ('fk_group', 'fk_subject') 
+        unique_together = ('fk_group', 'fk_teacher', 'fk_subject') 
         ordering = ['fk_group__group_name', 'fk_subject__subject_name']
 
     def __str__(self):
