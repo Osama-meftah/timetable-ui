@@ -47,6 +47,7 @@
         }
     </style> {% endcomment %}
 </head>
+<script src="{% static 'src/js/sidebar.js' %}"></script>
 <body class="flex flex-col min-h-screen">
     {% include "header.html" %}
 
@@ -65,7 +66,6 @@
     <script src="{% static 'src/js/mode.js' %}"></script>
     <script src="{% static 'src/js/upload_file.js' %}"></script>
     <script src="{% static 'src/js/delete.js' %}"></script>
-    <script src="{% static 'src/js/sidebar.js' %}"></script>
     {% block extra_js %}
     {% endblock %}
 </body>

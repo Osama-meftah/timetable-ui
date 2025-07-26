@@ -17,7 +17,7 @@ router.register('teachers',TeacherViewSet )
 router.register('groups',GroupViewSet )  
 router.register('todays',TodayViewSet )  # تسجيل ViewSet
 router.register('periods',PeriodViewSet )  # تسجيل ViewSet
-router.register('teacherTimes',TeacherTimeViewSet )  
+router.register('teacherTimes',TeacherTimeViewSet, basename='teachertime') 
 router.register('distributions',DistributionViewSet )  
 router.register('lectures',LectureViewSet )  
 router.register('tables',TableViewSet )

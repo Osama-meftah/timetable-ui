@@ -20,24 +20,95 @@ def dashboard(request):
     عرض لوحة التحكم.
     """
     return render(request, 'dashboard.html')
+import requests
+from django.conf import settings
+
+def api_search_items(endpoint, query, request):
+    """
+    إرسال طلب GET إلى API يحتوي على فلترة بالبحث، مع التوكن ومعالجة الأخطاء.
+    """
+    url = f"{BASE_API_URL}{endpoint}?q={query}"
+    print(url)
+    token = request.session.get("token")
+
+    headers = {
+        "Content-Type": "application/json"
+    }
+    if token:
+        headers["Authorization"] = f"Token {token}"
+
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+
+        if isinstance(data, dict) and "results" in data:
+            return data["results"]
+        else:
+            return []
+
+    except requests.exceptions.RequestException as e:
+        # طباعة الخطأ لغايات التصحيح فقط (أزلها لاحقًا في الإنتاج)
+        print("API search error:", e)
+        return []
 
 class TeachersAvailableView(View):
-    def get(self, request,id=None):
-        return render(request, 'teachers_management/list.html')
-    
-    def post(self, request,id=None):
-        return render(request, 'teachers_management/list.html')
+    def get(self, request, id=None):
+        user = get_user_id(request)
+        # user_id = user['id']
+        teacher = user['teacher']
+        print(teacher)
+        teacher_id = teacher['teacher_name']
+        
+        availabilities = api_get(f"{Endpoints.teacher_times}", request=request)
+        print(availabilities)
+        # print("fjldsfjsdalfjaldsfjladsjf")
+        days = api_get(Endpoints.todays, request=request) or []
+        periods = api_get(Endpoints.periods, request=request) or []
+        
+        if isinstance(availabilities, dict):
+            availabilities = [availabilities]
+        # print(teacher_id)
+        return render(request, 'teachers_management/list.html', {
+            "availabilities": availabilities,
+            "days": days,
+            "periods": periods,
+            "page_title": "أوقات التواجد"
+        })
+    def post(self, request, id=None):
+        availability_id = request.POST.get("availability_id")
+        day_id = request.POST.get("day")
+        period_id = request.POST.get("period")
+        teacher_id = get_user_id(request)
+
+        if not teacher_id:
+            messages.error(request, "❌ يجب تسجيل الدخول أولاً.")
+            return redirect("login")
+
+        if not day_id or not period_id:
+            messages.error(request, "❌ جميع الحقول مطلوبة.")
+            return redirect("teachers_availability")
+
+        time_data = {
+            "fk_today_id": day_id,
+            "fk_period_id": period_id,
+            "fk_teacher_id": teacher_id,
+        }
+        api_post(f"{Endpoints.teacher_times}", time_data, request=request,redirect_to='teachers_availability')
+
+        return redirect("teachers_availability")
+    # return render(request, 'teachers_management/list.html')
+
 
 def teacher_dashboard_view(request):
     user=request.session.get('user')
-    print(user)
+    # print(user)
     # user=User.objects.get(id=user_id)
     return render(request, 'teachers_management/dashboard_teatcher.html', {'teacher': user})
 
 class TeacherManagementView(View):
-    
     def get(self, request, id=None):
-        user = request.session.get("user")
+        # user = request.session.get("user")
         try:
             if id:
                 return api_get(f"{Endpoints.teachers}{id}/", request=request, 
@@ -49,7 +120,7 @@ class TeacherManagementView(View):
             teachers_data = api_get(Endpoints.teachers, request=request) or []
             teacher_times_data = api_get(Endpoints.teacher_times, request=request) or []
             distributions_data = api_get(Endpoints.distributions, request=request) or []
-
+            # print(teachers_data)
             teachers_with_data = []
             for teacher in teachers_data:
                 teacher_id = teacher["id"]
@@ -132,7 +203,7 @@ class TeacherManagementView(View):
                     endpoint_url=f"{BASE_API_URL}{Endpoints.teachersUpload}",
                     success_title="✅ تم رفع ملف المدرسين بنجاح.",
                     error_title="❌ فشل رفع ملف المدرسين",
-                    redirect_to=request.path_info
+                    redirect_to=request.path_info,timeout=300,
                 )
                 return result or redirect(request.path_info)
             else:
@@ -694,10 +765,10 @@ class GroupsView(View):
         try:
             if action_type == 'add':
                 api_post(Endpoints.groups, data, request=request, success_message="✅ تم إضافة المجموعة بنجاح.", redirect_to='groups_management')
-                messages.success(request, "✅ تم إضافة المجموعة بنجاح.")
+                # messages.success(request, "✅ تم إضافة المجموعة بنجاح.")
             elif action_type == 'edit' and group_id:
                 api_put(f"{Endpoints.groups}{group_id}/", data, request=request, redirect_to='groups_management')
-                messages.success(request, "✅ تم تعديل المجموعة بنجاح.")
+                # messages.success(request, "✅ تم تعديل المجموعة بنجاح.")
             else:
                 messages.error(request, "نوع العملية غير صحيح أو بيانات ناقصة.")
         except Exception as e:
@@ -710,7 +781,7 @@ class GroupDeleteView(View):
         item_id = request.POST.get('item_id')
         try:
             api_delete(f"{Endpoints.groups}{item_id}/", request=request, redirect_to='groups_management')
-            messages.success(request, "✅ تم حذف المجموعة بنجاح.")
+            # messages.success(request, "✅ تم حذف المجموعة بنجاح.")
         except Exception as e:
             messages.error(request, f"❌ حدث خطأ أثناء حذف المجموعة: {e}")
             # print(f"Error deleting group with ID {item_id}: {e}")

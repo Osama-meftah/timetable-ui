@@ -88,20 +88,6 @@ class LevelUploadView(APIView):
 #             success_message_singular="مستوى"
 #         )
 
-class TeacherUploadView(APIView):
-    parser_classes = [MultiPartParser]
-
-    def post(self, request):
-        return handle_upload(
-            request=request,
-            model=Teacher,
-            serializer_class=TeacherSerializer,
-            required_fields=["teacher_name"],  # فقط الاسم هنا
-            get_existing=lambda data: Teacher.objects.filter(teacher_email=data["teacher_email"]).first(),
-            prepare_data=lambda row: prepare_teacher_data(row),
-            success_message_singular="مدرس"
-        )
-
 # class TeacherUploadView(APIView):
 #     parser_classes = [MultiPartParser]
 
@@ -110,18 +96,71 @@ class TeacherUploadView(APIView):
 #             request=request,
 #             model=Teacher,
 #             serializer_class=TeacherSerializer,
-#             required_fields=["teacher_name", "teacher_email"],
+#             required_fields=["teacher_name"],  # فقط الاسم هنا
 #             get_existing=lambda data: Teacher.objects.filter(teacher_email=data["teacher_email"]).first(),
-#             prepare_data=lambda row: {
-#                 "teacher_name": row.get("teacher_name", "").strip(),
-#                 "teacher_email": row.get("teacher_email", "").strip(),
-#                 "teacher_phone": row.get("teacher_phone", "").strip(),
-#                 "teacher_address": row.get("teacher_address", "").strip(),
-#                 "teacher_status": row.get("teacher_status", "نشط").strip()
-#             },
+#             prepare_data=lambda row: prepare_teacher_data(row),
 #             success_message_singular="مدرس"
 #         )
-        
+
+from django.contrib.auth.models import User
+from .utils import create_random_password, extract_username_from_email, send_password_email
+
+class TeacherUploadView(APIView):
+    parser_classes = [MultiPartParser]
+
+    def post(self, request):
+        return handle_upload(
+            request=request,
+            model=Teacher,
+            serializer_class=TeacherSerializer,
+            required_fields=["teacher_name", "teacher_email"],
+            get_existing=lambda data: Teacher.objects.filter(teacher_email=data["teacher_email"]).first(),
+            prepare_data=self.__class__.prepare_teacher_data,  # الحل هنا
+            success_message_singular="مدرس"
+        )
+
+    @staticmethod
+    def prepare_teacher_data(row):
+        email = str(row.get("teacher_email", "")).strip()
+        name = str(row.get("teacher_name", "")).strip()
+        phone = str(row.get("teacher_phone", "")).strip()
+        address = str(row.get("teacher_address", "")).strip()
+        status = str(row.get("teacher_status", "نشط")).strip()
+        is_staff = False
+
+        if not email:
+            raise ValueError("يجب إدخال البريد الإلكتروني لكل مدرس")
+
+        username = extract_username_from_email(email)
+
+        user = User.objects.filter(username=username).first()
+        if not user:
+            password = create_random_password()
+            user = User.objects.create_user(username=username, email=email, is_staff=is_staff)
+            user.set_password(password)
+            user.save()
+            send_password_email(user, password)
+            Teacher.objects.create(
+                teacher_name=name,
+                teacher_email=email,
+                teacher_phone=phone,
+                teacher_address=address,
+                teacher_status=status,
+                user=user
+            )
+            # أرسل كلمة المرور إن كان المدرس نشطًا
+            # if status == "نشط":
+
+        return {
+            "teacher_name": name,
+            "teacher_email": email,
+            "teacher_phone": phone,
+            "teacher_address": address,
+            "teacher_status": status,
+            "user": user.id  # هذا ما سيتم تمريره للـ serializer
+        }
+
+
 class SubjectUploadView(APIView):
     parser_classes = [MultiPartParser]
 

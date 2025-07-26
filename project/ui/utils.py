@@ -31,6 +31,7 @@ class Endpoints:
     uploadSubjects = "uploadSubjects/"
     distributions = "distributions/"
     lectures = "lectures/"
+    searchteachers = "searchteachers/"
 
 def show_backend_messages(request, response_json, default_success=""):
     if not request:
@@ -86,53 +87,6 @@ def handle_response(request, response):
         messages.warning(request, "تنسيق استجابه غير متوقع")
         return False, None
 
-def api_get(endpoint):
-    try:
-        
-        response = requests.get(f"{BASE_API_URL}{endpoint}")
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        raise RuntimeError(f"GET request failed: {e}")
-
-def api_post(endpoint, data):
-    try:
-        print(f"{BASE_API_URL}{endpoint}", data)
-        response = requests.post(f"{BASE_API_URL}{endpoint}", json=data)
-        # response.raise_for_status()
-        return response.json()
-    
-    except requests.exceptions.RequestException as e:
-        raise RuntimeError(f"POST request failed: {e}")
-
-def api_get_with_token(endpoint,token):
-    try:
-        header={
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-        }
-        response = requests.get(f"{BASE_API_URL}{endpoint}", headers=header)
-        # response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        raise RuntimeError(f"POST request failed: {e}")
-
-def api_put(endpoint, data):
-    try:
-        response = requests.put(f"{BASE_API_URL}{endpoint}", json=data)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        raise RuntimeError(f"PUT request failed: {e}")
-
-def api_delete(endpoint):
-    try:
-        response = requests.delete(f"{BASE_API_URL}{endpoint}")
-        response.raise_for_status()
-        return True
-    except requests.exceptions.RequestException as e:
-        raise RuntimeError(f"DELETE request failed: {e}")
-
 def show_backend_messages(request, response_json, default_success=""):
     if not request:
         return
@@ -187,11 +141,26 @@ def handle_exception(request, message, exception):
             messages.error(request, str(exception))
     return None
 
-def api_get(endpoint, request=None, timeout=10, redirect_to=None, render_template=None,success_message=None, render_context=None):
+def api_get_with_token(endpoint,token):
     try:
-        response = requests.get(f"{BASE_API_URL}{endpoint}", timeout=timeout)
-        response.raise_for_status()
+        header={
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+        }
+        response = requests.get(f"{BASE_API_URL}{endpoint}", headers=header)
+        # response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"POST request failed: {e}")
 
+
+def api_get(endpoint, request=None, timeout=60, redirect_to=None, render_template=None, success_message=None, render_context=None):
+    headers = {}
+    if request and 'token' in request.session:
+        headers["Authorization"] = f"Bearer {request.session['token']}"
+    try:
+        response = requests.get(f"{BASE_API_URL}{endpoint}", headers=headers, timeout=timeout)
+        response.raise_for_status()
         try:
             data = response.json()
         except ValueError:
@@ -200,12 +169,9 @@ def api_get(endpoint, request=None, timeout=10, redirect_to=None, render_templat
                 messages.error(request, msg)
             if redirect_to:
                 return redirect(redirect_to)
-            # if render_template:
-                
-            #     return render(request, render_template, render_context or {})
-            # return None
+            return None
 
-        show_backend_messages(request, data)
+        show_backend_messages(request, data, success_message or "")
 
         if redirect_to:
             return redirect(redirect_to)
@@ -213,7 +179,6 @@ def api_get(endpoint, request=None, timeout=10, redirect_to=None, render_templat
         if render_template:
             context = render_context or {}
             context.update({'data': data})
-            print(context)
             return render(request, render_template, context)
 
         return data
@@ -235,15 +200,15 @@ def api_get(endpoint, request=None, timeout=10, redirect_to=None, render_templat
             return render(request, render_template, render_context or {})
         return None
 
-def api_post(endpoint, data, request=None,success_message=None, timeout=10, redirect_to=None, render_template=None, render_context=None):
+def api_post(endpoint, data, request=None, success_message=None, timeout=60, redirect_to=None, render_template=None, render_context=None):
+    headers = {"Content-Type": "application/json"}
+    if request and 'token' in request.session:
+        headers["Authorization"] = f"Bearer {request.session['token']}"
     try:
-        # print(data)
-        response = requests.post(f"{BASE_API_URL}{endpoint}", json=data, timeout=timeout)
-        print(response.status_code)
-        # response.raise_for_status()
+        response = requests.post(f"{BASE_API_URL}{endpoint}", json=data, headers=headers, timeout=timeout)
+        response.raise_for_status()
         try:
             data = response.json()
-            print(data)
         except ValueError:
             msg = f"رد غير متوقع من الخادم: {response.text[:200]}"
             if request:
@@ -254,7 +219,7 @@ def api_post(endpoint, data, request=None,success_message=None, timeout=10, redi
                 return render(request, render_template, render_context or {})
             return None
 
-        show_backend_messages(request, data)
+        show_backend_messages(request, data, success_message or "")
 
         if redirect_to:
             return redirect(redirect_to)
@@ -283,11 +248,13 @@ def api_post(endpoint, data, request=None,success_message=None, timeout=10, redi
             return render(request, render_template, render_context or {})
         return None
 
-def api_put(endpoint, data, request=None, timeout=10, redirect_to=None, render_template=None, render_context=None):
+def api_put(endpoint, data, request=None, timeout=60, redirect_to=None, render_template=None, render_context=None):
+    headers = {"Content-Type": "application/json"}
+    if request and 'token' in request.session:
+        headers["Authorization"] = f"Bearer {request.session['token']}"
     try:
-        response = requests.put(f"{BASE_API_URL}{endpoint}", json=data, timeout=timeout)
+        response = requests.put(f"{BASE_API_URL}{endpoint}", json=data, headers=headers, timeout=timeout)
         response.raise_for_status()
-
         try:
             data = response.json()
         except ValueError:
@@ -329,22 +296,20 @@ def api_put(endpoint, data, request=None, timeout=10, redirect_to=None, render_t
             return render(request, render_template, render_context or {})
         return None
 
-def api_delete(endpoint, request=None, timeout=10, redirect_to=None, render_template=None, render_context=None):
+def api_delete(endpoint, request=None, timeout=60, redirect_to=None, render_template=None, render_context=None):
+    headers = {}
+    if request and 'token' in request.session:
+        headers["Authorization"] = f"Bearer {request.session['token']}"
     try:
-        response = requests.delete(f"{BASE_API_URL}{endpoint}", timeout=timeout)
+        response = requests.delete(f"{BASE_API_URL}{endpoint}", headers=headers, timeout=timeout)
         response.raise_for_status()
-
         if request:
             messages.success(request, "✅ تم الحذف بنجاح")
-
         if redirect_to:
             return redirect(redirect_to)
-
         if render_template:
             return render(request, render_template, render_context or {})
-
         return True
-
     except requests.exceptions.Timeout:
         if request:
             messages.error(request, "⏳ انتهت مهلة الاتصال بالخادم.")
@@ -353,7 +318,6 @@ def api_delete(endpoint, request=None, timeout=10, redirect_to=None, render_temp
         if render_template:
             return render(request, render_template, render_context or {})
         return False
-
     except requests.exceptions.RequestException as e:
         handle_exception(request, "فشل في حذف العنصر", e)
         if redirect_to:
@@ -443,3 +407,13 @@ def paginate_queryset(queryset, request, page_key="page", page_size_key="page_si
         if hasattr(request, "session"):
             messages.error(request, f"خطأ في التحويل للصفحات: {e}")
         return queryset
+
+def get_user_id(request):
+    """
+    استرجاع معرف المستخدم من الجلسة.
+    """
+    user =request.session.get('user')
+    # print(user)
+    # user_id = user.get('id') if user else None
+
+    return user

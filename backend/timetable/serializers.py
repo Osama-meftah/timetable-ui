@@ -149,17 +149,23 @@ class SubjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subject
         fields = ['id', 'subject_name', 'term']
+class TeacherBriefSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Teacher
+        fields = ['id','teacher_name', 'teacher_email', 'teacher_phone', 'teacher_status']
 
 class UserSerializer(serializers.ModelSerializer):
+    teacher = TeacherBriefSerializer(read_only=True)  # اسم الحقل لازم يطابق اسم العلاقة في الموديل
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email','is_staff']
-        
+        fields = ['id', 'username', 'email', 'is_staff', 'teacher']
+
 class TeacherSerializer(serializers.ModelSerializer):
     teacher_status_display = serializers.CharField(source='get_teacher_status_display', read_only=True)
     class Meta:
         model = Teacher
-        fields = ['id', 'teacher_name', 'teacher_phone', 'teacher_email', 'teacher_status','teacher_status_display', 'teacher_address']
+        fields = ['id', 'teacher_name', 'teacher_phone', 'teacher_email', 'teacher_status','teacher_status_display','teacher_address']
 
 
 class TodaySerializer(serializers.ModelSerializer):
@@ -194,6 +200,33 @@ class TeacherTimeSerializer(serializers.ModelSerializer):
         model = TeacherTime
         fields = '__all__'
 
+    def validate(self, data):
+        fk_today = data.get('fk_today_id')
+        fk_period = data.get('fk_period_id')
+        fk_teacher = data.get('fk_teacher_id')
+
+        qs = TeacherTime.objects.filter(
+            fk_today=fk_today,
+            fk_period=fk_period,
+            fk_teacher=fk_teacher
+        )
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+
+        if qs.exists():
+            raise serializers.ValidationError("هذا الوقت موجود مسبقًا لنفس المدرس في نفس اليوم.")
+
+        return data
+
+    def create(self, validated_data):
+        instance = super().create(validated_data)
+        self.success_message = "تم إنشاء وقت الأستاذ بنجاح."
+        return instance
+
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        self.success_message = "تم تحديث وقت الأستاذ بنجاح."
+        return instance
 # Serializer للنموذج Distribution
 class DistributionSerializer(serializers.ModelSerializer):
     fk_group = GroupSerializer(read_only=True)
