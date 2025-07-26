@@ -4,6 +4,7 @@ from math import ceil
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
+from datetime import datetime
 
 # Create your models here.
 
@@ -273,6 +274,8 @@ class TeacherTime(models.Model):
     def __str__(self):
         return f"{self.fk_teacher.teacher_name} - {self.fk_today.day_name}"
 
+def current_year():
+    return datetime.now().year
 class Distribution(models.Model):
     fk_group = models.ForeignKey(
         Group, 
@@ -292,11 +295,13 @@ class Distribution(models.Model):
         related_name='distributions', 
         verbose_name="المادة"
     )
+    date = models.DateField(auto_now_add=True) # إضافة حقل التاريخ
+    year = models.PositiveIntegerField(editable=False,default=current_year) # حقل السنة، غير قابل للتعديل
 
     class Meta:
         verbose_name = "توزيع"
         verbose_name_plural = "التوزيعات"
-        unique_together = ('fk_group', 'fk_subject') 
+        unique_together = ('fk_group', 'fk_subject','year') 
         ordering = ['fk_group__group_name', 'fk_subject__subject_name']
 
     def __str__(self):
