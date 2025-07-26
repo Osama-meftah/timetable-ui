@@ -68,10 +68,11 @@ class HallSerializer(serializers.ModelSerializer):
 class LevelSerializer(serializers.ModelSerializer):
     fk_program = ProgramSerializer(read_only=True)
     program_name = serializers.CharField(write_only=True)  # استلام اسم البرنامج بدلاً من المعرف
+    level_name_display= serializers.CharField(source='get_level_name_display', read_only=True)
 
     class Meta:
         model = Level
-        fields = '__all__'
+        fields = ['id', 'level_name', 'number_students', 'fk_program', 'program_name', 'level_name_display']
 
     def create(self, validated_data):
         program_name = validated_data.pop('program_name', None)

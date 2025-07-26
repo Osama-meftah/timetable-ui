@@ -108,12 +108,6 @@ def teacher_dashboard_view(request):
     return render(request, 'teachers_management/dashboard_teatcher.html', {'teacher': user})
 
 class TeacherManagementView(View):
-    def get_or_cache(self, key, endpoint, request, timeout=KeysCach.timeout):
-        data = cache.get(key)
-        if data is None:
-            data = api_get(endpoint, request=request) or []
-            cache.set(key, data, timeout)
-        return data
     def get(self, request, id=None):
         # user = request.session.get("user")
         try:
@@ -124,9 +118,9 @@ class TeacherManagementView(View):
                 return render(request, "teachers/add_edit.html", {"page_title": "إضافة مدرس"})
 
             # جلب البيانات
-            teachers_data = self.get_or_cache(KeysCach.teachers_data, Endpoints.teachers, request)
-            teacher_times_data = self.get_or_cache(KeysCach.teacher_times_data, Endpoints.teacher_times, request)
-            distributions_data = self.get_or_cache(KeysCach.distributions_data, Endpoints.distributions, request)
+            teachers_data = get_or_cache(KeysCach.teachers_data, Endpoints.teachers, request)
+            teacher_times_data = get_or_cache(KeysCach.teacher_times_data, Endpoints.teacher_times, request)
+            distributions_data = get_or_cache(KeysCach.distributions_data, Endpoints.distributions, request)
             
             # teachers_data = api_get(Endpoints.teachers, request=request) or []
             # teacher_times_data = api_get(Endpoints.teacher_times, request=request) or []
@@ -200,12 +194,20 @@ class TeacherManagementView(View):
         print(teacher_data)
 
         try: 
+            teachers=cache.get(KeysCach.teachers_data)
             if id:
                 # تعديل باستخدام api_put مع إعادة عرض الصفحة بعد التعديل
-                return api_put(f"{Endpoints.teachers}{id}/", teacher_data, request=request,
-                               redirect_to='teachers_management',
-                               render_template="teachers/add_edit.html",
-                               render_context={"teacher": teacher_data})
+                response= api_put(f"{Endpoints.teachers}{id}/", teacher_data, request=request)
+                            #    redirect_to='teachers_management',
+                            #    render_template="teachers/add_edit.html",
+                            #    render_context={"teacher": teacher_data})
+                if response['teacher']:
+                    for i, teacher in enumerate(teachers):
+                        if str(teacher['id']) == str(id):
+                            teachers[i].update(response['teacher'])
+                            cache.set(KeysCach.teachers_data, teachers, timeout=KeysCach.timeout)
+                            break
+                return redirect(request.path)
             
             elif form_type == "upload_teachers":
                 result = handle_file_upload_generic(
@@ -219,9 +221,11 @@ class TeacherManagementView(View):
                 return result or redirect(request.path_info)
             else:
                 # إضافة باستخدام api_post مع إعادة توجيه بعد الإضافة
-                api_post(Endpoints.teachers, teacher_data, request=request)
-                # messages.success(request, "✅ تم إضافة المدرس.")
-                return redirect("teachers_management")
+                response=api_post(Endpoints.teachers, teacher_data, request=request)
+                if response.get('teacher'):
+                    teachers.append(response['teacher'])
+                    cache.set(KeysCach.teachers_data, teachers, timeout=KeysCach.timeout)
+                return redirect(request.path)
 
         except Exception as e:
             messages.error(request, f"❌ حدث خطأ أثناء حفظ بيانات المدرس: {str(e)}")
@@ -231,8 +235,14 @@ class TeacherManagementView(View):
 class TeacherDeleteView(View):
     def post(self, request, id):
         try:
-            api_delete(f"{Endpoints.teachers}{id}/", request=request,redirect_to='teacher_management')
-            messages.success(request, "تم حذف المدرس بنجاح.")
+            teachers=cache.get(KeysCach.teachers_data)
+            api_delete(f"{Endpoints.teachers}{id}/", request=request)
+            for i, teacher in enumerate(teachers):
+                if str(teacher['id']) == str(id):
+                    del teachers[i]
+                    cache.set(KeysCach.teachers_data, teachers, timeout=KeysCach.timeout)
+                    break
+            return redirect("teachers_management")
         except Exception as e:
             handle_exception(request, "حدث خطأ أثناء حذف المدرس", e)
         return redirect("teachers_management")
@@ -241,21 +251,16 @@ class TeacherDeleteView(View):
 class TeacherAvailabilityAndCoursesView(View):
     def get(self, request, id=None):
         try:
-            teachers = cache.get(KeysCach.teachers_data)
-            # days = get_or_cache("days_data", Endpoints.todays, request)
-            # periods = get_or_cache("periods_data", Endpoints.periods, request)
-            # subjects = get_or_cache("subjects_data", Endpoints.subjects, request)
-            # levels = get_or_cache("levels_data", Endpoints.levels, request)
-            # programs = get_or_cache("programs_data", Endpoints.programs, request)
-            # groups = get_or_cache("groups_data", Endpoints.groups, request)
 
-            teachers = api_get(Endpoints.teachers, request=request) or []
-            days = api_get(Endpoints.todays, request=request) or []
-            periods = api_get(Endpoints.periods, request=request) or []
-            subjects = api_get(Endpoints.subjects, request=request) or []
-            levels = api_get(Endpoints.levels, request=request) or []
-            programs = api_get(Endpoints.programs, request=request) or []
-            groups = api_get(Endpoints.groups, request=request) or []
+            teachers = cache.get(KeysCach.teachers_data)
+            days = get_or_cache(KeysCach.days_data, Endpoints.todays, request)
+            periods=get_or_cache(KeysCach.periods_data, Endpoints.periods, request)
+            subjects = get_or_cache(KeysCach.subjects_data, Endpoints.subjects, request)
+            groups=get_or_cache(KeysCach.group_data, Endpoints.groups, request)
+            # days=api_get(Endpoints.todays, request=request) or []
+            # periods = api_get(Endpoints.periods, request=request) or []
+            # subjects = api_get(Endpoints.subjects, request=request) or []
+            # groups = api_get(Endpoints.groups, request=request) or []
 
             teacher = None
             teacher_times = []
@@ -278,8 +283,6 @@ class TeacherAvailabilityAndCoursesView(View):
                 "days": days,
                 "periods": periods,
                 "subjects": subjects,
-                "levels": levels,
-                "programs": programs,
                 "groups": groups,
                 "page_title": "تعديل" if id else "إضافة",
             }
@@ -315,8 +318,9 @@ class TeacherAvailabilityAndCoursesView(View):
                                     if str(distribution['id']) == str(dist_id):
                                         if response.get('distribution'):
                                             distributions[i].update(response['distribution'])
+                                            cache.set(KeysCach.distributions_data, distributions, timeout=KeysCach.timeout)
                                             break
-                                cache.set(KeysCach.distributions_data, distributions, timeout=KeysCach.timeout)
+                                
                                 return redirect("add_edit_teacher_with_courses", id=teacher_id)
 
                             else:
@@ -350,6 +354,7 @@ class TeacherAvailabilityAndCoursesView(View):
                                     if str(time['id']) == str(availability_id):
                                         if response.get('teachertime'):
                                             times[j].update(response['teachertime'])
+                                            cache.set(KeysCach.teacher_times_data, times, timeout=KeysCach.timeout)
                                             break
                             else:
                                 response= api_post(Endpoints.teacher_times, time_data, request=request)
@@ -374,8 +379,9 @@ class TeacherAvailabilityAndCoursesView(View):
                         for i, distribution in enumerate(distributions):
                             if str(distribution['id']) == str(dist_id):
                                 del distributions[i]
+                                cache.set(KeysCach.distributions_data, distributions, timeout=KeysCach.timeout)
                                 break
-                        cache.set(KeysCach.distributions_data, distributions, timeout=KeysCach.timeout)
+                        
                         messages.success(request, "تم حذف توزيع المقرر بنجاح.")
                     except Exception as e:
                         handle_exception(request, "فشل في حذف توزيع المقرر", e)
@@ -390,6 +396,7 @@ class TeacherAvailabilityAndCoursesView(View):
                         for i, time in enumerate(times):
                             if str(time['id']) == str(availability_id):
                                 del times[i]
+                                cache.set(KeysCach.teacher_times_data, times, timeout=KeysCach.timeout)
                                 break
                         messages.success(request, "تم حذف وقت التوفر بنجاح.")
                     except Exception as e:
@@ -406,7 +413,8 @@ class TeacherAvailabilityAndCoursesView(View):
 
 class CoursesListView(View):
     def get(self, request):
-        subjects = api_get(Endpoints.subjects, request=request) or []
+        # subjects = api_get(Endpoints.subjects, request=request) or []
+        subjects= get_or_cache(KeysCach.subjects_data, Endpoints.subjects, request)
         total_courses = len(subjects)
         active_courses = sum(1 for c in subjects if c.get("active", True))
         full_courses = sum(1 for c in subjects if c.get("is_full", False))
@@ -436,39 +444,52 @@ class CoursesListView(View):
         
         messages.error(request, "عملية غير صالحة.")
         return redirect("courses_management")
-
 class CourseCreateView(View):
     def get(self, request):
-        levels = api_get(Endpoints.levels, request=request)
-        if not levels:
-            return redirect("courses_management")
-        return render(request, "courses/add_edit.html", {"levels": levels, "page_title": "إضافة مقرر"})
-
+        return render(request, "courses/add_edit.html", {"page_title": "إضافة مقرر"})
     def post(self, request):
         data = {
             "subject_name": request.POST.get("subject_name"),
             "term": request.POST.get("term"),
         }
-        return api_post(Endpoints.subjects, data, request=request, redirect_to="add_course")
+        subjects=cache.get(KeysCach.subjects_data)
+        response=api_post(Endpoints.subjects, data, request=request)
+        if response.get('subject'):
+            subjects.append(response['subject'])
+            cache.set(KeysCach.subjects_data, subjects, timeout=KeysCach.timeout)
+        return redirect("courses_management")
+    
 class CourseUpdateView(View):
     def get(self, request, id):
         subject = api_get(f"{Endpoints.subjects}{id}/", request=request)
-        levels = api_get(Endpoints.levels, request=request)
-        if not subject or not levels:
+        if not subject:
             return redirect("courses_management")
-        return render(request, "courses/add_edit.html", {"subject": subject, "levels": levels, "page_title": "تعديل"})
-
+        return render(request, "courses/add_edit.html", {"subject": subject, "page_title": "تعديل"})
+    
     def post(self, request, id):
         data = {
             "subject_name": request.POST.get("subject_name"),
             "term": request.POST.get("term"),
         }
-        return api_put(f"{Endpoints.subjects}{id}/", data, request=request, redirect_to="courses_management")
+        response= api_put(f"{Endpoints.subjects}{id}/", data, request=request)
+        subjects=cache.get(KeysCach.subjects_data)
+        if response.get('subject'):
+            for i, subject in enumerate(subjects):
+                if str(subject['id']) == str(id):
+                    subjects[i].update(response['subject'])
+                    cache.set(KeysCach.subjects_data, subjects, timeout=KeysCach.timeout)
+                    break
+        return redirect("courses_management")
 class CourseDeleteView(View):
     def post(self, request, id):
-        print(f"Deleting course with ID: {id}"
-              f" and request data: {request.POST}")
-        return api_delete(f"{Endpoints.subjects}{id}/", request=request, redirect_to="courses_management")
+        api_delete(f"{Endpoints.subjects}{id}/", request=request)
+        subjects = cache.get(KeysCach.subjects_data)
+        for i, subject in enumerate(subjects):
+            if str(subject['id']) == str(id):
+                del subjects[i]
+                cache.set(KeysCach.subjects_data, subjects, timeout=KeysCach.timeout)
+                break
+        return redirect("courses_management")
 
 class RoomsListView(View):
     def get(self, request):
