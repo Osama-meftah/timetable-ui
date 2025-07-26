@@ -195,12 +195,13 @@
         {% include "pagination.html" with page_obj=rooms %}
     </div>
 </div>
-{% include "delete_modal.html" %}
 {% include "upload_modal.html" %}
+{% include "delete_modal.html" %}
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'src/js/search.js' %}"></script>
+<script src="{% static 'src/js/show_modal_message.js' %}"></script>
 <script>
     new SearchComponent({
         inputSelector: ".search-input[data-type='room']",

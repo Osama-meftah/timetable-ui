@@ -55,50 +55,56 @@ def api_search_items(endpoint, query, request):
 class TeachersAvailableView(View):
     def get(self, request, id=None):
         user = get_user_id(request)
-        # user_id = user['id']
-        teacher = user['teacher']
-        teacher_name = teacher['teacher_name']
-        # print(teacher_name)
-        
-        availabilities = api_search_items(Endpoints.searchteacherstimes, teacher_name, request=request)
-        # api_get(f"{Endpoints.teacher_times}", request=request)
-        # print(availabilities)
+        teacher = user.get('teacher') if user else None
+        availabilities = []
+        if teacher:
+            teacher_name = teacher.get('teacher_name')
+            availabilities = api_search_items(Endpoints.searchteacherstimes, teacher_name, request=request) or []
+            print("اسم المدرس:", teacher_name)
+        else:
+            print("لا يوجد مدرس مرتبط بالمستخدم")
+
         days = api_get(Endpoints.todays, request=request) or []
         periods = api_get(Endpoints.periods, request=request) or []
-        
+
         if isinstance(availabilities, dict):
             availabilities = [availabilities]
-            
+
         context = {
             "availabilities": availabilities,
             "days": days,
             "periods": periods,
             "page_title": "أوقات التواجد",
         }
-        return render(request, 'teachers_management/list.html',context)
+        return render(request, 'teachers_management/list.html', context)
+
     def post(self, request, id=None):
         availability_id = request.POST.get("availability_id")
         day_id = request.POST.get("day")
         period_id = request.POST.get("period")
-        teacher_id = get_user_id(request)
-        print(teacher_id)
+
+        user = get_user_id(request)
+        teacher = user.get("teacher") if user else None
+        teacher_id = teacher.get("id") if teacher else None
+
         if not teacher_id:
             messages.error(request, "❌ يجب تسجيل الدخول أولاً.")
-            return redirect("login")
+            return redirect("teachers_availability")
 
         if not day_id or not period_id:
             messages.error(request, "❌ جميع الحقول مطلوبة.")
             return redirect("teachers_availability")
+
         time_data = {
             "fk_today_id": day_id,
             "fk_period_id": period_id,
-            "fk_teacher": teacher_id['teacher']['id'],
+            "fk_teacher": teacher_id,
         }
+
         print(time_data)
-        api_post(f"{Endpoints.teacher_times}", time_data, request=request,redirect_to='teachers_availability')
+        api_post(f"{Endpoints.teacher_times}", time_data, request=request, redirect_to='teachers_availability')
 
         return redirect("teachers_availability")
-    # return render(request, 'teachers_management/list.html')
 
 
 def teacher_dashboard_view(request):
@@ -814,7 +820,7 @@ class TimeTableSettingsView(View):
     
 class PeriodsView(View):
     def get(self, request, id=None):
-        return render(request, 'timetables/period_management.html')
+        return render(request, 'periods/period_management.html')
 
 class GroupsView(View):
     def get(self, request, id=None):

@@ -295,7 +295,7 @@ class Distribution(models.Model):
         related_name='distributions', 
         verbose_name="المادة"
     )
-    date = models.DateField(auto_now_add=True) # إضافة حقل التاريخ
+    date = models.DateField(auto_now_add=True,blank=True,null=True) # إضافة حقل التاريخ
     year = models.PositiveIntegerField(editable=False,default=current_year) # حقل السنة، غير قابل للتعديل
 
     class Meta:
