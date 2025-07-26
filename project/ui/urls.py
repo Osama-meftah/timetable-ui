@@ -8,8 +8,8 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     # path()
     
-    path('teachers/availability/', views.TeachersAvailableView.as_view(), name='teachers_availability'),
-
+    path('teachers_availability/', views.TeachersAvailableView.as_view(), name='teachers_availability'),
+    path('teachers_availability/delete/<int:id>/', views.TeachersAvailableView.as_view(), name='teachers_availability_delete'),
     path('teacher_dashboard/',views.teacher_dashboard_view,name="teacher_dashboard"),
     path('send_reseat_mail/',send_reseat_mail,name='send_reseat_mail'),
     path('send_forget_email/',send_forget_password_mail,name='send_forget_email'),

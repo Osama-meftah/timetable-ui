@@ -8,9 +8,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const navLinks = document.querySelectorAll('aside nav a');
 
     
-    
     let isDesktopSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-
+    if (toggleSidebarBtn) {
+      toggleSidebarBtn.addEventListener("click", () => {
+        if (window.innerWidth <= 768) {
+          sidebar.classList.toggle("open-mobile-sidebar");
+        } else {
+          isDesktopSidebarCollapsed = !isDesktopSidebarCollapsed;
+    
+          applyDesktopSidebarState();
+    
+          localStorage.setItem("sidebarCollapsed", isDesktopSidebarCollapsed);
+        }
+      });
+    }
     function updatePageTitle(title) {
         if (pageTitle) {
             pageTitle.textContent = title;
@@ -70,7 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const linkHref = link.getAttribute('href');
         const linkPageTitle = link.dataset.pageTitle;
 
-        
         if (linkHref === currentPath || (currentPath === '/' && linkPageTitle === 'لوحة التحكم')) {
             link.classList.add('text-indigo-300', 'bg-indigo-800');
             link.classList.remove('text-gray-300');
@@ -101,20 +111,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     
-    if (toggleSidebarBtn) {
-        toggleSidebarBtn.addEventListener('click', () => {
-            if (window.innerWidth <= 768) {
-                
-                sidebar.classList.toggle('open-mobile-sidebar');
-            } else {
-                
-                
-                isDesktopSidebarCollapsed = !isDesktopSidebarCollapsed;
-                
-                applyDesktopSidebarState();
-                
-                localStorage.setItem('sidebarCollapsed', isDesktopSidebarCollapsed);
-            }
-        });
-    }
+    
 });
