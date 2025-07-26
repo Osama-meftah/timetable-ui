@@ -203,7 +203,7 @@ class TeacherViewSet(BaseViewSet):
             return Response({
                 "status": "success",
                 "message": self.success_create_message,
-                "teacher": TeacherSerializer(teacher).data
+                "teacher": serializer.data
             }, status=status.HTTP_201_CREATED)
 
         return Response({

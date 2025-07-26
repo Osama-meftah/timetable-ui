@@ -2,7 +2,7 @@ import requests
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.shortcuts import redirect, render
-
+from django.core.cache import cache
 BASE_API_URL = "http://127.0.0.1:8001/api/"
 
 class Endpoints:
@@ -37,6 +37,17 @@ class KeysCach:
     teachers_data="teachers_data"
     teacher_times_data="teacher_times_data"
     distributions_data="distributions_data"
+    days_data="days_data"
+    periods_data="periods_data"
+    group_data="group_data"
+    subjects_data="subjects_data"
+
+def get_or_cache(key, endpoint, request, timeout=KeysCach.timeout):
+        data = cache.get(key)
+        if data is None:
+            data = api_get(endpoint, request=request) or []
+            cache.set(key, data, timeout)
+        return data
 
 def show_backend_messages(request, response_json, default_success=""):
     if not request:
