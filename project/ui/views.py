@@ -351,8 +351,6 @@ class TeacherAvailabilityAndCoursesView(View):
     def post(self, request, id=None):
         form_type = request.POST.get('form_type')
         teacher_id = request.POST.get('selected_teacher_id')
-        path = request.path  # مثل: /teacherswithcourses/add/
-        is_add = path.endswith("/add/") 
         try:
             if form_type == "courses_form":
                 has_add = False
@@ -369,7 +367,7 @@ class TeacherAvailabilityAndCoursesView(View):
                             "fk_teacher_id": teacher_id,
                             "fk_subject_id": subject_id,
                         }
-                        print(dist_data)
+                        # print(dist_data)
                         try:
                             distributions=cache.get(KeysCach.distributions_data)
                             if dist_id:
@@ -452,9 +450,7 @@ class TeacherAvailabilityAndCoursesView(View):
                             if str(distribution['id']) == str(dist_id):
                                 del distributions[i]
                                 cache.set(KeysCach.distributions_data, distributions, timeout=KeysCach.timeout)
-                                break
-                        
-                        messages.success(request, "تم حذف توزيع المقرر بنجاح.")
+                                break                        
                     except Exception as e:
                         handle_exception(request, "فشل في حذف توزيع المقرر", e)
                 return redirect("add_edit_teacher_with_courses", id=teacher_id)
@@ -470,7 +466,6 @@ class TeacherAvailabilityAndCoursesView(View):
                                 del times[i]
                                 cache.set(KeysCach.teacher_times_data, times, timeout=KeysCach.timeout)
                                 break
-                        messages.success(request, "تم حذف وقت التوفر بنجاح.")
                     except Exception as e:
                         handle_exception(request, "فشل في حذف وقت التوفر", e)
                 return redirect("add_edit_teacher_with_courses", id=teacher_id)
