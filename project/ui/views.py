@@ -305,7 +305,10 @@ class TeacherAvailabilityAndCoursesView(View):
         is_add = path.endswith("/add/") 
         try:
             if form_type == "courses_form":
-                for i in range(1, 100):
+                has_add = False
+                has_edit = False
+                i=1
+                while True:
                     group_id = request.POST.get(f'dist_group_{i}')
                     subject_id = request.POST.get(f'dist_subject_{i}')
                     dist_id = request.POST.get(f'distribution_id_{i}')
@@ -316,6 +319,7 @@ class TeacherAvailabilityAndCoursesView(View):
                             "fk_teacher_id": teacher_id,
                             "fk_subject_id": subject_id,
                         }
+                        print(dist_data)
                         try:
                             distributions=cache.get(KeysCach.distributions_data)
                             if dist_id:
@@ -326,22 +330,29 @@ class TeacherAvailabilityAndCoursesView(View):
                                             distributions[i].update(response['distribution'])
                                             cache.set(KeysCach.distributions_data, distributions, timeout=KeysCach.timeout)
                                             break
-                                
-                                return redirect("add_edit_teacher_with_courses", id=teacher_id)
+                                has_edit = True
 
                             else:
-                               response= api_post(Endpoints.distributions, dist_data, request=request)
-                               if response.get('distribution'):
+                                response= api_post(Endpoints.distributions, dist_data, request=request)
+                                if response.get('distribution'):
                                     distributions.append(response['distribution'])
                                     cache.set(KeysCach.distributions_data, distributions, timeout=KeysCach.timeout)
-                               return redirect("add_edit_teacher_with_courses")
+                                has_add=True
                         except Exception as e:
                             handle_exception(request, f"فشل حفظ توزيع رقم {i}", e)
-
-                
-            
+                    else:
+                        break
+                    i+=1
+                if has_add:
+                    return redirect("add_edit_teacher_with_courses")
+                elif has_edit:
+                    return redirect("add_edit_teacher_with_courses", id=teacher_id)
             elif form_type == "times_form":
-                for i in range(1, 100):
+                print(f"teacher id is {teacher_id}")
+                has_add = False
+                has_edit = False
+                i=1
+                while True:
                     day_id = request.POST.get(f'time_day_{i}')
                     period_id = request.POST.get(f'time_period_{i}')
                     availability_id = request.POST.get(f'availability_id_{i}')
@@ -352,6 +363,7 @@ class TeacherAvailabilityAndCoursesView(View):
                             "fk_period_id": period_id,
                             "fk_teacher": teacher_id,
                         }
+                        print(time_data)
                         try:
                             times = cache.get(KeysCach.teacher_times_data)
                             if availability_id:
@@ -362,19 +374,23 @@ class TeacherAvailabilityAndCoursesView(View):
                                             times[j].update(response['teachertime'])
                                             cache.set(KeysCach.teacher_times_data, times, timeout=KeysCach.timeout)
                                             break
+                                has_edit = True
                             else:
                                 response= api_post(Endpoints.teacher_times, time_data, request=request)
                                 if response.get('teachertime'):
                                     times.append(response['teachertime'])
                                     cache.set(KeysCach.teacher_times_data, times, timeout=KeysCach.timeout)
+                                has_add = True
                     
-                                messages.success(request, "تم حفظ الأوقات المتاحة بنجاح.")
                         except Exception as e:
                             handle_exception(request, f"فشل حفظ وقت رقم {i}", e)
                     else:
                         break
-                
-                return redirect("add_edit_teacher_with_courses", id=teacher_id)
+                    i+=1
+                if has_edit:
+                    return redirect("add_edit_teacher_with_courses", id=teacher_id)
+                elif has_add:
+                    return redirect("add_edit_teacher_with_courses")
             
             elif form_type == "delete_distribution":
                 dist_id = request.POST.get("item_id")
