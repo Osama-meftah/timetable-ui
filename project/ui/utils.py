@@ -352,6 +352,35 @@ def api_delete(endpoint, request=None, timeout=60, redirect_to=None, render_temp
         if render_template:
             return render(request, render_template, render_context or {})
         return False
+    
+def api_search_items(endpoint, query, request):
+    """
+    إرسال طلب GET إلى API يحتوي على فلترة بالبحث، مع التوكن ومعالجة الأخطاء.
+    """
+    url = f"{BASE_API_URL}{endpoint}?q={query}"
+    print(url)
+    token = request.session.get("token")
+
+    headers = {
+        "Content-Type": "application/json"
+    }
+    if token:
+        headers["Authorization"] = f"Token {token}"
+
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        # print(response)
+        response.raise_for_status()
+        data = response.json()
+        if isinstance(data, dict) and 'results' in data:
+            return data['results']
+        else:
+            return []
+
+    except requests.exceptions.RequestException as e:
+        # طباعة الخطأ لغايات التصحيح فقط (أزلها لاحقًا في الإنتاج)
+        print("API search error:", e)
+        return []
 
 def handle_file_upload_generic(request, *, file_field_name, endpoint_url, success_title="✅ تم رفع الملف", error_title="❌ خطأ في رفع الملف", timeout=20, redirect_to=None, render_template=None, render_context=None):
     file = request.FILES.get(file_field_name)

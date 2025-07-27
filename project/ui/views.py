@@ -19,38 +19,88 @@ def dashboard(request):
     """
     عرض لوحة التحكم.
     """
-    return render(request, 'dashboard.html')
-import requests
-from django.conf import settings
+    subjects = api_get(Endpoints.subjects)
+    teachers_data = api_get(Endpoints.teachers)
+    total_teacher = len(teachers_data)
+    total_courses = len(subjects)
+    listName=[ sub.get('subject_name') for sub in subjects]
+    distribution =api_get(Endpoints.distributions)
+    distributionList=[ dist.get("fk_teacher")  for dist in distribution ]
+    
+    countSubTeacher=[]
+    for teacher in teachers_data:
+        
+        teacher_id = teacher["id"]
+        count=0
+        for d in distribution:
+            if d["fk_teacher"]["id"] == teacher_id:
+                count+=1
+        if count > 2:
+            countSubTeacher.append({
+                "name":teacher["teacher_name"],
+                "countSub":count,
+                "countHour":2*count
+            })
+    # sorted(countSubTeacher)
+    countSubTeacher.sort(key=lambda item: item['countSub'], reverse=True)
+    allNamesTeachers=[]
+    teacherNotSubject=[]
+    for teach in teachers_data:
+        allNamesTeachers.append(teach["teacher_name"])
+        if teach not in distributionList:
+            teacherNotSubject.append({"key": teach['id'],"val":teach["teacher_name"]})
+            
+    halls=api_get(Endpoints.halls,request)
+    notActivHall=[]
+    allNamesHalls=[]
+    for hal in halls:
+        allNamesHalls.append(hal["hall_name"])
+        if hal["hall_status"] == "under_maintenance":
+            notActivHall.append({"key": hal["id"],"val":hal["hall_name"]})
+    
+    levels=api_get(Endpoints.levels,request)
+    allNamesLevels=[]
 
-def api_search_items(endpoint, query, request):
-    """
-    إرسال طلب GET إلى API يحتوي على فلترة بالبحث، مع التوكن ومعالجة الأخطاء.
-    """
-    url = f"{BASE_API_URL}{endpoint}?q={query}"
-    print(url)
-    token = request.session.get("token")
+    for level in levels:
+        allNamesLevels.append(level["level_name"]) 
+    
+    lecuters=api_get(Endpoints.lectures,request)
+    taimeTable=[]
+    periods=api_get(Endpoints.periods,request)
+    todays=api_get(Endpoints.todays,request)
+    for lecuter in lecuters:
+        period_id=lecuter['fk_period']
+        for p in periods: 
+            if p["id"] == period_id:   
+                period= f"{p['period_from']} - {p['period_to']}"
+        day_id=lecuter['fk_day']
+        for d in todays: 
+            if d["id"] == day_id:
+                day=  d['day_name_display'] 
+        taimeTable.append({
+            "subject": lecuter["fk_distribution"]["fk_subject"]["subject_name"],
+            "level": lecuter["fk_distribution"]["fk_group"]["fk_level"]["level_name"],
+            "teacher": lecuter["fk_distribution"]["fk_teacher"]["teacher_name"],
+            "hall": lecuter["fk_hall"]["hall_name"],
+            "day": day,
+            "period": period, 
+        })
+    
+    context={
+        "total_teacher":total_teacher,
+        "total_courses":total_courses,
+        "listName":listName,
+        "teacherNotSubject":teacherNotSubject,
+        "notActivHall":notActivHall,
+        "allNamesTeachers":allNamesTeachers,
+        "allNamesHalls":allNamesHalls,
+        "allNamesLevels":allNamesLevels,
+        "countSubTeacher":countSubTeacher,
+        "taimeTable":taimeTable
+        }
+    return render(request, 'dashboard.html',context)
 
-    headers = {
-        "Content-Type": "application/json"
-    }
-    if token:
-        headers["Authorization"] = f"Token {token}"
 
-    try:
-        response = requests.get(url, headers=headers, timeout=10)
-        # print(response)
-        response.raise_for_status()
-        data = response.json()
-        if isinstance(data, dict) and 'results' in data:
-            return data['results']
-        else:
-            return []
-
-    except requests.exceptions.RequestException as e:
-        # طباعة الخطأ لغايات التصحيح فقط (أزلها لاحقًا في الإنتاج)
-        print("API search error:", e)
-        return []
 
 class TeachersAvailableView(View):
     def get(self, request, id=None):
