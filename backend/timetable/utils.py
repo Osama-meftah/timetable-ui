@@ -171,46 +171,46 @@ def prepare_data_with_fk_name_to_id(row, fk_field, name_column, model, display_n
 
     return data
 
-def get_existing_by_name_and_fk_name(data, model, name_field, fk_field):
-    return model.objects.filter(
-        **{
-            name_field: data.get(name_field),
-            fk_field: data.get(fk_field)
-        }
-    ).first()
+# def get_existing_by_name_and_fk_name(data, model, name_field, fk_field):
+#     return model.objects.filter(
+#         **{
+#             name_field: data.get(name_field),
+#             fk_field: data.get(fk_field)
+#         }
+#     ).first()
 
-import re
-import random
+# import re
+# import random
 
-def generate_email(name):
-    normalized = re.sub(r'[^a-zA-Z0-9]+', '', name.lower())
-    normalized = normalized or "teacher"
-    suffix = random.randint(100, 999)
-    return f"{normalized}{suffix}@example.com"
+# def generate_email(name):
+#     normalized = re.sub(r'[^a-zA-Z0-9]+', '', name.lower())
+#     normalized = normalized or "teacher"
+#     suffix = random.randint(100, 999)
+#     return f"{normalized}{suffix}@example.com"
 
-from django.core.validators import validate_email
-from django.core.exceptions import ValidationError
+# from django.core.validators import validate_email
+# from django.core.exceptions import ValidationError
 
-def clean_email_or_generate(raw_email, fallback_name):
-    email = raw_email.strip()
-    try:
-        validate_email(email)
-        return email
-    except ValidationError:
-        return generate_email(fallback_name)
+# def clean_email_or_generate(raw_email, fallback_name):
+#     email = raw_email.strip()
+#     try:
+#         validate_email(email)
+#         return email
+#     except ValidationError:
+#         return generate_email(fallback_name)
 
-def prepare_teacher_data(row):
-    name = row.get("teacher_name", "").strip()
-    if not name:
-        return {}
+# def prepare_teacher_data(row):
+#     name = row.get("teacher_name", "").strip()
+#     if not name:
+#         return {}
 
-    raw_email = row.get("teacher_email", "").strip()
-    email = clean_email_or_generate(raw_email, name)
+#     raw_email = row.get("teacher_email", "").strip()
+#     email = clean_email_or_generate(raw_email, name)
 
-    return {
-        "teacher_name": name,
-        "teacher_email": email,
-        "teacher_phone": row.get("teacher_phone", "").strip(),
-        "teacher_address": row.get("teacher_address", "").strip(),
-        "teacher_status": row.get("teacher_status", "active").strip()
-    }
+#     return {
+#         "teacher_name": name,
+#         "teacher_email": email,
+#         "teacher_phone": row.get("teacher_phone", "").strip(),
+#         "teacher_address": row.get("teacher_address", "").strip(),
+#         "teacher_status": row.get("teacher_status", "active").strip()
+#     }

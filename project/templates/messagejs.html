@@ -1,0 +1,101 @@
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const messageModal = document.getElementById('messageModal');
+        const modalIcon = document.getElementById('modalIcon');
+        const modalMessage = document.getElementById('modalMessage');
+
+        let currentTimeout = null;
+
+        function showMessageModal(message, type = "info", duration = 5000) {
+            if (currentTimeout) {
+                clearTimeout(currentTimeout);
+                currentTimeout = null;
+                messageModal.classList.remove("translate-y-0", "opacity-100");
+                messageModal.classList.add("translate-y-full", "opacity-0");
+                const oldListener = messageModal.dataset.transitionEndListener;
+                if (oldListener) {
+                    messageModal.removeEventListener("transitionend", oldListener);
+                    delete messageModal.dataset.transitionEndListener;
+                }
+            }
+
+            // Reset background color classes
+            messageModal.classList.remove("bg-green-600", "bg-red-600", "bg-amber-500", "bg-blue-600");
+            
+            // Reset icon classes: Important to clear previous Font Awesome icons
+            modalIcon.className = "text-2xl mr-4"; // Resets to base styling for icon size and margin
+
+            let bgColor = "";
+            let iconClass = ""; // This will hold "fas fa-check-circle" etc.
+
+            if (type === "success") {
+                bgColor = "bg-green-600";
+                iconClass = "fas fa-check-circle";
+            } else if (type === "error") {
+                bgColor = "bg-red-600";
+                iconClass = "fas fa-times-circle";
+            } else if (type === "warning") {
+                bgColor = "bg-amber-500";
+                iconClass = "fas fa-exclamation-triangle";
+            } else { // Default to 'info'
+                bgColor = "bg-blue-600";
+                iconClass = "fas fa-info-circle";
+            }
+
+            // Apply new background color
+            messageModal.classList.add(bgColor);
+            
+            // FIX: Use spread operator to add multiple classes from iconClass string
+            // This splits "fas fa-check-circle" into "fas" and "fa-check-circle" and adds them separately.
+            modalIcon.classList.add(...iconClass.split(' ')); 
+            
+            modalMessage.textContent = message;
+
+            // Show animation
+            setTimeout(() => {
+                messageModal.classList.remove("translate-y-full", "opacity-0");
+                messageModal.classList.add("translate-y-0", "opacity-100");
+            }, 100);
+
+            // Set timeout to automatically hide
+            currentTimeout = setTimeout(() => {
+                messageModal.classList.remove("translate-y-0", "opacity-100");
+                messageModal.classList.add("translate-y-full", "opacity-0");
+
+                const transitionEndHandler = () => {
+                    messageModal.removeEventListener("transitionend", transitionEndHandler);
+                    messageModal.remove(); // Remove the element from DOM after animation
+                    currentTimeout = null;
+                };
+
+                messageModal.dataset.transitionEndListener = transitionEndHandler;
+                messageModal.addEventListener("transitionend", transitionEndHandler, { once: true });
+            }, duration);
+        }
+
+        // --- Django Messages Integration (example) ---
+        // Make sure Font Awesome CSS is linked in your <head> for icons to display.
+        const djangoMessages = [];
+        {% if messages %}
+          {% for message in messages %}
+            djangoMessages.push({
+              type: "{{ message.tags }}",
+              text: `{{ message|escapejs }}`
+            });
+          {% endfor %}
+        {% endif %}
+
+        const grouped = {};
+        djangoMessages.forEach(msg => {
+            const type = msg.type === 'debug' ? 'info' : msg.type;
+            if (!grouped[type]) grouped[type] = [];
+            grouped[type].push(msg.text);
+        });
+
+        // Display the first grouped message as a toast
+        for (const [type, msgs] of Object.entries(grouped)) {
+            showMessageModal(msgs.join("\n"), type, 5000);
+            break; // Show only the first message type
+        }
+    });
+</script>

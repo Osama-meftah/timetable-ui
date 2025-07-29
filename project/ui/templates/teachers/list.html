@@ -173,7 +173,7 @@
                                 <i class="fas fa-edit text-lg"></i>
                             </a>
                             <button type="button" class="delete-btn group text-red-600 hover:text-red-800 dark:text-red-400 
-                           dark:hover:text-red-300" data-id="{{ teacher.id }}" data-name="{{ teacher.name }}"
+                            dark:hover:text-red-300" data-id="{{ teacher.id }}" data-name="{{ teacher.teacher_name }}"
                                 data-type="المدرس" data-url="{% url 'delete_teacher' 0 %}" data-form-type="delete">
                                 <i class="fas fa-trash-alt text-lg group-hover:scale-110 transition-transform"></i>
                             </button>
@@ -374,6 +374,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'src/js/show_modal_message.js' %}"></script>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         new SearchComponent({

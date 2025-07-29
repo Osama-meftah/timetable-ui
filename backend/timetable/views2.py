@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from .models import *
 from .serializers import *
 from .utils import create_random_password, extract_username_from_email, send_password_email
+from rest_framework.permissions import IsAuthenticated
 
 # ViewSet الأساسي الذي يتعامل مع كل العمليات
 class BaseViewSet(ModelViewSet):
@@ -91,6 +92,7 @@ class GroupViewSet(BaseViewSet):
 
 
 class TeacherTimeViewSet(BaseViewSet):
+    # permission_classes = [IsAuthenticated]
     queryset = TeacherTime.objects.all()
     serializer_class = TeacherTimeSerializer
     success_create_message = "تم إنشاء وقت الأستاذ بنجاح."
@@ -136,14 +138,6 @@ class PeriodViewSet(BaseViewSet):
     success_create_message = "تم إنشاء الفترة بنجاح."
     success_update_message = "تم تحديث الفترة بنجاح."
     success_delete_message = "تم حذف الفترة بنجاح."
-
-
-# class TableViewSet(BaseViewSet):
-#     queryset = Table.objects.all()
-#     serializer_class = TableSerializer
-#     success_create_message = "تم إنشاء الجدول بنجاح."
-#     success_update_message = "تم تحديث الجدول بنجاح."
-#     success_delete_message = "تم حذف الجدول بنجاح."
 
 
 class LevelViewSet(BaseViewSet):
@@ -224,6 +218,7 @@ class TeacherViewSet(BaseViewSet):
             "status": "success",
             "message": self.success_delete_message
         }, status=status.HTTP_204_NO_CONTENT)
+        
 # class TeacherViewSet(ModelViewSet):
 #     queryset=Teacher.objects.all()
 #     serializer_class=TeacherSerializer

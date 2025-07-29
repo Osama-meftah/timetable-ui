@@ -4,507 +4,299 @@
 {% block page_header_title %}
     {{ page_title }}
 {% endblock %}
+
 {% block content %}
-    <div class="container mx-auto py-6 sm:py-8">
-        
-        <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6">
-            <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6">
-                {{ page_title }}
-            </h2>
+<div class="container mx-auto py-6 sm:py-8">
+    <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6">
+        <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6">
+            {{ page_title }}
+        </h2>
 
-            {# Form for Distributed Courses #}
-            <form method="POST" 
-                  action="{% if teacher.id %}
-                              {% url 'add_edit_teacher_with_courses' id=teacher.id %}
-                          {% else %}
-                              {% url 'add_edit_teacher_with_courses' %}
-                          {% endif %}"
-                  id="courses-form">
-                {% csrf_token %}
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div>
-                        <label for="selected_teacher_input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            المدرس <span class="text-red-500">*</span>
-                        </label>
-                        {% comment %} {% if teacher %}
-                            <input type="text" value="{{ teacher.teacher_name }}"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                                readonly disabled>
-                            <input type="hidden" name="selected_teacher_id" id="selected_teachers_id" value="{{ teacher.id }}">
-                        {% else %}
-                            <input type="text" id="selected_teacher_input" list="teachers_list"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                            placeholder="اكتب اسم المدرس أو اختر من القائمة..." required>
-                        
-                            <input type="hidden" name="selected_teacher_id" id="selected_teacher_id_hidden">
-                            
-                            <datalist id="teachers_list">
-                                {% for t in all_teachers %}
-                                    <option data-id="{{ t.id }}" value="{{ t.teacher_name }}"></option>
-                                {% endfor %}
-                            </datalist>
-
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                يمكنك كتابة اسم المدرس أو اختيار اسمه من القائمة.
-                            </p>
-                        {% endif %} {% endcomment %}
-
-
-{% if teacher %}
-  <input type="text" value="{{ teacher.teacher_name }}"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-      readonly disabled>
-  <input type="hidden" name="selected_teacher_id" id="selected_teachers_id" value="{{ teacher.id }}">
-{% else %}
-  <select id="selected_teacher" name="selected_teacher_id"
-      class="tom-select mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" required>
-      <option value="">اختر مدرسًا...</option>
-      {% for t in all_teachers %}
-        <option value="{{ t.id }}">{{ t.teacher_name }}</option>
-      {% endfor %}
-  </select>
-{% endif %}
-                    </div>
-                </div>
-                {# Distributed Courses section #}
-                <div class="mb-8">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center">
-                        <i class="fas fa-book ml-2 text-purple-600"></i>
-                        المقررات الموزعة
-                    </h3>
-                    <div id="distribution-container" class="space-y-4">
-                        {% if teacher_distributions %}
-                            {% for item in teacher_distributions %}
-                                <div class="distribution-item grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600 relative">
-                                    <input type="hidden" name="distribution_id_{{ forloop.counter }}" value="{{ item.id }}">
-                                    
-                                    <div>
-                                        <label for="group-{{ forloop.counter }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">المجموعة</label>
-                                        <select id="group-{{ forloop.counter }}" name="dist_group_{{ forloop.counter }}" class="tom-select mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
-                                            <option value="">اختر مجموعة</option>
-                                            {% for group in groups %}
-                                                <option value="{{ group.id }}" {% if item.fk_group.id == group.id %}selected{% endif %}> {{ group.fk_level.fk_program.program_name }}  - {{ group.fk_level.level_name_display}} -{{ group.group_name }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label for="subject-{{ forloop.counter }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">المادة</label>
-                                        <select id="subject-{{ forloop.counter }}" name="dist_subject_{{ forloop.counter }}" class="tom-select mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 
-                                        dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
-                                            <option value="">اختر مادة</option>
-                                            {% for subject in subjects %}
-                                                <option value="{{ subject.id }}" {% if item.fk_subject.id == subject.id %}selected{% endif %}>{{ subject.subject_name }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        class="delete-btn absolute top-0 left-0 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-lg p-1 rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition-colors duration-200"
-                                        title="إزالة هذا المقرر"
-                                        data-id="{{ item.id }}"
-                                        data-name="{{ item.fk_subject.subject_name }} في {{ item.fk_program.program_name }} - {{ item.fk_level.level_name }} - {{ item.fk_group.group_name }}"
-                                        data-type="توزيع مقرر"
-                                        data-form-type="delete_distribution"
-                                        data-url="{% url 'add_edit_teacher_with_courses' 0 %}" 
-                                        >
-                                        <i class="fas fa-times-circle"></i>
-                                    </button>
-
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
-                    <button
-                            type="button"
-                            id="add-distribution-btn"
-                            class="mt-4 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold py-2 px-4 rounded-md flex items-center gap-2 transition-colors duration-200"
-                    >
-                        <i class="fas fa-plus-circle"></i>
-                        إضافة مقرر
-                    </button>
-                </div>
-
-                {# Save button for Distributed Courses #}
-                <div class="flex justify-start gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-                    <button type="submit" name="form_type" value="courses_form" 
-                            class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
-                        حفظ المقررات
-                    </button>
-                    <a href="{% url 'teachers_management' %}"
-                       class="bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:text-gray-200 font-bold py-2 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
-                        إلغاء
-                    </a>
-                </div>
-            </form>
-
-            <hr class="my-8 border-gray-200 dark:border-gray-700"> {# A separator between the two forms #}
-
-            {# Form for Available Days and Times #}
-            <form method="POST"
-            action="{% if teacher.id %}
-                        {% url 'add_edit_teacher_with_courses' id=teacher.id %}
+        <!-- Form for Distributed Courses -->
+        <form method="POST" 
+              action="{% if teacher.id %}{% url 'add_edit_teacher_with_courses' id=teacher.id %}{% else %}{% url 'add_edit_teacher_with_courses' %}{% endif %}"
+              id="courses-form">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                    <label for="selected_teacher" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        المدرس <span class="text-red-500">*</span>
+                    </label>
+                    {% if teacher %}
+                        <input type="text" value="{{ teacher.teacher_name }}"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                            readonly disabled>
+                        <input type="hidden" name="selected_teacher_id" value="{{ teacher.id }}">
                     {% else %}
-                        {% url 'add_edit_teacher_with_courses' %}
-                    {% endif %}"
-            id="times-form">
-          {% csrf_token %}
-          
-          <input type="hidden" name="selected_teacher_id" id="times_form_selected_teacher_id" value="{{ teacher.id }}"> {# Pass teacher ID to the second form too #}
+                        <select id="selected_teacher" name="selected_teacher_id"
+                            class="tom-select mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-gray-200 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" required>
+                            <option value="">اختر مدرسًا...</option>
+                            {% for t in all_teachers %}
+                                <option value="{{ t.id }}">{{ t.teacher_name }}</option>
+                            {% endfor %}
+                        </select>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Distributed Courses section -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center">
+                    <i class="fas fa-book ml-2 text-purple-600"></i>
+                    المقررات الموزعة
+                </h3>
+                <div id="distribution-container" class="space-y-4">
+                    {% for item in teacher_distributions %}
+                        <div class="distribution-item grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600 relative">
+                            <input type="hidden" name="distribution_id_{{ forloop.counter }}" value="{{ item.id }}">
+                            <div>
+                                <label for="group-{{ forloop.counter }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">المجموعة</label>
+                                <select id="group-{{ forloop.counter }}" name="dist_group_{{ forloop.counter }}" class="select-group mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm bg-gray-200 text-gray-900 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
+                                    <option value="">اختر مجموعة</option>
+                                    {% for group in groups %}
+                                        <option value="{{ group.id }}" {% if item.fk_group.id == group.id %}selected{% endif %}> {{ group.fk_level.fk_program.program_name }}  - {{ group.fk_level.level_name }} -{{ group.group_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="subject-{{ forloop.counter }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">المادة</label>
+                                <select id="subject-{{ forloop.counter }}" name="dist_subject_{{ forloop.counter }}" class="select-subject mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm bg-gray-200 text-gray-900 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
+                                    <option value="">اختر مادة</option>
+                                    {% for subject in subjects %}
+                                        <option value="{{ subject.id }}" {% if item.fk_subject.id == subject.id %}selected{% endif %}>{{ subject.subject_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="button" class="delete-btn absolute top-0 left-0 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-lg p-1 rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition-colors duration-200" title="إزالة هذا المقرر" data-id="{{ item.id }}" data-name="{{ item.fk_subject.subject_name }}" data-type="توزيع مقرر" data-form-type="delete_distribution" data-url="{% url 'add_edit_teacher_with_courses' 0 %}">
+                                <i class="fas fa-times-circle"></i>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+                <button type="button" id="add-distribution-btn" class="mt-4 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold py-2 px-4 rounded-md flex items-center gap-2 transition-colors duration-200">
+                    <i class="fas fa-plus-circle"></i>
+                    إضافة مقرر
+                </button>
+            </div>
 
-          <div class="mb-8">
-              <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center">
-                  <i class="fas fa-calendar-alt ml-2 text-indigo-600"></i>
-                  الأيام والأوقات المتاحة
-              </h3>
-              <div id="availability-container" class="space-y-4">
-                  {% if teacher_times %}
-                      {% for item in teacher_times %}
-                          <div class="availability-item relative flex flex-col sm:flex-row items-center gap-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600">
-                              <input type="hidden" name="availability_id_{{ forloop.counter }}" value="{{ item.id }}">
-                              <div class="w-full sm:w-1/3">
-                                  <label for="day-{{ forloop.counter }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">اليوم</label>
-                                  <select id="day-{{ forloop.counter }}" name="time_day_{{ forloop.counter }}"
-                                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none
-                                          focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
-                                      <option value="">اختر يوم</option>
-                                      {% for day in days %}
-                                          <option value="{{ day.id }}" {% if item.fk_today.id == day.id %}selected{% endif %}>{{ day.day_name_display }}</option>
-                                      {% endfor %}
-                                  </select>
-                              </div>
-                              <div class="w-full sm:w-2/3">
-                                  <label for="period-{{ forloop.counter }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">الفترة</label>
-                                  <select id="period-{{ forloop.counter }}" name="time_period_{{ forloop.counter }}"
-                                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none
-                                          focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
-                                      <option value="">اختر فترة</option>
-                                      {% for period in periods %}
-                                          <option value="{{ period.id }}" {% if item.fk_period.id == period.id %}selected{% endif %}>{{ period.period_from }} - {{ period.period_to }}</option>
-                                      {% endfor %}
-                                  </select>
-                              </div>
-                              <button
-                                          type="button"
-                                          class="delete-btn absolute top-0 left-0 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-lg p-1 rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition-colors duration-200"
-                                          data-id="{{ item.id }}"
-                                          data-name="{{ item.day }} - {{ item.period }}"
-                                          data-type="توزيع الأوقات"
-                                          data-form-type="delete_availability"
-                                          data-url="{% url 'add_edit_teacher_with_courses' 0 %}">
-                                          <i class="fas fa-times-circle"></i>
-                                      </button>
-                                  
-                                  
-                          </div>
-                      {% endfor %}
-                  {% else %}
+            <div class="flex justify-start gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <button type="submit" name="form_type" value="courses_form" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
+                    حفظ المقررات
+                </button>
+                <a href="{% url 'teachers_management' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:text-gray-200 font-bold py-2 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
+                    إلغاء
+                </a>
+            </div>
+        </form>
 
-                      {# If no available times, add an empty item for the user to start adding times #}
-                      <div class="availability-item relative flex flex-col sm:flex-row items-center gap-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600">
-                          <input type="hidden" name="availability_id_1" value="">
-                          
-                          <div class="w-full sm:w-1/3">
-                              <label for="day-1" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">اليوم</label>
-                              <select id="day-1" name="time_day_1"
-                                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none
-                                          focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
-                                  <option value="">اختر يوم</option>
-                                  {% for day in days %}
-                                      <option value="{{ day.id }}">{{ day.day_name_display }}</option>
-                                  {% endfor %}
-                              </select>
-                          </div>
-                          <div class="w-full sm:w-2/3">
-                              <label for="period-1" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">الفترة</label>
-                              <select id="period-1" name="time_period_1"
-                                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none
-                                          focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
-                                  <option value="">اختر فترة</option>
-                                  {% for period in periods %}
-                                      <option value="{{ period.id }}">{{ period.period_from }} - {{ period.period_to }}</option>
-                                  {% endfor %}
-                              </select>
-                          </div>
-                          <button
-                                      type="button"
-                                      class="delete-btn absolute top-0 left-0 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-lg p-1 rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition-colors duration-200"
-                                      data-id="{{ item.id }}"
-                                      data-name="{{ item.day }} - {{ item.period }}"
-                                      data-type="توزيع الأوقات"
-                                      data-form-type="delete_availability"
-                                      data-url="{% url 'add_edit_teacher_with_courses' 0 %}">
-                                      <i class="fas fa-times-circle"></i>
-                                  </button>
-                                  
-                          </div>
-                      {% endif %}
-              </div>
-              <button
-                          type="button"
-                          id="add-availability-btn"
-                          class="mt-4 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold py-2 px-4 rounded-md flex items-center gap-2 transition-colors duration-200"
-              >
-                  <i class="fas fa-plus-circle"></i>
-                  إضافة يوم متاح
-              </button>
-          </div>
+        <hr class="my-8 border-gray-200 dark:border-gray-700">
 
-          {# Save button for Available Days and Times #}
-          <div class="flex justify-start gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-              <button type="submit" name="form_type" value="times_form"
-                      class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
-                  حفظ الأوقات
-              </button>
-              <a href="{% url 'teachers_management' %}"
-                 class="bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:text-gray-200 font-bold py-2 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
-                  إلغاء
-              </a>
-          </div>
-          <div class="mt-6 text-center">
-            <a href="{% url 'teachers_management' %}"
-               class="inline-flex items-center text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300
-                            font-medium transition-colors duration-200">
+        <!-- Form for Available Days and Times -->
+        <form method="POST"
+              action="{% if teacher.id %}{% url 'add_edit_teacher_with_courses' id=teacher.id %}{% else %}{% url 'add_edit_teacher_with_courses' %}{% endif %}"
+              id="times-form">
+            {% csrf_token %}
+            
+            <input type="hidden" name="selected_teacher_id" id="times_form_selected_teacher_id" value="{{ teacher.id }}">
+
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center">
+                    <i class="fas fa-calendar-alt ml-2 text-indigo-600"></i>
+                    الأيام والأوقات المتاحة
+                </h3>
+                <div id="availability-container" class="space-y-4">
+                    {% for item in teacher_times %}
+                        <div class="availability-item relative flex flex-col sm:flex-row items-center gap-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600">
+                            <input type="hidden" name="availability_id_{{ forloop.counter }}" value="{{ item.id }}">
+                            <div class="w-full sm:w-1/3">
+                                <label for="day-{{ forloop.counter }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">اليوم</label>
+                                <select id="day-{{ forloop.counter }}" name="time_day_{{ forloop.counter }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm bg-gray-200 text-gray-900 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
+                                    <option value="">اختر يوم</option>
+                                    {% for day in days %}
+                                        <option value="{{ day.id }}" {% if item.fk_today.id == day.id %}selected{% endif %}>{{ day.day_name_display }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="w-full sm:w-2/3">
+                                <label for="period-{{ forloop.counter }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">الفترة</label>
+                                <select id="period-{{ forloop.counter }}" name="time_period_{{ forloop.counter }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm bg-gray-200 text-gray-900 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
+                                    <option value="">اختر فترة</option>
+                                    {% for period in periods %}
+                                        <option value="{{ period.id }}" {% if item.fk_period.id == period.id %}selected{% endif %}>{{ period.period_from }} - {{ period.period_to }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="button" class="delete-btn absolute top-0 left-0 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-lg p-1 rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition-colors duration-200" data-id="{{ item.id }}" data-name="{{ item.fk_today.day_name_display }}" data-type="توزيع الأوقات" data-form-type="delete_availability" data-url="{% url 'add_edit_teacher_with_courses' 0 %}">
+                                <i class="fas fa-times-circle"></i>
+                            </button>
+                        </div>
+                    {% empty %}
+                        <div class="availability-item relative flex flex-col sm:flex-row items-center gap-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600">
+                            <input type="hidden" name="availability_id_1" value="">
+                            <div class="w-full sm:w-1/3">
+                                <label for="day-1" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">اليوم</label>
+                                <select id="day-1" name="time_day_1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm bg-gray-200 text-gray-900 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
+                                    <option value="">اختر يوم</option>
+                                    {% for day in days %}<option value="{{ day.id }}">{{ day.day_name_display }}</option>{% endfor %}
+                                </select>
+                            </div>
+                            <div class="w-full sm:w-2/3">
+                                <label for="period-1" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">الفترة</label>
+                                <select id="period-1" name="time_period_1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm bg-gray-200 text-gray-900 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
+                                    <option value="">اختر فترة</option>
+                                    {% for period in periods %}<option value="{{ period.id }}">{{ period.period_from }} - {{ period.period_to }}</option>{% endfor %}
+                                </select>
+                            </div>
+                            <button type="button" class="delete-btn absolute top-0 left-0 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-lg p-1 rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition-colors duration-200" data-id="" data-name="" data-type="توزيع الأوقات" data-form-type="delete_availability" data-url="{% url 'add_edit_teacher_with_courses' 0 %}">
+                                <i class="fas fa-times-circle"></i>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+                <button type="button" id="add-availability-btn" class="mt-4 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold py-2 px-4 rounded-md flex items-center gap-2 transition-colors duration-200">
+                    <i class="fas fa-plus-circle"></i>
+                    إضافة يوم متاح
+                </button>
+            </div>
+
+            <div class="flex justify-start gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <button type="submit" name="form_type" value="times_form" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
+                    حفظ الأوقات
+                </button>
+                <a href="{% url 'teachers_management' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:text-gray-200 font-bold py-2 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
+                    إلغاء
+                </a>
+            </div>
+        </form>
+        
+        <div class="mt-6 text-center">
+            <a href="{% url 'teachers_management' %}" class="inline-flex items-center text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium transition-colors duration-200">
                 <i class="fas fa-arrow-right-from-bracket mr-2 rtl:mr-0 rtl:ml-2"></i> العودة إلى صفحة المعلمين
             </a>
         </div>
-
-      </form>
-      
-        </div>
     </div>
-    <script src="{% static 'src/js/show_modal_message.js' %}"></script>
-    {% include "message.html" %}
-    {% include "delete_modal.html" %}
+</div>
 
-    {# Custom Confirmation Modal #}
-        {% endblock %}
+{% include "message.html" %}
+{% include "delete_modal.html" %}
+{% endblock %}
 
 {% block extra_js %}
+<!-- Scripts remain the same -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const teacherSelect = document.getElementById("selected_teacher");
+    const timesFormHiddenInput = document.getElementById("times_form_selected_teacher_id");
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const input = document.getElementById("selected_teacher_input");
-            const hiddenInput = document.getElementById("selected_teacher_id_hidden");
-            const timesFormHiddenInput = document.getElementById("times_form_selected_teacher_id");
+    if (teacherSelect && timesFormHiddenInput) {
+        teacherSelect.addEventListener("change", function () {
+            timesFormHiddenInput.value = teacherSelect.value;
+        });
+    }
 
-            if (!input || !hiddenInput) {
-                if (timesFormHiddenInput && "{{ teacher.id }}") {
-                    timesFormHiddenInput.value = "{{ teacher.id }}";
-                }
-                return; 
-            }
-        
-            const dataListOptions = document.querySelectorAll("#teachers_list option");
-        
-            input.addEventListener("change", function () {
-                const val = input.value.trim();
-                let matched = false;
-                let selectedId = ""; 
+    const teacherId = "{{ teacher.id|default:'' }}";
+    if (teacherId && timesFormHiddenInput) {
+        timesFormHiddenInput.value = teacherId;
+    }
+});
+</script>
 
-                for (let option of dataListOptions) {
-                    if (option.value.trim() === val) {
-                        selectedId = option.dataset.id;
-                        matched = true;
-                        break;
-                    }
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function updateElementIndexes(containerId, itemClass) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        const items = container.querySelectorAll(`.${itemClass}`);
+        items.forEach((item, index) => {
+            const newIndex = index + 1;
+            item.querySelectorAll('[name]').forEach(input => {
+                const originalName = input.getAttribute('name');
+                if (originalName) {
+                    input.name = originalName.replace(/_\d+$/, `_${newIndex}`);
                 }
-        
-                hiddenInput.value = selectedId;
-                
-                if (timesFormHiddenInput) {
-                    timesFormHiddenInput.value = selectedId;
-                }
-        
-                console.log("Selected teacher ID (courses form):", hiddenInput.value);
-                console.log("Selected teacher ID (times form):", timesFormHiddenInput ? timesFormHiddenInput.value : 'N/A');
             });
-            
-            if (timesFormHiddenInput && hiddenInput && hiddenInput.value) {
-                timesFormHiddenInput.value = hiddenInput.value;
+            item.querySelectorAll('[id]').forEach(el => {
+                const originalId = el.getAttribute('id');
+                if (originalId) {
+                    el.id = originalId.replace(/-\d+$/, `-${newIndex}`);
+                }
+            });
+            item.querySelectorAll('label[for]').forEach(label => {
+                const originalFor = label.getAttribute('for');
+                if (originalFor) {
+                    label.setAttribute('for', originalFor.replace(/-\d+$/, `-${newIndex}`));
+                }
+            });
+        });
+    }
+
+    function setupDynamicItems(containerId, itemClass, addButtonId, getItemHtml) {
+        const container = document.getElementById(containerId);
+        const addButton = document.getElementById(addButtonId);
+        if (!container || !addButton) return;
+
+        let counter = container.querySelectorAll(`.${itemClass}`).length;
+
+        addButton.addEventListener('click', () => {
+            counter++;
+            container.insertAdjacentHTML('beforeend', getItemHtml(counter));
+        });
+
+        container.addEventListener('click', function(e) {
+            const deleteButton = e.target.closest('.delete-btn');
+            if (deleteButton) {
+                const itemToRemove = deleteButton.closest(`.${itemClass}`);
+                if (itemToRemove) {
+                    itemToRemove.remove();
+                    updateElementIndexes(containerId, itemClass);
+                }
             }
         });
-    </script>
+    }
 
-    <script>
-        let itemTypeToDelete = null;
-        let itemIdToDelete = null;
-        let teacherId = "{{ teacher.id }}"; 
-        
-        let distributionCounter = {{ teacher_distributions|length|default:0 }};
-        if (distributionCounter === 0) {
-            distributionCounter = 1; 
-        } else {
-            
-            distributionCounter = {{ teacher_distributions|length }} + 1;
-        }
+    const getDistributionItemHtml = (counter) => `
+        <div class="distribution-item grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600 relative">
+            <input type="hidden" name="distribution_id_${counter}" value="">
+            <div>
+                <label for="group-${counter}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">المجموعة</label>
+                <select id="group-${counter}" name="dist_group_${counter}" class="select-group mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm bg-gray-200 text-gray-900 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
+                    <option value="">اختر مجموعة</option>
+                    {% for group in groups %}<option value="{{ group.id }}">{{ group.fk_level.fk_program.program_name }}  - {{ group.fk_level.level_name }} -{{ group.group_name }}</option>{% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="subject-${counter}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">المادة</label>
+                <select id="subject-${counter}" name="dist_subject_${counter}" class="select-subject mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm bg-gray-200 text-gray-900 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
+                    <option value="">اختر مادة</option>
+                    {% for subject in subjects %}<option value="{{ subject.id }}">{{ subject.subject_name }}</option>{% endfor %}
+                </select>
+            </div>
+            <button type="button" class="delete-btn absolute top-0 left-0 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-lg p-1 rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition-colors duration-200" title="إزالة"><i class="fas fa-times-circle"></i></button>
+        </div>`;
 
-        document.addEventListener('DOMContentLoaded', function() {
-            
-            function updateElementIndexes(containerId, itemClass, namePrefix) {
-                const container = document.getElementById(containerId);
-                if (!container) return; 
-            
-                const items = container.querySelectorAll(`.${itemClass}`);
-                items.forEach((item, index) => {
-                    const newIndex = index + 1;
-                    item.setAttribute('data-index', newIndex);
-            
-                    item.querySelectorAll('[name]').forEach(input => {
-                        const originalName = input.getAttribute('name');
-                        if (originalName) {
-                            let newName = '';
-                            
-                            if (originalName.startsWith('distribution_id_')) {
-                                newName = `distribution_id_${newIndex}`;
-                            } else if (originalName.startsWith('availability_id_')) {
-                                newName = `availability_id_${newIndex}`;
-                            }
-                            
-                            else if (originalName.startsWith(namePrefix)) {
-                                
-                                const parts = originalName.substring(namePrefix.length).split('_');
-                                const suffix = parts[0]; 
-                                newName = `${namePrefix}${suffix}_${newIndex}`;
-                            }
-            
-                            if (newName) {
-                                input.setAttribute('name', newName);
-                                
-                                if (input.id) {
-                                    const idParts = input.id.split('-');
-                                    if (idParts.length > 1) { 
-                                        input.id = `${idParts[0]}-${newIndex}`;
-                                    }
-                                }
-                            }
-                        }
-                    });
-            
-                    
-                    item.querySelectorAll('label[for]').forEach(label => {
-                        const originalFor = label.getAttribute('for');
-                        if (originalFor) {
-                            const forParts = originalFor.split('-');
-                            if (forParts.length > 1) {
-                                label.setAttribute('for', `${forParts[0]}-${newIndex}`);
-                            }
-                        }
-                    });
-                });
-            }
-            
-            
-            function setupDynamicItems(containerId, itemClass, addButtonId, namePrefix, getItemHtml) {
-                const container = document.getElementById(containerId);
-                const addButton = document.getElementById(addButtonId);
-            
-                
-                let counter = container.querySelectorAll(`.${itemClass}`).length;
-            
-                
-                if (counter === 0 && !teacherId) { 
-                    addItem(); 
-                } else {
-                    
-                    updateElementIndexes(containerId, itemClass, namePrefix);
-                }
-            
-                
-                function addItem() {
-                    counter++;
-                    const newItemHtml = getItemHtml(counter);
-                    container.insertAdjacentHTML('beforeend', newItemHtml);
-                    updateElementIndexes(containerId, itemClass, namePrefix);
-                }
-            
-                
-                if (addButton) {
-                    addButton.addEventListener('click', addItem);
-                }
-            
-            }
+    const getAvailabilityItemHtml = (counter) => `
+        <div class="availability-item relative flex flex-col sm:flex-row items-center gap-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600">
+            <input type="hidden" name="availability_id_${counter}" value="">
+            <div class="w-full sm:w-1/3">
+                <label for="day-${counter}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">اليوم</label>
+                <select id="day-${counter}" name="time_day_${counter}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm bg-gray-200 text-gray-900 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
+                    <option value="">اختر يوم</option>
+                    {% for day in days %}<option value="{{ day.id }}">{{ day.day_name_display }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="w-full sm:w-2/3">
+                <label for="period-${counter}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">الفترة</label>
+                <select id="period-${counter}" name="time_period_${counter}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm bg-gray-200 text-gray-900 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
+                    <option value="">اختر فترة</option>
+                    {% for period in periods %}<option value="{{ period.id }}">{{ period.period_from }} - {{ period.period_to }}</option>{% endfor %}
+                </select>
+            </div>
+            <button type="button" class="delete-btn absolute top-0 left-0 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-lg p-1 rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition-colors duration-200" title="إزالة"><i class="fas fa-times-circle"></i></button>
+        </div>`;
 
-            const getDistributionItemHtml = (counter) => `
-                <div class="distribution-item grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600 relative">
-                    <input type="hidden" name="distribution_id_${counter}" value="">
-                    
-                    <div>
-                        <label for="group-${counter}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">المجموعة</label>
-                        <select id="group-${counter}" name="dist_group_${counter}" class="tom-select mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
-                            <option value="">اختر مجموعة</option>
-                            {% for group in groups %}
-                                <option value="{{ group.id }}"> {{ group.fk_level.fk_program.program_name }}  -[{{ group.fk_level.level_name_display }} - ({{ group.group_name }})]</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div>
-                        <label for="subject-${counter}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">المادة</label>
-                        <select id="subject-${counter}" name="dist_subject_${counter}" class="tom-select mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
-                            <option value="">اختر مادة</option>
-                            {% for subject in subjects %}
-                                <option value="{{ subject.id }}">{{ subject.subject_name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <button
-                        type="button"
-                        class="delete-btn absolute top-0 left-0 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-lg p-1 rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition-colors duration-200"
-                        title="إزالة هذا المقرر"
-                        data-id="" {# لا يوجد معرف هنا لأن العنصر جديد #}
-                        data-name="" {# لا يوجد اسم هنا لأن العنصر جديد #}
-                        data-type="توزيع مقرر"
-                        data-form-type="delete_distribution"
-                        data-url="{% url 'add_edit_teacher_with_courses' 0 %}" 
-                        >
-                        <i class="fas fa-times-circle"></i>
-                    </button>
-                </div>
-            `;
-        
-            
-            const getAvailabilityItemHtml = (counter) => `
-                <div class="availability-item relative flex flex-col sm:flex-row items-center gap-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600">
-                    <input type="hidden" name="availability_id_${counter}" value="">
-                    <div class="w-full sm:w-1/3">
-                        <label for="day-${counter}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">اليوم</label>
-                        <select id="day-${counter}" name="time_day_${counter}"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none
-                                focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
-                            <option value="">اختر يوم</option>
-                            {% for day in days %}
-                                <option value="{{ day.id }}">{{ day.day_name_display }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="w-full sm:w-2/3">
-                        <label for="period-${counter}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">الفترة</label>
-                        <select id="period-${counter}" name="time_period_${counter}"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none
-                                focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
-                            <option value="">اختر فترة</option>
-                            {% for period in periods %}
-                                <option value="{{ period.id }}" >{{ period.period_from }} - {{ period.period_to }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <button
-                                type="button"
-                                class="delete-btn absolute top-0 left-0 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-lg p-1 rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition-colors duration-200"
-                                data-id="" {# لا يوجد معرف هنا لأن العنصر جديد #}
-                                data-name="" {# لا يوجد اسم هنا لأن العنصر جديد #}
-                                data-type="توزيع الأوقات"
-                                data-form-type="delete_availability"
-                                data-url="{% url 'add_edit_teacher_with_courses' 0 %}">
-                                <i class="fas fa-times-circle"></i>
-                            </button>
-                            
-                </div>
-            `;
-        
-            
-            setupDynamicItems('distribution-container', 'distribution-item', 'add-distribution-btn', 'dist_', getDistributionItemHtml);
-            setupDynamicItems('availability-container', 'availability-item', 'add-availability-btn', 'time_', getAvailabilityItemHtml);
-        });
-        
-    </script>
+    setupDynamicItems('distribution-container', 'distribution-item', 'add-distribution-btn', getDistributionItemHtml);
+    setupDynamicItems('availability-container', 'availability-item', 'add-availability-btn', getAvailabilityItemHtml);
+});
+</script>
 {% endblock %}
