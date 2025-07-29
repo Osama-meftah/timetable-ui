@@ -57,13 +57,13 @@ def process_rows(df, required_fields, model_class, get_existing, prepare_data, s
         return None, None, None, f"الملف ناقص الأعمدة التالية: {', '.join(missing_columns)}"
 
     df = df.fillna("").astype(str).apply(lambda x: x.str.strip())
-    print(df)
+    # print(df)
 
     for index, row in df.iterrows():
         try:
-            print(row)
+            # print(row)
             data = prepare_data(row)
-            print(data)
+            # print(data)
             if not all(is_field_valid(data.get(field)) for field in required_fields):
                 errors.append(f"الصف {index + 2}: البيانات ناقصة.")
                 fail_count += 1

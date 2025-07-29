@@ -6,6 +6,7 @@
 {% endblock %}
 
 {% block content %}
+{% include "message.html" %}
     <div class="container mx-auto  py-8 px-4 sm:px-6 lg:px-8">
        
         <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6 md:p-8 mt-8">
@@ -15,37 +16,57 @@
             </h2>
 
             {# قسم إعدادات الجدول العام #}
-            <div class="mb-10 p-6 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700 shadow-md">
+            {% comment %} <div class="mb-10 p-6 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700 shadow-md"> {% endcomment %}
                 <h3 class="text-xl font-semibold text-purple-800 dark:text-purple-200 mb-5 flex items-center">
                     <i class="fas fa-cogs ml-2 text-purple-600"></i>
                     إعدادات الجدول العام
                 </h3>
-                <form action="" method ="POST">
+                <form action="{% url "table" %}" method ="POST">
                     {% csrf_token %}
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {# العام الدراسي #}
-                        <div>
+                        {% comment %} <div>
                             <label for="academic_year" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 العام الدراسي <span class="text-red-500">*</span>
                             </label>
                             <input type="text" id="academic_year" name="academic_year" placeholder="مثال: 2023-2024" required
                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
-                        </div>
+                        </div> {% endcomment %}
 
                         {# الفصل الدراسي #}
-                        <div>
-                            <label for="academic_term" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                الفصل الدراسي <span class="text-red-500">*</span>
-                            </label>
-                            <select id="academic_term" name="academic_term" required
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="">اختر الفصل...</option>
-                                <option value="first">الفصل الأول</option>
-                                <option value="second">الفصل الثاني</option>
-                            </select>
-                        </div>
+                <div>
+                    <label for="semester" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        الفصل الدراسي <span class="text-red-500">*</span>
+                    </label>
+                    <select
+                        id="semester"
+                        name="semester"
+                        class="form-select w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-200 transition duration-200 ease-in-out transform hover:scale-[1.01]"
+                        required
+                    >
+                        <option value="" disabled >اختر الفصل الدراسي</option>
+                        <option value="term1" {% if selected_semester == 'term1' %}selected{% endif %} >الأول</option>
+                        <option value="term2" {% if selected_semester == 'term2' %}selected{% endif %} >الثاني</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="random" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        نوع توزيع المحاضرات على القاعات <span class="text-red-500">*</span>
+                    </label>
+                    <select
+                        id="random"
+                        name="random"
+                        class="form-select w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-200 transition duration-200 ease-in-out transform hover:scale-[1.01]"
+                        required
+                    >
+                        <option value="" disabled >اختار نوع التوزيع</option>
+                        <option value="True" {% if selected_random == 'True' %}selected{% endif %}>عشوائي</option>
+                        <option value="False" {% if selected_random == 'False' %}selected{% endif %}>ثابت</option>
+                    </select>
+                </div>
                         {# وقت بدء الدراسة اليومي - Note: This field is duplicated, consider removing one if logic allows #}
-                        <div>
+                        {% comment %} <div>
                             <label for="daily_start_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 بدء الدراسة يومياً <span class="text-red-500">*</span>
                             </label>
@@ -53,29 +74,29 @@
                                    class="mt-1 block w-full rounded-md border-gray-300
                                    shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500
                                    focus:ring-indigo-500">
-                        </div>
+                        </div> {% endcomment %}
 
                         {# وقت انتهاء الدراسة اليومي - Note: This field is duplicated, consider removing one if logic allows #}
-                        <div>
+                        {% comment %} <div>
                             <label for="daily_end_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 انتهاء الدراسة يومياً <span class="text-red-500">*</span>
                             </label>
                             <input type="time" id="daily_end_time" name="daily_end_time" required dir="ltr"
                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700
                                    dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
-                        </div>
+                        </div> {% endcomment %}
                     </div>
 
                     <div class="flex justify-end gap-3 pt-6 border-t border-purple-200 dark:border-purple-700">
                         <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
-                            <i class="fas fa-save ml-2"></i> حفظ الإعدادات
+                            <i class="fas fa-save ml-2"></i> انشاء الجدول
                         </button>
-                        <button type="reset" class="bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:text-gray-200 font-bold py-2.5 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
+                        {% comment %} <button type="reset" class="bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:text-gray-200 font-bold py-2.5 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
                             <i class="fas fa-undo ml-2"></i> مسح الإعدادات
-                        </button>
+                        </button> {% endcomment %}
                     </div>
                 </form>
-            </div>
+            {% comment %} </div> {% endcomment %}
 
             {# قسم عرض التعارضات (الجديد) #}
             <div class="p-6 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700 shadow-md">

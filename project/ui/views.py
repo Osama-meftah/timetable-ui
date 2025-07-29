@@ -257,7 +257,10 @@ class TeacherAvailabilityAndCoursesView(View):
                                     cache.set(KeysCach.distributions_data, distributions, timeout=KeysCach.timeout)
                                return redirect("add_edit_teacher_with_courses")
                         except Exception as e:
+                            print(f"Error saving distribution {i}: {e}")
                             handle_exception(request, f"فشل حفظ توزيع رقم {i}", e)
+                            messages.error(request, f"فشل حفظ توزيع رقم {i}: {str(e)}")
+                            return redirect(request.path_info)
 
                 
             
@@ -357,8 +360,8 @@ class CoursesListView(View):
         })
     
     def post(self, request):
-        from_type = request.POST.get("form_type")
-        print(f"Received POST request with data: {from_type}")
+        # from_type = request.POST.get("form_type")
+        # print(f"Received POST request with data: {from_type}")
         if request.POST.get("form_type") == "upload_courses":
             return handle_file_upload(
                 request,

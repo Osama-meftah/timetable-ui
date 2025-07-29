@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_tags %}
+
+{% block content %}
+<div class="container mx-auto py-6">
+  <h2 class="text-2xl font-bold mb-4 text-center">الجدول الدراسي</h2>
+
+  <table class="w-full border text-center border-collapse">
+    <thead>
+      <tr>
+        <th class="border p-2" rowspan="2">اليوم</th>
+        {% comment %} صف القاعات %}{% endcomment %}
+        {% for hall in halls %}
+          <th class="border p-2" colspan="{{ periods|length }}">{{ hall.hall_name }}</th>
+        {% endfor %}
+      </tr>
+      <tr>
+        {% comment %} صف الفترات (تحت كل قاعة) %}{% endcomment %}
+        {% for hall in halls %}
+          {% for period in periods %}
+            <th class="border p-2">{{ period.period_from }} - {{ period.period_to }}</th>
+          {% endfor %}
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for day, day_data in schedule.items %}
+      <tr>
+        <td class="border p-2 font-bold">{{ day }}</td>
+
+        {% for hall in halls %}
+          {% for period in periods %}
+            {% with key=period.period_from|stringformat:"s"|add:"-"|add:period.period_to|stringformat:"s" %}
+            <td class="border p-2 text-right align-top">
+              {% for lec in day_data|get_item:key %}
+                {% if lec.hall == hall.hall_name %}
+                  <div>
+                    <span class="font-semibold">{{ lec.course }}</span><br>
+                    <span class="font-semibold">{{lec.program}}-{{ lec.level }}-{{ lec.group }}</span>
+                    <small>{{ lec.teacher }}</small>
+                  </div>
+                {% endif %}
+              {% empty %}
+                <span class="text-gray-400">---</span>
+              {% endfor %}
+            </td>
+            {% endwith %}
+          {% endfor %}
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

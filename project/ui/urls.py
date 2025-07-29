@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from .views_acount import *
+from .views_table import *
 
 urlpatterns = [
     path('login/', LoginView, name='login'),
@@ -51,4 +52,9 @@ urlpatterns = [
     
     path('groups/', views.GroupsView.as_view(), name='groups_management'),
     path('groups/delete/<int:id>/', views.GroupDeleteView.as_view(), name='groups_delete'),
+
+    path('table/', TableView.as_view(), name='table'),
+    path('table/delete/<int:id>/',TableDeleteView.as_view(), name='table_delete'),
+    path('lectures/<int:id>/', LecturesView.as_view(), name='view_table_lectures'),
+
 ]

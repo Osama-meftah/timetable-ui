@@ -13,7 +13,8 @@ function prepareDeleteModal(btn) {
   const name = btn.getAttribute("data-name");
   const type = btn.getAttribute("data-type");
   const formType = btn.getAttribute("data-form-type");
-  const url = btn.getAttribute("data-url").replace("0", id);
+  // const url = btn.getAttribute("data-url").replace("0", id);
+  const url = btn.getAttribute("data-url");
   const teacherIdInput =
   document.getElementById("selected_teachers_id")?.value || null;
   if (!id || !name || !type || !formType || !url) {

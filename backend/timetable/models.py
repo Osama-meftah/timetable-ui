@@ -309,10 +309,20 @@ class Distribution(models.Model):
 
 # الجدول (Table)
 class Table(models.Model):
+    SEMESTER_CHOICES = [
+        ('term1', 'الأول'),
+        ('term2', 'الثاني')
+    ]
     created_at = models.DateField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
     table = models.FileField(max_length=100, upload_to="tables_file/", verbose_name="ملف الجدول")
     # إضافة حقل اسم للجدول ليكون أكثر وصفية
     name = models.CharField(max_length=100, verbose_name="اسم الجدول", blank=True, null=True)
+    semester= models.CharField(
+        choices=SEMESTER_CHOICES, 
+        verbose_name="الفصل الدراسي", 
+        default='term1', 
+        max_length=10
+    ) # تم تصحيح القيمة الافتراضية
     
     class Meta:
         verbose_name = "جدول"

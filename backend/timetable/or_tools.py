@@ -39,6 +39,7 @@ class TimeTableScheduler:
         self.temp_file = None
         self.log=[]
         self.conflicts=[]
+        self.random_enabled =True
     def add_data(self): 
         for row in self.available_times_df:
             time_from=row.period_from
@@ -389,7 +390,11 @@ class TimeTableScheduler:
         return temp_file
 
     def solve(self):
-        self.solver.parameters.random_seed=random.randint(1,10000)
+        
+        if self.random_enabled:
+            self.solver.parameters.random_seed=random.randint(1,10000)
+        else:
+            self.solver.parameters.random_seed=0
         self.solver.parameters.enumerate_all_solutions=False
        
         status = self.solver.Solve(self.model)

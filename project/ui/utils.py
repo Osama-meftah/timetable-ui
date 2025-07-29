@@ -30,7 +30,7 @@ class Endpoints:
     subjects = "subjects/"
     uploadSubjects = "uploadSubjects/"
     distributions = "distributions/"
-    lectures = "lectures/"
+    lectures = "lectures/by-table/"
 
 class KeysCach:
     timeout=3600
@@ -252,7 +252,7 @@ def api_get(endpoint, request=None, timeout=10, redirect_to=None, render_templat
             return render(request, render_template, render_context or {})
         return None
 
-def api_post(endpoint, data, request=None,success_message=None, timeout=10, redirect_to=None, render_template=None, render_context=None):
+def api_post(endpoint, data, request=None,success_message=None, timeout=20, redirect_to=None, render_template=None, render_context=None):
     try:
         # print(data)
         response = requests.post(f"{BASE_API_URL}{endpoint}", json=data, timeout=timeout)
