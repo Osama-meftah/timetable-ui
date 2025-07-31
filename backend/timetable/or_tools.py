@@ -202,13 +202,13 @@ class TimeTableScheduler:
                         if time_slot not in available_times_str:
                             available_times_str.append(time_slot)
                 self.conflicts.append({
-                    'نوع التعارض': 'تم تعيين دكتور في غير موعدة',
-                    'تفاصيل التعارض':f"اسم الدكتور: {doctor_name} , اليوم:{day} , الوقت: {time} الأوقات المتاحة: {available_times_str}"})
+                    'conflicts_type': 'تم تعيين دكتور في غير موعدة',
+                    'conflicts_detail':f"اسم الدكتور: {doctor_name} , اليوم:{day} , الوقت: {time} الأوقات المتاحة: {available_times_str}"})
 
             if(std_count>capacity):
                 self.conflicts.append({
-                    'نوع التعارض': 'لم يتم تعين قاعة',
-                    'تفاصيل التعارض':f'قسم: {dept} , مستوى:{level} , عدد الطلاب: {std_count} اكبر من {capacity} في قاعة :{room}'
+                    'conflicts_type': 'لم يتم تعين قاعة',
+                    'conflicts_detail':f'قسم: {dept} , مستوى:{level} , عدد الطلاب: {std_count} اكبر من {capacity} في قاعة :{room}'
                 })
         # return conflicts
     
@@ -263,8 +263,8 @@ class TimeTableScheduler:
         for (dept, level), stdcount in dept_level_courses.items():
             if stdcount[0]>max_capacity:
                  self.conflicts.append({
-                    'نوع التعارض': 'لم يتم تعين قاعة',
-                    'تفاصيل التعارض':f'قسم: {dept} , مستوى:{level} , عدد الطلاب: {stdcount[0]} اكبر من {max_capacity} ',
+                    'conflicts_type': 'لم يتم تعين قاعة',
+                    'conflicts_detail':f'قسم: {dept} , مستوى:{level} , عدد الطلاب: {stdcount[0]} اكبر من {max_capacity} ',
                 })
         
         for course_id, course_info in self.lecture_times.items():
@@ -299,22 +299,20 @@ class TimeTableScheduler:
             # If professor has more courses than available time slots
             if num_courses > total_available_slots and total_available_slots!=0 :
                self.conflicts.append({
-                    'نوع التعارض': 'عدد المواد أكثر من الأوقات المتاحة',
-                    'تفاصيل التعارض':f'اسم الدكتور:{professor_name} ,عدد المواد:{str(num_courses)},عدد الأوقات المتاحة:{str(total_available_slots)}'
+                    'conflicts_type': 'عدد المواد أكثر من الأوقات المتاحة',
+                    'conflicts_detail':f'اسم الدكتور:{professor_name} ,عدد المواد:{str(num_courses)},عدد الأوقات المتاحة:{str(total_available_slots)}'
                 })
             
             # If professor has no available times for some courses
             if total_available_slots == 0 and num_courses > 0:
                self.conflicts.append({
-                    'نوع التعارض': 'لا يوجد أوقات متاحة',
-                    'تفاصيل التعارض':f'اسم الدكتور:{professor_name} ,عدد المواد:{str(num_courses)},عدد الأوقات المتاحة:0'})
+                    'conflicts_type': 'لا يوجد أوقات متاحة',
+                    'conflicts_detail':f'اسم الدكتور:{professor_name} ,عدد المواد:{str(num_courses)},عدد الأوقات المتاحة:0'})
                 
-            if total_lectures>total_cells:
-                  self.conflicts.append({
-                    'نوع التعارض': 'لا يوجد قاعات كافيه ',
-                    'تفاصيل التعارض':f' عدد المحاضرات كامله : {total_lectures} عدد الخلايا المتاحه في الجدول لاستيعاب المحاضرات : {total_cells}'})
-                  break
-            
+        if total_lectures>total_cells:
+            self.conflicts.append({
+                    'conflicts_type': 'لا يوجد قاعات كافيه ',
+                    'conflicts_detail':f' عدد المحاضرات كامله : {total_lectures} عدد الخلايا المتاحه في الجدول لاستيعاب المحاضرات : {total_cells}'})
         # return conflicts
     
 
@@ -443,7 +441,7 @@ class TimeTableScheduler:
             self.check_initial_conflicts()
             if self.conflicts:
                 self.log.append("\nتم العثور على تعارضات محتملة")
-                self.write_conflicts_to_excel(self.conflicts)
+                # self.write_conflicts_to_excel(self.conflicts)
             else:
                 self.log.append("\nلم يتم العثور على تعارضات واضحة   ")
     def run(self):

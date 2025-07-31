@@ -31,7 +31,7 @@ class Endpoints:
     subjects = "subjects/"
     uploadSubjects = "uploadSubjects/"
     distributions = "distributions/"
-    lectures = "lectures/"
+    lectures = "lectures/by-table/"
     searchteachers = "searchteachers/"
 
 class KeysCach:

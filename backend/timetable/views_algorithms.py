@@ -13,6 +13,8 @@ from .views2 import BaseViewSet
 from rest_framework.decorators import action
 from collections import defaultdict
 from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import LectureFilter
 
 
 class TableViewSet(BaseViewSet):
@@ -39,7 +41,7 @@ class TableViewSet(BaseViewSet):
     def create(self, request, *args, **kwargs):
         try:
             semester = request.data.get('semester')
-            random_enabled = request.data.get('random')
+            random_enabled = request.data.get('random', 'False')  # Default to 'False' if not provided
             if random_enabled == 'True':
                 random_enabled = True
             elif random_enabled == 'False':
@@ -51,6 +53,7 @@ class TableViewSet(BaseViewSet):
             # تشغيل الجدولة
             scheduler = TimeTableScheduler(semester_filter=semester)
             scheduler.random_enabled = random_enabled
+            conflict = scheduler.conflicts
             scheduler.run()
 
             # التحقق من تكرار الجدول بنفس البيانات
@@ -82,6 +85,14 @@ class TableViewSet(BaseViewSet):
             unique_id = str(uuid.uuid4())[:8]
             filename = f"schedule_{timestamp}_{unique_id}.xlsx"
 
+            if conflict:
+                return Response({
+                    'status': 'error',
+                    'message': 'تم العثور على تعارضات في الجدول الزمني، يرجى مراجعة البيانات المدخلة.',
+                    'conflicts': conflict
+                })
+            if not scheduler.temp_file:
+                return Response({'status': 'error', 'message': 'لم يتم إنشاء ملف الجدول الزمني، يرجى التحقق من البيانات المدخلة.'})
             django_file = File(scheduler.temp_file)
             if django_file.size == 0:
                 return Response({'status': 'error', 'message': 'الملف الناتج فارغ، يرجى التحقق من البيانات المدخلة.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -105,7 +116,7 @@ class TableViewSet(BaseViewSet):
                 "status": "success",
                 "message": "تم إنشاء الجدول وتنفيذ الجدولة بنجاح ✅",
                 self.queryset.model.__name__.lower(): serializer.data,
-                "log": scheduler.log
+                "log": scheduler.log,
             }, status=status.HTTP_201_CREATED)
 
         except Exception as e:
@@ -124,20 +135,23 @@ def deep_convert(obj):
 class LecturesViewSet(BaseViewSet):
     queryset = Lecture.objects.all()
     serializer_class = LectureSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = LectureFilter
     @action(detail=False, methods=['get'], url_path='by-table/(?P<table_id>[^/.]+)')
     def by_table(self, request, table_id=None):
-        lectures= self.queryset.filter(fk_table__id=table_id)
+        base_qs = self.queryset.filter(fk_table__id=table_id)
+        filtered_qs = LectureFilter(request.GET, queryset=base_qs).qs
         # days=Today.objects.all()
         # periods=Period.objects.all()
         schedule = {}
       
-        if not lectures.exists():
+        if not filtered_qs.exists():
         
             return Response({"detail": "لا توجد محاضرات لهذا الجدول"}, status=status.HTTP_404_NOT_FOUND)
         try:
             schedule = defaultdict(lambda: defaultdict(list))
             # serializer = self.get_serializer(lectures, many=True)
-            for lec in lectures:
+            for lec in filtered_qs:
                 day = lec.fk_day.get_day_name_display()
                 period = f"{lec.fk_period.period_from}-{lec.fk_period.period_to}"     
                 schedule[day][period].append({

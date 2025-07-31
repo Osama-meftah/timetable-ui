@@ -25,7 +25,13 @@ class TableView(View):
         if not semester:
             messages.error(request, "يرجى تحديد الفصل الدراسي")
         response=api_post(Endpoints.tables, data={"semester":semester,"random":random_enabled},request=request)
-        return render(request,'timetables/list.html',{"selected_random":random_enabled,"selected_semester":semester})
+        if response:
+            conflict = response.get('conflicts', [])
+            request.session['conflicts'] = conflict
+        else:
+            request.session.remove('conflicts')
+            conflict = []
+        return render(request,'timetables/list.html',{"selected_random":random_enabled,"selected_semester":semester,"conflicts":conflict})
 
 class TableDeleteView(View):
     def post(self, request, id):
@@ -35,19 +41,21 @@ class TableDeleteView(View):
         
 class LecturesView(View):
     def get(self, request, id):
-        response = api_get(f"{Endpoints.lectures}{id}/", request=request)
+        program_id = request.GET.get('program')
+        print(f"Program ID: {program_id}")
+        response = api_get(f"{Endpoints.lectures}{id}/?program={program_id}", request=request)
         # days=api_get(Endpoints.todays, request=request)
         hall=api_get(Endpoints.halls, request=request)
         periods=api_get(Endpoints.periods, request=request)
+        programs = api_get(Endpoints.programs, request=request)
         if response.get('lecture'):
             context = {
                 'schedule': response.get('lecture'),
                 'periods': periods,
-                # 'days': days,
+                'table_id': id,
                 'halls': hall,
-            
+                'programs': programs,
             }
             return render(request, 'timetables/lecture_list.html', context)
         messages.error(request, "لا توجد محاضرات لهذا الجدول")
         return redirect('table')
-    

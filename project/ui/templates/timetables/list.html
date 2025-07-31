@@ -2,51 +2,37 @@
 {% load static %}
 
 {% block page_header_title %}
-    إعداد الجدول الدراسي
+إعداد الجدول الدراسي
 {% endblock %}
 
 {% block content %}
 {% include "message.html" %}
-    <div class="container mx-auto  py-8 px-4 sm:px-6 lg:px-8">
-       
-        <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6 md:p-8 mt-8">
-            <h2 class="text-3xl font-extrabold text-gray-800 dark:text-gray-100 mb-8 text-center border-b-4 pb-4 border-indigo-500 dark:border-indigo-400">
-                <i class="fas fa-calendar-alt text-indigo-600 dark:text-indigo-400 mr-3 text-3xl"></i>
-                إعداد الجدول الدراسي
-            </h2>
+<div class="container mx-auto  py-8 px-4 sm:px-6 lg:px-8">
 
-            {# قسم إعدادات الجدول العام #}
-            {% comment %} <div class="mb-10 p-6 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700 shadow-md"> {% endcomment %}
-                <h3 class="text-xl font-semibold text-purple-800 dark:text-purple-200 mb-5 flex items-center">
-                    <i class="fas fa-cogs ml-2 text-purple-600"></i>
-                    إعدادات الجدول العام
-                </h3>
-                <form action="{% url "table" %}" method ="POST">
-                    {% csrf_token %}
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {# العام الدراسي #}
-                        {% comment %} <div>
-                            <label for="academic_year" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                العام الدراسي <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" id="academic_year" name="academic_year" placeholder="مثال: 2023-2024" required
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
-                        </div> {% endcomment %}
-
-                        {# الفصل الدراسي #}
+    <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6 md:p-8 mt-8">
+        <h2
+            class="text-3xl font-extrabold text-gray-800 dark:text-gray-100 mb-8 text-center border-b-4 pb-4 border-indigo-500 dark:border-indigo-400">
+            <i class="fas fa-calendar-alt text-indigo-600 dark:text-indigo-400 mr-3 text-3xl"></i>
+            إعداد الجدول الدراسي
+        </h2>
+        {% comment %}
+        <h3 class="text-xl font-semibold text-purple-800 dark:text-purple-200 mb-5 flex items-center">
+            <i class="fas fa-cogs ml-2 text-purple-600"></i>
+            إعدادات الجدول العام
+        </h3> {% endcomment %}
+        <form action="{% url "table" %}" method="POST">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div>
                     <label for="semester" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                         الفصل الدراسي <span class="text-red-500">*</span>
                     </label>
-                    <select
-                        id="semester"
-                        name="semester"
+                    <select id="semester" name="semester"
                         class="form-select w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-200 transition duration-200 ease-in-out transform hover:scale-[1.01]"
-                        required
-                    >
-                        <option value="" disabled >اختر الفصل الدراسي</option>
-                        <option value="term1" {% if selected_semester == 'term1' %}selected{% endif %} >الأول</option>
-                        <option value="term2" {% if selected_semester == 'term2' %}selected{% endif %} >الثاني</option>
+                        required>
+                        <option value="" disabled>اختر الفصل الدراسي</option>
+                        <option value="term1" {% if selected_semester == 'term1' %}selected{% endif %}>الأول</option>
+                        <option value="term2" {% if selected_semester == 'term2' %}selected{% endif %}>الثاني</option>
                     </select>
                 </div>
 
@@ -54,112 +40,116 @@
                     <label for="random" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                         نوع توزيع المحاضرات على القاعات <span class="text-red-500">*</span>
                     </label>
-                    <select
-                        id="random"
-                        name="random"
+                    <select id="random" name="random"
                         class="form-select w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-200 transition duration-200 ease-in-out transform hover:scale-[1.01]"
-                        required
-                    >
-                        <option value="" disabled >اختار نوع التوزيع</option>
+                        required>
+                        <option value="" disabled>اختار نوع التوزيع</option>
                         <option value="True" {% if selected_random == 'True' %}selected{% endif %}>عشوائي</option>
                         <option value="False" {% if selected_random == 'False' %}selected{% endif %}>ثابت</option>
                     </select>
                 </div>
-                        {# وقت بدء الدراسة اليومي - Note: This field is duplicated, consider removing one if logic allows #}
-                        {% comment %} <div>
-                            <label for="daily_start_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                بدء الدراسة يومياً <span class="text-red-500">*</span>
-                            </label>
-                            <input dir="ltr" type="time" id="daily_start_time" name="daily_start_time" required
-                                   class="mt-1 block w-full rounded-md border-gray-300
-                                   shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500
-                                   focus:ring-indigo-500">
-                        </div> {% endcomment %}
+            </div>
 
-                        {# وقت انتهاء الدراسة اليومي - Note: This field is duplicated, consider removing one if logic allows #}
-                        {% comment %} <div>
-                            <label for="daily_end_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                انتهاء الدراسة يومياً <span class="text-red-500">*</span>
-                            </label>
-                            <input type="time" id="daily_end_time" name="daily_end_time" required dir="ltr"
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700
-                                   dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
-                        </div> {% endcomment %}
+            <div class="gap-3 pt-6 ">
+                <button type="submit"
+                    class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
+                    <i class="fas fa-save ml-2"></i> انشاء الجدول
+                </button>
+            </div>
+        </form>
+
+        <div class="shadow-md mt-6">
+            <h3 class="text-xl font-semibold text-red-800 dark:text-red-200 mb-5 flex items-center">
+                <i class="fas fa-exclamation-triangle ml-2 text-red-600"></i>
+                التعارضات الموجودة
+            </h3>
+            {% if conflicts %}
+            <div class="mt-10 space-y-6">
+                {% for conflict in conflicts %}
+                <div
+                    class="bg-red-100 dark:bg-red-900/40 border-red-600 dark:border-red-400 p-4 rounded-md shadow-sm animate-fade-in">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-red-800 dark:text-red-200 font-semibold">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>{{ conflict.conflicts_type }}</span>
+                        </div>
                     </div>
-
-                    <div class="flex justify-end gap-3 pt-6 border-t border-purple-200 dark:border-purple-700">
-                        <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
-                            <i class="fas fa-save ml-2"></i> انشاء الجدول
-                        </button>
-                        {% comment %} <button type="reset" class="bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:text-gray-200 font-bold py-2.5 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
-                            <i class="fas fa-undo ml-2"></i> مسح الإعدادات
-                        </button> {% endcomment %}
-                    </div>
-                </form>
-            {% comment %} </div> {% endcomment %}
-
-            {# قسم عرض التعارضات (الجديد) #}
-            <div class="p-6 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700 shadow-md">
-                <h3 class="text-xl font-semibold text-red-800 dark:text-red-200 mb-5 flex items-center">
-                    <i class="fas fa-exclamation-triangle ml-2 text-red-600"></i>
-                    التعارضات الموجودة
-                </h3>
-
-                <div class="space-y-4">
-                    {# تعارض المدرس #}
-                    <div class="bg-red-100 dark:bg-red-900/50 p-4 rounded-md shadow-sm border border-red-300 dark:border-red-600">
-                        <p class="font-bold text-red-800 dark:text-red-200 mb-1">
-                            <i class="fas fa-user-times mr-2"></i> تعارض المدرس: أ. أحمد محمد
-                        </p>
-                        <ul class="list-disc list-inside text-sm text-red-700 dark:text-red-300">
-                            <li>
-                                **المادة:** مقدمة في البرمجة (م1)
-                                <span class="text-gray-600 dark:text-gray-400 text-xs mr-2">الأحد 08:00-09:00 في قاعة 101</span>
-                            </li>
-                            <li>
-                                **المادة:** هياكل البيانات (م2)
-                                <span class="text-gray-600 dark:text-gray-400 text-xs mr-2">الأحد 08:30-09:30 في قاعة 202</span>
-                            </li>
-                        </ul>
-                        <p class="text-xs text-red-600 dark:text-red-400 mt-2">
-                            <i class="fas fa-info-circle mr-1"></i> المدرس مُسند لحصتين متداخلتين في نفس الوقت.
-                        </p>
-                    </div>
-
-                    {# تعارض القاعة #}
-                    <div class="bg-red-100 dark:bg-red-900/50 p-4 rounded-md shadow-sm border border-red-300 dark:border-red-600">
-                        <p class="font-bold text-red-800 dark:text-red-200 mb-1">
-                            <i class="fas fa-door-closed mr-2"></i> تعارض القاعة: قاعة 101
-                        </p>
-                        <ul class="list-disc list-inside text-sm text-red-700 dark:text-red-300">
-                            <li>
-                                **المادة:** مقدمة في البرمجة (م1) - مدرس: أ. أحمد
-                                <span class="text-gray-600 dark:text-gray-400 text-xs mr-2">الأحد 08:00-09:00</span>
-                            </li>
-                            <li>
-                                **المادة:** نظم تشغيل (م3) - مدرس: د. سارة
-                                <span class="text-gray-600 dark:text-gray-400 text-xs mr-2">الأحد 08:00-09:00</span>
-                            </li>
-                        </ul>
-                        <p class="text-xs text-red-600 dark:text-red-400 mt-2">
-                            <i class="fas fa-info-circle mr-1"></i> القاعة مُسندة لحصتين في نفس الوقت.
-                        </p>
-                    </div>
-
-                    {# رسالة في حال عدم وجود تعارضات #}
-                    <div class="bg-green-100 dark:bg-green-900/50 p-4 rounded-md shadow-sm border border-green-300 dark:border-green-600 text-center">
-                        <p class="text-green-800 dark:text-green-200 font-semibold">
-                            <i class="fas fa-check-circle mr-2"></i> لا توجد تعارضات حالياً في الجدول.
-                        </p>
+                    <div class="mt-2 text-sm text-red-700 dark:text-red-300 whitespace-pre-line leading-relaxed">
+                        {{ conflict.conflicts_detail }}
                     </div>
                 </div>
-
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-4 text-center">
-                    ملاحظة: سيتم عرض التعارضات هنا تلقائياً بعد إضافة أو تعديل الحصص.
+                {% endfor %}
+            </div>
+            {% else %}
+            <div
+                class="mt-10 bg-green-100 dark:bg-green-900/40 dark:border-green-400 p-4 rounded-md shadow-sm text-center animate-fade-in">
+                <p class="text-green-800 dark:text-green-200 font-semibold">
+                    <i class="fas fa-check-circle mr-2"></i> لا توجد تعارضات حالياً في الجدول.
                 </p>
             </div>
+            {% endif %}
+
+
+            {% comment %} <div class="space-y-4">
+                {# تعارض المدرس #}
+                <div
+                    class="bg-red-100 dark:bg-red-900/50 p-4 rounded-md shadow-sm border border-red-300 dark:border-red-600">
+                    <p class="font-bold text-red-800 dark:text-red-200 mb-1">
+                        <i class="fas fa-user-times mr-2"></i> تعارض المدرس: أ. أحمد محمد
+                    </p>
+                    <ul class="list-disc list-inside text-sm text-red-700 dark:text-red-300">
+                        <li>
+                            **المادة:** مقدمة في البرمجة (م1)
+                            <span class="text-gray-600 dark:text-gray-400 text-xs mr-2">الأحد 08:00-09:00 في قاعة
+                                101</span>
+                        </li>
+                        <li>
+                            **المادة:** هياكل البيانات (م2)
+                            <span class="text-gray-600 dark:text-gray-400 text-xs mr-2">الأحد 08:30-09:30 في قاعة
+                                202</span>
+                        </li>
+                    </ul>
+                    <p class="text-xs text-red-600 dark:text-red-400 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i> المدرس مُسند لحصتين متداخلتين في نفس الوقت.
+                    </p>
+                </div>
+
+                {# تعارض القاعة #}
+                <div
+                    class="bg-red-100 dark:bg-red-900/50 p-4 rounded-md shadow-sm border border-red-300 dark:border-red-600">
+                    <p class="font-bold text-red-800 dark:text-red-200 mb-1">
+                        <i class="fas fa-door-closed mr-2"></i> تعارض القاعة: قاعة 101
+                    </p>
+                    <ul class="list-disc list-inside text-sm text-red-700 dark:text-red-300">
+                        <li>
+                            **المادة:** مقدمة في البرمجة (م1) - مدرس: أ. أحمد
+                            <span class="text-gray-600 dark:text-gray-400 text-xs mr-2">الأحد 08:00-09:00</span>
+                        </li>
+                        <li>
+                            **المادة:** نظم تشغيل (م3) - مدرس: د. سارة
+                            <span class="text-gray-600 dark:text-gray-400 text-xs mr-2">الأحد 08:00-09:00</span>
+                        </li>
+                    </ul>
+                    <p class="text-xs text-red-600 dark:text-red-400 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i> القاعة مُسندة لحصتين في نفس الوقت.
+                    </p>
+                </div>
+
+                {# رسالة في حال عدم وجود تعارضات #}
+                <div
+                    class="bg-green-100 dark:bg-green-900/50 p-4 rounded-md shadow-sm border border-green-300 dark:border-green-600 text-center">
+                    <p class="text-green-800 dark:text-green-200 font-semibold">
+                        <i class="fas fa-check-circle mr-2"></i> لا توجد تعارضات حالياً في الجدول.
+                    </p>
+                </div>
+            </div>
+
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-4 text-center">
+                ملاحظة: سيتم عرض التعارضات هنا تلقائياً بعد إضافة أو تعديل الحصص.
+            </p> {% endcomment %}
         </div>
     </div>
+</div>
 {% endblock %}
 
 
@@ -171,7 +161,8 @@
 
 
 
-{% comment %} <div class="mb-10 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700 shadow-md">
+{% comment %} <div
+    class="mb-10 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700 shadow-md">
     <h3 class="text-xl font-semibold text-blue-800 dark:text-blue-200 mb-5 flex items-center">
         <i class="fas fa-plus-circle ml-2 text-blue-600"></i>
         إضافة/تعديل حصة دراسية
@@ -186,7 +177,7 @@
                     المادة <span class="text-red-500">*</span>
                 </label>
                 <select id="subject_select" name="subject" required
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="">اختر المادة...</option>
                     <option value="1">مقدمة في البرمجة</option>
                     <option value="2">الرياضيات المتقطعة</option>
@@ -201,7 +192,7 @@
                     المدرس <span class="text-red-500">*</span>
                 </label>
                 <select id="teacher_select" name="teacher" required
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="">اختر المدرس...</option>
                     <option value="1">أ. أحمد محمد</option>
                     <option value="2">د. سارة علي</option>
@@ -215,7 +206,7 @@
                     القسم <span class="text-red-500">*</span>
                 </label>
                 <select id="department_select" name="department" required
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="">اختر القسم...</option>
                     <option value="1">علوم الحاسوب</option>
                     <option value="2">كيمياء</option>
@@ -229,7 +220,7 @@
                     المستوى <span class="text-red-500">*</span>
                 </label>
                 <select id="level_select" name="level" required
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="">اختر المستوى...</option>
                     <option value="1">المستوى الأول</option>
                     <option value="2">المستوى الثاني</option>
@@ -242,7 +233,7 @@
                     القاعة الدراسية <span class="text-red-500">*</span>
                 </label>
                 <select id="classroom_select" name="classroom" required
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="">اختر القاعة...</option>
                     <option value="1">قاعة 101 (سعة 50)</option>
                     <option value="2">معمل حاسوب 2 (سعة 30)</option>
@@ -256,7 +247,7 @@
                     اليوم <span class="text-red-500">*</span>
                 </label>
                 <select id="day_select" name="day" required
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="">اختر اليوم...</option>
                     <option value="Sunday">الأحد</option>
                     <option value="Monday">الاثنين</option>
@@ -272,7 +263,7 @@
                     وقت البدء <span class="text-red-500">*</span>
                 </label>
                 <input type="time" id="start_time" name="start_time" required
-                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
             </div>
 
             {# وقت الانتهاء #}
@@ -281,7 +272,7 @@
                     وقت الانتهاء <span class="text-red-500">*</span>
                 </label>
                 <input type="time" id="end_time" name="end_time" required
-                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
             </div>
 
             {# عدد الطلاب المتوقع #}
@@ -290,15 +281,17 @@
                     عدد الطلاب المتوقع
                 </label>
                 <input type="number" id="expected_students" name="expected_students" min="1"
-                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
             </div>
         </div>
 
         <div class="flex justify-end gap-3 pt-6 border-t border-blue-200 dark:border-blue-700">
-            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
+            <button type="submit"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
                 <i class="fas fa-save ml-2"></i> حفظ الحصة
             </button>
-            <button type="reset" class="bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:text-gray-200 font-bold py-2.5 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
+            <button type="reset"
+                class="bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:text-gray-200 font-bold py-2.5 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
                 <i class="fas fa-undo ml-2"></i> مسح الحقول
             </button>
         </div>

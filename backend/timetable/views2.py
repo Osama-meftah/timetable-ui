@@ -6,6 +6,8 @@ from .models import *
 from .serializers import *
 from .utils import create_random_password, extract_username_from_email, send_password_email
 from rest_framework.permissions import IsAuthenticated
+from .filters import *
+from django_filters.rest_framework import DjangoFilterBackend
 
 # ViewSet الأساسي الذي يتعامل مع كل العمليات
 class BaseViewSet(ModelViewSet):
@@ -151,6 +153,8 @@ class LevelViewSet(BaseViewSet):
 class SubjectViewSet(BaseViewSet):
     queryset = Subject.objects.all()
     serializer_class = SubjectSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = SubjectFilter
     success_create_message = "تم إنشاء المادة بنجاح."
     success_update_message = "تم تحديث المادة بنجاح."
     success_delete_message = "تم حذف المادة بنجاح."
