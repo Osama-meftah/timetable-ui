@@ -27,11 +27,18 @@ class TableView(View):
         response=api_post(Endpoints.tables, data={"semester":semester,"random":random_enabled},request=request)
         if response:
             conflict = response.get('conflicts', [])
+            available_unscheduled=response.get('available_unscheduled',[])
+            
             request.session['conflicts'] = conflict
+            request.session['available_unscheduled']=available_unscheduled
         else:
-            request.session.remove('conflicts')
+            # if request.session.get('conflicts') and request.session.get('available_unscheduled'):
+            #     request.session.remove('conflicts')
+            #     request.session.remove('available_unscheduled')
+                
             conflict = []
-        return render(request,'timetables/list.html',{"selected_random":random_enabled,"selected_semester":semester,"conflicts":conflict})
+            available_unscheduled=[]
+        return render(request,'timetables/list.html',{"selected_random":random_enabled,"selected_semester":semester,"conflicts":conflict,'available_unscheduled':available_unscheduled})
 
 class TableDeleteView(View):
     def post(self, request, id):

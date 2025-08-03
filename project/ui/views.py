@@ -483,7 +483,7 @@ class CoursesListView(View):
     def get(self, request):
         # subjects = api_get(Endpoints.subjects, request=request) or []
         term= request.GET.get("term")
-        subjects=api_get(f"{Endpoints.subjects}?term={term}", request=request) or []
+        subjects=api_get(Endpoints.subjects, request=request) or []
         # subjects= get_or_cache(f"{KeysCach.subjects_data}?term={term}", Endpoints.subjects, request)
         total_courses = len(subjects)
         active_courses = sum(1 for c in subjects if c.get("active", True))
@@ -880,11 +880,14 @@ class DeleteProgramLevelView(View):
 class TimeTableSettingsView(View):
     def get(self, request, id=None):
         if request.session.get('conflicts'):
+            available_unscheduled=request.session.get('available_unscheduled')
             conflicts= request.session.get('conflicts')
         else:
             conflicts = []
+            available_unscheduled=[]
 
-        return render(request, 'timetables/list.html',{'conflicts': conflicts})
+
+        return render(request, 'timetables/list.html',{'conflicts': conflicts,'available_unscheduled':available_unscheduled})
     
     
 class PeriodsView(View):

@@ -35,7 +35,7 @@ class Endpoints:
     searchteachers = "searchteachers/"
 
 class KeysCach:
-    timeout=3600
+    timeout=60
     teachers_data="teachers_data"
     teacher_times_data="teacher_times_data"
     distributions_data="distributions_data"

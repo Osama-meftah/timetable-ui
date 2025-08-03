@@ -53,11 +53,14 @@ class TableViewSet(BaseViewSet):
             # تشغيل الجدولة
             scheduler = TimeTableScheduler(semester_filter=semester)
             scheduler.random_enabled = random_enabled
-            conflict = scheduler.conflicts
             scheduler.run()
+            conflict = scheduler.conflicts
+            available_unscheduled=scheduler.available_unscheduled_slots
+
 
             # التحقق من تكرار الجدول بنفس البيانات
             generated_lectures = scheduler.generated_schedule
+            print(generated_lectures)
 
             existing_tables = Table.objects.filter(semester=semester)
 
@@ -89,10 +92,11 @@ class TableViewSet(BaseViewSet):
                 return Response({
                     'status': 'error',
                     'message': 'تم العثور على تعارضات في الجدول الزمني، يرجى مراجعة البيانات المدخلة.',
-                    'conflicts': conflict
+                    'conflicts': conflict,
+                    'available_unscheduled':available_unscheduled
                 })
             if not scheduler.temp_file:
-                return Response({'status': 'error', 'message': 'لم يتم إنشاء ملف الجدول الزمني، يرجى التحقق من البيانات المدخلة.'})
+                return Response({'status': 'error', 'message': 'لم يتم إنشاء ملف الجدول الزمني، يرجى التحقق من البيانات المدخلة.','lpg':scheduler.log})
             django_file = File(scheduler.temp_file)
             if django_file.size == 0:
                 return Response({'status': 'error', 'message': 'الملف الناتج فارغ، يرجى التحقق من البيانات المدخلة.'}, status=status.HTTP_400_BAD_REQUEST)
