@@ -272,7 +272,7 @@ class TeacherManagementView(View):
                     endpoint_url=f"{BASE_API_URL}{Endpoints.teachersUpload}",
                     success_title="✅ تم رفع ملف المدرسين بنجاح.",
                     error_title="❌ فشل رفع ملف المدرسين",
-                    redirect_to=request.path_info,timeout=300,
+                    redirect_to=request.path_info,timeout=1000,
                 )
                 return result or redirect(request.path_info)
             else:
@@ -514,17 +514,17 @@ class CoursesListView(View):
 class CourseCreateView(View):
     def get(self, request):
         return render(request, "courses/add_edit.html", {"page_title": "إضافة مقرر"})
-    def post(self, request):
-        data = {
-            "subject_name": request.POST.get("subject_name"),
-            "term": request.POST.get("term"),
-        }
-        subjects=cache.get(KeysCach.subjects_data)
-        response=api_post(Endpoints.subjects, data, request=request)
-        if response.get('subject'):
-            subjects.append(response['subject'])
-            cache.set(KeysCach.subjects_data, subjects, timeout=KeysCach.timeout)
-        return redirect("courses_management")
+    # def post(self, request):
+    #     data = {
+    #         "subject_name": request.POST.get("subject_name"),
+    #         "term": request.POST.get("term"),
+    #     }
+    #     subjects=cache.get(KeysCach.subjects_data)
+    #     response=api_post(Endpoints.subjects, data, request=request)
+    #     if response.get('subject'):
+    #         subjects.append(response['subject'])
+    #         cache.set(KeysCach.subjects_data, subjects, timeout=KeysCach.timeout)
+    #     return redirect("courses_management")
     
 class CourseUpdateView(View):
     def get(self, request, id):
@@ -533,20 +533,20 @@ class CourseUpdateView(View):
             return redirect("courses_management")
         return render(request, "courses/add_edit.html", {"subject": subject, "page_title": "تعديل"})
     
-    def post(self, request, id):
-        data = {
-            "subject_name": request.POST.get("subject_name"),
-            "term": request.POST.get("term"),
-        }
-        response= api_put(f"{Endpoints.subjects}{id}/", data, request=request)
-        subjects=cache.get(KeysCach.subjects_data)
-        if response.get('subject'):
-            for i, subject in enumerate(subjects):
-                if str(subject['id']) == str(id):
-                    subjects[i].update(response['subject'])
-                    cache.set(KeysCach.subjects_data, subjects, timeout=KeysCach.timeout)
-                    break
-        return redirect("courses_management")
+    # def post(self, request, id):
+    #     data = {
+    #         "subject_name": request.POST.get("subject_name"),
+    #         "term": request.POST.get("term"),
+    #     }
+    #     response= api_put(f"{Endpoints.subjects}{id}/", data, request=request)
+    #     subjects=cache.get(KeysCach.subjects_data)
+    #     if response.get('subject'):
+    #         for i, subject in enumerate(subjects):
+    #             if str(subject['id']) == str(id):
+    #                 subjects[i].update(response['subject'])
+    #                 cache.set(KeysCach.subjects_data, subjects, timeout=KeysCach.timeout)
+    #                 break
+    #     return redirect("courses_management")
 class CourseDeleteView(View):
     def post(self, request, id):
         api_delete(f"{Endpoints.subjects}{id}/", request=request)
@@ -755,8 +755,9 @@ class DepartmentDeleteView(View):
 
 class AddProgramLevelView(View):
     def get(self, request):
-        programs = api_get(Endpoints.programs)
-        levels = api_get(Endpoints.levels)
+        programs = api_get(Endpoints.programs,request)
+        levels = api_get(Endpoints.levels,request)
+        # print(levels)
         departments = api_get(Endpoints.departments)
         return render(request, 'programs/add_edit.html', {
             "programs": programs,
@@ -767,36 +768,52 @@ class AddProgramLevelView(View):
 
     def post(self, request):
         form_type = request.POST.get('form_type')
+        types = request.POST.get('type')
+        # if form_type == "program_form_submit":
+        #     program_name = request.POST.get('program_name')
+        #     fk_department_id = request.POST.get('fk_department')
+        #     data = {
+        #         'program_name': program_name,
+        #         'department_id': fk_department_id,
+        #     }
+        #     try:
+        #         api_post(Endpoints.programs, data)
+        #         messages.success(request, "✅ تم إضافة البرنامج بنجاح!")
+        #     except Exception as e:
+        #         handle_exception(request, f"❌ فشل حفظ البرنامج {data}", e)
 
-        if form_type == "program_form_submit":
-            program_name = request.POST.get('program_name')
-            fk_department_id = request.POST.get('fk_department')
-            data = {
-                'program_name': program_name,
-                'department_id': fk_department_id,
-            }
-            try:
-                api_post(Endpoints.programs, data)
-                messages.success(request, "✅ تم إضافة البرنامج بنجاح!")
-            except Exception as e:
-                handle_exception(request, f"❌ فشل حفظ البرنامج {data}", e)
+        # if form_type == "level_form_submit":
+        #     level_id = request.POST.get('level_id')
+        #     level_name = request.POST.get('level_name')
+        #     number_students = request.POST.get('number_students')
+        #     fk_program_id = request.POST.get('fk_program')
+        #     # print(fk_program_id)
+        #     if types =='add':
+        #         level_data = {
+        #             "level_name": level_name,
+        #             "number_students": number_students,
+        #             "program_name": fk_program_id
+        #         }
+        #         print(level_data)
+        #         # print()
+        #         try:
+        #             api_post(Endpoints.levels, level_data)
+        #         except Exception as e:
+        #             handle_exception(request, f"❌ فشل حفظ المستوى {level_data}", e)
+        #     else:
+        #         level_data = {
+        #             "level_name": level_name,
+        #             "number_students": number_students,
+        #             "program_name": fk_program_id
+        #             }
+        #         print(level_data)
+        #         try:
+        #             api_put(f"{Endpoints.levels}{level_id}/", level_data)
+        #             messages.success(request, "✅ تم تعديل المستوى بنجاح!")
+        #         except Exception as e:
+        #             handle_exception(request, f"❌ فشل تعديل المستوى {level_data}", e)
 
-        elif form_type == "level_form_submit":
-            level_name = request.POST.get('level_name')
-            number_students = request.POST.get('number_students')
-            fk_program_id = request.POST.get('fk_program')
-            level_data = {
-                "level_name": level_name,
-                "number_students": number_students,
-                "fk_program_id": fk_program_id
-            }
-            try:
-                api_post(Endpoints.levels, level_data)
-                messages.success(request, "✅ تم إضافة المستوى بنجاح!")
-            except Exception as e:
-                handle_exception(request, f"❌ فشل حفظ المستوى {level_data}", e)
-
-        elif form_type == 'upload_levels':
+        if form_type == 'upload_levels':
             handle_file_upload_generic(
                 request,
                 file_field_name='data_file',
@@ -812,6 +829,8 @@ class EditProgramLevelView(View):
         programs = api_get(Endpoints.programs)
         levels = api_get(Endpoints.levels)
         departments = api_get(Endpoints.departments)
+        print(program)
+        print(departments)
         return render(request, 'programs/add_edit.html', {
             "program": program,
             "programs": programs,
@@ -820,39 +839,55 @@ class EditProgramLevelView(View):
             "page_title": "تعديل"
         })
 
-    def post(self, request, id):
-        form_type = request.POST.get('form_type')
+    # def post(self, request, id):
+    #     form_type = request.POST.get('form_type')
+    #     types = request.POST.get('type')
+        # print(types)
+        # if form_type == "program_form_submit":
+        #     program_name = request.POST.get('program_name')
+        #     fk_department_id = request.POST.get('fk_department')
+        #     data = {
+        #         'program_name': program_name,
+        #         'department_id': fk_department_id,
+        #     }
+            
+        #     try:
+        #         api_put(f"{Endpoints.programs}{id}/", data)
+        #         # messages.success(request, "✅ تم تعديل البرنامج بنجاح!")
+        #     except Exception as e:
+        #         handle_exception(request, f"❌ فشل تعديل البرنامج {data}", e)
 
-        if form_type == "program_form_submit":
-            program_name = request.POST.get('program_name')
-            fk_department_id = request.POST.get('fk_department')
-            data = {
-                'program_name': program_name,
-                'department_id': fk_department_id,
-            }
-            try:
-                api_put(f"{Endpoints.programs}{id}/", data)
-                messages.success(request, "✅ تم تعديل البرنامج بنجاح!")
-            except Exception as e:
-                handle_exception(request, f"❌ فشل تعديل البرنامج {data}", e)
+        # if form_type == "level_form_submit":
+        #     level_id = request.POST.get('level_id')
+        #     level_name = request.POST.get('level_name')
+        #     number_students = request.POST.get('number_students')
+        #     fk_program_id = request.POST.get('fk_program')
 
-        elif form_type == "level_form_submit":
-            level_id = request.POST.get('level_id')
-            level_name = request.POST.get('level_name')
-            number_students = request.POST.get('number_students')
-            fk_program_id = request.POST.get('fk_program')
-            level_data = {
-                "level_name": level_name,
-                "number_students": number_students,
-                "fk_program_id": fk_program_id
-            }
-            try:
-                api_put(f"{Endpoints.levels}{level_id}/", level_data)
-                messages.success(request, "✅ تم تعديل المستوى بنجاح!")
-            except Exception as e:
-                handle_exception(request, f"❌ فشل تعديل المستوى {level_data}", e)
+        #     if types =='add':
+        #         level_data = {
+        #             "level_name": level_name,
+        #             "number_students": number_students,
+        #             "program_name": fk_program_id
+        #         }
+        #         # print("level_data", level_data)
+        #         try:
+        #             api_post(Endpoints.levels, level_data,request)
+        #             # messages.success(request, "✅ تم إضافة المستوى بنجاح!")
+        #         except Exception as e:
+        #             handle_exception(request, f"❌ فشل حفظ المستوى {level_data}", e)
+        #     else:
+        #         level_data = {
+        #             "level_name": level_name,
+        #             "number_students": number_students,
+        #             "program_name": fk_program_id
+        #             }
+        #         try:
+        #             api_put(f"{Endpoints.levels}{level_id}/", level_data,request)
+        #             # messages.success(request, "✅ تم تعديل المستوى بنجاح!")
+        #         except Exception as e:
+        #             handle_exception(request, f"❌ فشل تعديل المستوى {level_data}", e)
 
-        return redirect(request.path_info)
+        # return redirect(request.path_info)
 class DeleteProgramLevelView(View):
     def post(self, request,id=None):
         item_id = request.POST.get('item_id')
