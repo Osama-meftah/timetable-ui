@@ -33,7 +33,7 @@ class Program(models.Model):
         verbose_name_plural = "البرامج"
         ordering = ['program_name']
         # إضافة قيد التفرد: لا يمكن أن يتكرر اسم البرنامج ضمن نفس القسم
-        # unique_together = ('program_name', 'fk_department')
+        unique_together = ('program_name', 'fk_department')
 
     def __str__(self):
         return self.program_name
@@ -51,7 +51,7 @@ class Hall(models.Model):
         verbose_name = "قاعة"
         verbose_name_plural = "القاعات"
         ordering = ['-capacity_hall']
-
+        
     def __str__(self):
         return self.hall_name
     
