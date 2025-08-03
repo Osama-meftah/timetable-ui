@@ -254,9 +254,10 @@ class DistributionSerializer(serializers.ModelSerializer):
 
 
 class TableSerializer(serializers.ModelSerializer):
+    semester_display = serializers.CharField(source='get_semester_display', read_only=True)
     class Meta:
         model = Table
-        fields = '__all__'
+        fields = ['id', 'name', 'table', 'semester', 'semester_display', 'created_at']
 
 # Serializer للنموذج Lecture
 class LectureSerializer(serializers.ModelSerializer):
@@ -264,6 +265,8 @@ class LectureSerializer(serializers.ModelSerializer):
     fk_table = TableSerializer(read_only=True) # عرض بيانات الجدول
     fk_teachertime = TeacherTimeSerializer(read_only=True) # عرض بيانات وقت الأستاذ
     fk_distribution = DistributionSerializer(read_only=True) # عرض بيانات التوزيع
+    fk_day = TodaySerializer(read_only=True) # عرض بيانات اليوم
+    fk_period = PeriodSerializer(read_only=True) # عرض بيانات الفترة
 
     class Meta:
         model = Lecture

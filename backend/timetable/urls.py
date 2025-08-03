@@ -2,7 +2,7 @@ from django.urls import path,include
 from .views2 import *
 from rest_framework.routers import DefaultRouter
 from .views_upload_files import  *
-from .views_algorithms import TableViewSet
+from .views_algorithms import TableViewSet,LecturesViewSet
 from .views_search import *
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .views_accounts import *
@@ -19,7 +19,7 @@ router.register('todays',TodayViewSet )  # تسجيل ViewSet
 router.register('periods',PeriodViewSet )  # تسجيل ViewSet
 router.register('teacherTimes',TeacherTimeViewSet) 
 router.register('distributions',DistributionViewSet )  
-router.register('lectures',LectureViewSet )  
+router.register('lectures',LecturesViewSet )  
 router.register('tables',TableViewSet )
 
 urlpatterns =[

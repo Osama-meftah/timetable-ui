@@ -9,21 +9,24 @@ import requests
 def import_teachers_to_api(file_path, api_url):
     df = pd.read_excel(file_path)
 
+    i=1
     for _, row in df.iterrows():
         teacher_name = row.get('ProfessorName')
         teacher_id = row.get('ProfessorID')
 
+        
         if teacher_name:
             data = {
                 "id": teacher_id,
                 # "email":"abwbkrhmyd479@gmail.com",
 
-                "email":f"{teacher_name.replace(' ', '').lower()}@example.com",
-                "name":teacher_name,
-                "status":"active",
+                "teacher_email":f"teacher{i}@gmail.com",
+                "teacher_name":teacher_name,
+                "teacher_status":"active",
                 # "teacher_name": teacher_name,
                 # "teacher_email": f"{teacher_name.replace(' ', '').lower()}@example.com"
             }
+            
 
             try:
                 response = requests.post(api_url, json=data)
@@ -37,7 +40,7 @@ def import_teachers_to_api(file_path, api_url):
                 print(f"❌ Exception for {teacher_name}: {e}")
         else:
             print("⚠️ Empty teacher name, skipping.")
-
+        i+=1
     print("🎉 Import via API finished.")
 
 
@@ -47,14 +50,14 @@ def import_from_availability_excel(file_path):
 
     # خريطة الأعمدة إلى رقم الفترة
     time_columns = {
-        'Time1': 5,
-        'Time2': 6,
-        'Time3': 7
+        'Time1': 1,
+        'Time2': 2,
+        'Time3': 3
     }
 
     for _, row in df.iterrows():
         professor_id = row['ProfessorID']
-        day_id = row['Days']+13
+        day_id = row['Days']+0
 
         try:
             teacher = Teacher.objects.get(id=professor_id)
@@ -108,7 +111,7 @@ def import_teachers_from_excel(file_path):
 def import_subjects_from_excel(file_path):
     df=pd.read_excel(file_path)
     for _, row in df.iterrows():
-        subject_name= row.get('Subject')
+        subject_name= row.get('subject_name')
         id= row.get('CourseID')
         term=row.get('term')  # استخدام معرف المادة من الملف
         if subject_name:
@@ -283,9 +286,9 @@ def import_deptartments(file_path):
 folder_path="C:/Users/abuba/Desktop/alogorithm timetable/-university-timetable-scheduler/data/"
 def import_all_data():
     # import_teachers_from_excel(folder_path + "Professors.xlsx")
-    # import_teachers_to_api(folder_path + "Professors.xlsx", "http://127.0.0.1:8001/api/create-user/")
+    # import_teachers_to_api(folder_path + "Professors.xlsx", "http://127.0.0.1:8001/api/teachers/")
     # import_subjects_from_excel(folder_path + "Courses_with_terms.xlsx")
-    import_from_availability_excel(folder_path + "ProDayTimes (1).xlsx")
+    # import_from_availability_excel(folder_path + "ProDayTimes (1).xlsx")
     # import_day(folder_path + "Days.xlsx")
     # import_period(folder_path + "period.xlsx")
     # import_deptartments(folder_path + "department.xlsx")
@@ -293,7 +296,7 @@ def import_all_data():
     # import_halls_from_excel(folder_path + "Rooms.xlsx")
     # import_levels_from_excel(folder_path + "levels.xlsx")
     # import_groups_from_excel(folder_path + "groups.xlsx")
-    # import_distributions(folder_path + "teaching_group - Copy.xlsx")
+    import_distributions(folder_path + "teaching_group - Copy.xlsx")
     # import_distributions(folder_path + "teaching_group.xlsx")
 
 
@@ -311,6 +314,7 @@ def import_all_data():
 # Teacher.objects.all().delete()
 # User.objects.all().delete()
 # Subject.objects.all().delete()
+# Hall.objects.all().delete()
 # Today.objects.all().delete()
 # Distribution.objects.all().delete()
 # TeacherTime.objects.all().delete()
@@ -321,6 +325,7 @@ def import_all_data():
 
 # Group.objects.all().delete()
 import_all_data()
+
 
 # Group.objects.all().delete()
 # from .models import Teacher

@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_header_title %}
+    {{ page_title|default:"عرض الجداول" }}
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+
+    <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6 sm:p-8">
+        <div class="flex flex-col center-title gap-4 lg:flex-row sm:items-center sm:justify-between mb-8">
+            <!-- العنوان -->
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap text-center sm:text-right">
+                قائمة الجداول الزمنية
+            </h2>
+        </div>
+
+        <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-md">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider w-16">#</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">اسم الجدول</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">الفصل الدراسي</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">تاريخ الإنشاء</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">تحميل</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider w-24">الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for table in tables %}
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                        <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-200">{{ forloop.counter }}</td>
+                        <td class="px-4 py-4 text-sm font-medium text-gray-900 dark:text-gray-200">{{ table.name|default:"(بدون اسم)" }}</td>
+                        <td class="px-4 py-4 text-sm font-medium text-gray-900 dark:text-gray-200">{{ table.semester_display }}</td>
+                        <td class="px-4 py-4 text-sm font-medium text-gray-900 dark:text-gray-200">{{ table.created_at }}</td>
+                        <td class="px-4 py-4 text-sm">
+                            <a href="{{ table.table }}" class="text-blue-600 dark:text-blue-400 hover:underline" download>تحميل</a>
+                        </td>
+                        <td class="px-4 py-4 text-sm font-medium flex items-center gap-4">
+                            <a href="{% url 'view_table_lectures' table.id %}" 
+                            class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 
+                            p-2 rounded-full hover:bg-green-100 dark:hover:bg-gray-700 transition-colors duration-150"
+                            title="عرض الجدول">
+                             <i class="fas fa-eye text-lg"></i>
+                           </a>
+                            <button
+                                type="button"
+                                class="delete-btn group text-red-600 hover:text-red-800 dark:text-red-400 
+                                dark:hover:text-red-300"
+                                data-id="{{table.id}}"
+                                data-name="{{ table.name|default:"(بدون اسم)" }}"
+                                data-type="الجدول"
+                                data-url="{% url 'table_delete' table.id %}" 
+                                data-form-type="delete">
+                                <i class="fas fa-trash-alt text-lg group-hover:scale-110 transition-transform"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">لا توجد جداول لعرضها حالياً.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% include "delete_modal.html" %}
+</div>
+{% endblock %}
