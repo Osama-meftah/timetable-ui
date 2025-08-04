@@ -39,7 +39,6 @@
           <h2 class="text-2xl  font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap text-center sm:text-right">
             إدارة المقررات الدراسية
           </h2>
-          {{courses}}
           <!-- أدوات التحكم -->
           <div class="flex flex-col lg:flex-row flex-wrap gap-3 sm:gap-4 w-full lg:w-auto justify-center sm:justify-end">
             
@@ -95,9 +94,9 @@
                         <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider w-40">الإجراءات</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700" data-type="courses">
-                    {% for course in courses %}
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row" >
+                <tbody id="course-list-container" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700" data-type="courses">
+                    {% comment %} {% for course in courses %} {% endcomment %}
+                    {% comment %} <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row" >
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200"> {{ forloop.counter }}</td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200 search-name" >{{ course.subject_name }}</td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
@@ -109,7 +108,7 @@
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium flex items-center justify-start w-1/3 gap-4">
                             <a 
-                            {% comment %} href="{% url 'edit_course' course.id %}" {% endcomment %}
+                            href="{% url 'edit_course' course.id %}"
                              class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 
                             dark:hover:text-indigo-300 p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-700 transition-colors duration-150" title="تعديل">
                                 <i class="fas fa-edit text-lg"></i>
@@ -132,7 +131,7 @@
                     <tr>
                         <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">لا يوجد مقررات لعرضها.</td>
                     </tr>
-                    {% endfor %}
+                    {% endfor %} {% endcomment %}
                 </tbody>
                 <div class="no-results-message hidden text-center py-8 bg-gray-50 dark:bg-gray-700 
                 rounded-b-lg border-t border-gray-200 dark:border-gray-700" data-type="courses">
@@ -140,10 +139,11 @@
                     <p class="text-lg font-medium text-gray-500 dark:text-gray-400">لا توجد مقررات مطابقة لبحثك.</p>
                     <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">حاول البحث بكلمات مختلفة أو تحقق من التهجئة.</p>
                 </div>
-            </table>
-        </div>
+              </table>
+            </div>
+            <div id="course-pagination-container" class="mt-4"></div>
     </div>
-    {% include "pagination.html" with page_obj=courses %}
+    {% comment %} {% include "pagination.html" with page_obj=courses page_key="page_detailed" page_id="teachers-section_details %} {% endcomment %}
 </div>
 
 
@@ -154,7 +154,7 @@
 {% block extra_js %}
 
 <script src="{% static 'src/js/search.js' %}"></script>
-<script src="{% static 'src/js/delete.js' %}"></script>
+<script src="{% static 'src/js/api_form.js' %}"></script>
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -163,8 +163,8 @@
             rowSelector: "tbody[data-type='courses']",
             noResultSelector: ".no-results-message[data-type='courses']",
             apiEndpoint: "http://127.0.0.1:8001/api/searchcourses/",
-            renderItemFn: (course, index) => `
-              <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row" data-type="courses">
+            renderItemFn: (course, index) => {
+              return ` <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row" data-type="courses">
                 <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">${index + 1}</td>
                 <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">${course.subject_name}</td>
                 <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200"> ${course.term === 'term1' ? 'الأول' : 'الثاني'}</td>
@@ -180,16 +180,71 @@
                     data-id="${course.id}"
                     data-name="${course.subject_name}"
                     data-type="المقرر"
-                    data-url="/courses/delete/${course.id}/"
+                    data-url="subjects/${course.id}/"
                     data-form-type="delete">
                     <i class="fas fa-trash-alt text-lg group-hover:scale-110 transition-transform"></i>
                   </button>
                 </td>
               </tr>
-            `
+            `;
+            }
+             
           });
           
       });
-</script>
+      // --- APIFormManager الجديد والمعدّل للمقررات ---
+      document.addEventListener("DOMContentLoaded", () => {
+          // لا نحتاج إلى عداد خارجي، الـ index من renderItem يكفي
+          const courseManager = new APIFormManager({
+              // لا يوجد نموذج لإضافة/تعديل في هذه الصفحة
+              formId: null,               
+              listContainerId: 'course-list-container',               
+              paginationContainerId: 'course-pagination-container',
+              apiBaseUrl: 'http://127.0.0.1:8001/api/',              
+              endPoint: 'subjects/', 
+              
+              // دالة مسؤولة عن إنشاء صف <tr> لكل مقرر
+              renderItem: (course, index) => {
+                  const tr = document.createElement('tr');
+                  tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row';
+                  
+                  const termDisplay = course.term === 'term1' ? 'الأول' : 'الثاني';
+                  
+                  tr.innerHTML = `
+                      <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
+                          ${index + 1}
+                      </td>
+                      <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200 search-name">
+                          ${course.subject_name}
+                      </td>
+                      <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
+                          ${termDisplay}
+                      </td>
+                      <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium flex items-center justify-start gap-4">
+                          <a 
+                              href="/courses/edit/${course.id}/"
+                              class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-700 transition-colors duration-150" title="تعديل">
+                              <i class="fas fa-edit text-lg"></i>
+                          </a>
+                          <button
+                              type="button"
+                              class="delete-btn group text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                              data-id="${course.id}"
+                              data-name="${course.subject_name}"
+                              data-type="المقرر" 
+                              data-url="subjects/${course.id}/">
+                              <i class="fas fa-trash-alt text-lg group-hover:scale-110 transition-transform"></i>
+                          </button>
+                      </td>
+                  `;
+                  return tr;
+              },
+    
+              // لا توجد دوال خاصة بالنماذج في هذه الصفحة
+              getFormData: null,
+              populateForm: null
+          });
+      });
+    </script>
 
 {% endblock %}

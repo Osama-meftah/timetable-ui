@@ -47,11 +47,18 @@ class SearchComponent {
 
     this.input.addEventListener("input", () => this.handleInput());
   }
-
   async handleInput() {
     const query = this.input.value.trim();
+
+    // إذا كان الحقل فارغًا، اجلب البيانات من API بدلًا من إرجاع النسخة الأصلية
     if (!query) {
-      this.resetToDefault();
+      try {
+        const res = await fetch(this.apiEndpoint);
+        const data = await res.json();
+        this.updateResults(data.results || []);
+      } catch (error) {
+        console.error("فشل الاسترجاع الافتراضي:", error);
+      }
       return;
     }
 
@@ -63,9 +70,27 @@ class SearchComponent {
       this.updateResults(data.results || []);
     } catch (error) {
       console.error("فشل البحث:", error);
-      this.resetToDefault();
     }
   }
+
+  // async handleInput() {
+  //   const query = this.input.value.trim();
+  //   if (!query) {
+  //     this.resetToDefault();
+  //     return;
+  //   }
+
+  //   try {
+  //     const res = await fetch(
+  //       `${this.apiEndpoint}?q=${encodeURIComponent(query)}`
+  //     );
+  //     const data = await res.json();
+  //     this.updateResults(data.results || []);
+  //   } catch (error) {
+  //     console.error("فشل البحث:", error);
+  //     this.resetToDefault();
+  //   }
+  // }
 
   resetToDefault() {
     this.rowsContainer.innerHTML = this.defaultRowsHTML;

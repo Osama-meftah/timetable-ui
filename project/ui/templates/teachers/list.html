@@ -105,27 +105,21 @@
                         <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             اسم المدرس</th>
-                        {% comment %} <th scope="col"
-                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            الهاتف</th> {% endcomment %}
                         <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">
                             البريد الإلكتروني</th>
                         <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">
                             حالة المدرس</th>
-                        {% comment %} <th scope="col"
-                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">
-                            العنوان</th> {% endcomment %}
                         <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-32">
                             الإجراءات</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"
+                <tbody id="teacher-list-container" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"
                     data-type="teacher">
                     {# Iterate over the paginated teachers object #}
-                    {% for teacher in teachers %}
+                    {% comment %} {% for teacher in teachers %}
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row">
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200 search-name">
                             {{ forloop.counter }}
@@ -133,13 +127,6 @@
                         <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
                             {{ teacher.teacher_name }}
                         </td>
-                        {% comment %} <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                            {% if teacher.teacher_phone %}
-                            {{ teacher.teacher_phone }}
-                            {% else %}
-                            <span class="text-gray-400 dark:text-gray-500">غير محدد</span>
-                            {% endif %}
-                        </td> {% endcomment %}
                         <td
                             class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
 
@@ -156,14 +143,6 @@
                                 {{ teacher.teacher_status_display }}
                             </span>
                         </td>
-                        {% comment %} <td
-                            class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
-                            {% if teacher.teacher_address %}
-                            {{ teacher.teacher_address }}
-                            {% else %}
-                            <span class="text-gray-400 dark:text-gray-500">غير محدد</span>
-                            {% endif %}
-                        </td> {% endcomment %}
                         <td
                             class="px-8 py-4 whitespace-nowrap text-right text-sm font-medium flex items-center justify-end gap-2">
                             <a href="{% url 'edit_teacher' teacher.id %}"
@@ -184,8 +163,8 @@
                         <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
                             لا يوجد مدرسون لعرضهم.
                         </td>
-                    </tr>
-                    {% endfor %}
+                    </tr> {% endcomment %}
+                    {% comment %} {% endfor %} {% endcomment %}
                 </tbody>
             </table>
             <div class="no-results-message hidden text-center py-8 bg-gray-50 dark:bg-gray-700 
@@ -195,8 +174,9 @@
                 <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">حاول البحث بكلمات مختلفة أو تحقق من التهجئة.
                 </p>
             </div>
+            <div id="teacher-pagination-container">
+</div>
         </div>
-        {% include "pagination.html" with page_obj=teachers page_key="page" page_id="teachers-section"%}
     </div>
 
     {# Detailed Teachers List Section (teachers_with_data) #}
@@ -251,12 +231,6 @@
                         <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             المدرس</th>
-                        {% comment %} <th scope="col"
-                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">
-                            البريد الإلكتروني</th> {% endcomment %}
-                        {% comment %} <th scope="col"
-                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden lg:table-cell">
-                            الهاتف</th> {% endcomment %}
                         <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden md:table-cell">
                             المقررات</th>
@@ -375,7 +349,7 @@
 
 {% block extra_js %}
 <script src="{% static 'src/js/show_modal_message.js' %}"></script>
-<script src="{% static 'src/js/axios_form.js' %}"></script>
+<script src="{% static 'src/js/api_form.js' %}"></script>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         new SearchComponent({
@@ -469,7 +443,56 @@
             }
         });
     });
+    
+document.addEventListener("DOMContentLoaded", () => {
+    var teacher_count = 1;
+    const teacherManager = new APIFormManager({
+        formId: null, 
+        
+        listContainerId: 'teacher-list-container', 
+        paginationContainerId: 'teacher-pagination-container',
+        apiBaseUrl: 'http://127.0.0.1:8001/api/',
+        endPoint: 'teachers/',
+        renderItem: (teacher, index =1) => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row';
+            tr.innerHTML = `
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
+                    ${teacher_count++}
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
+                    ${teacher.teacher_name}
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
+                    ${teacher.teacher_email}
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
+                    <span class="${teacher.teacher_status === 'active' ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'} font-semibold">
+                        ${teacher.teacher_status_display}
+                    </span>
+                </td>
+                <td class="px-8 py-4 whitespace-nowrap text-right text-sm font-medium flex items-center justify-end gap-2">
+                    <a href="/teachers/edit/${teacher.id}/"
+                        class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-700 transition-colors duration-150"
+                        title="تعديل">
+                        <i class="fas fa-edit text-lg"></i>
+                    </a>
+                    <button type="button" class="delete-btn group text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300" 
+                            data-id="${teacher.id}" 
+                            data-name="${teacher.teacher_name}"
+                            data-type="المدرس" 
+                            data-url="teachers/delete/${teacher.id}/">
+                        <i class="fas fa-trash-alt text-lg group-hover:scale-110 transition-transform"></i>
+                    </button>
+                </td>
+            `;
+            return tr;
+        },
 
+        getFormData: null,
+        populateForm: null
+    });
+});
 </script>
 
 <script src="{% static 'src/js/search.js' %}"></script> 

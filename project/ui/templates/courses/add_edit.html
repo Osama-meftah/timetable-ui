@@ -70,6 +70,7 @@
         </form>
     </div>
 </div>
+{% include "delete_modal.html" %}
 {% endblock %}
 
 {% block extra_js %}
@@ -80,11 +81,10 @@
     const isEditMode = !!subjectIdInput;
     const subjectId = isEditMode ? subjectIdInput.value : null;
 
-    const apiBase = "http://127.0.0.1:8001/api/subjects/";
-
     window.subjectForm = new APIFormManager({
       formId: "courseForm",
-      apiBaseUrl: apiBase,
+      //apiBaseUrl: apiBase,
+      endPoint: 'subjects/',
       getFormData: () => {
         const name = document.getElementById("subject_name").value.trim();
         const term = document.getElementById("term").value;

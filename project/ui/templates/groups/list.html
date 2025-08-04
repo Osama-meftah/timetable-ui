@@ -5,28 +5,16 @@
 {% block page_header_title %}
     إدارة المجموعات
 {% endblock %}
-<style>
-    :root.dark .search-input {
-        background-color: #4a5568 !important; 
-    }
-    :root:not(.dark) .search-input {
-        background-color: #e5e7eb !important; 
-        color: #1f2937 !important;
-    }
-    td , th {
-        text-align: start;
-    }
-</style>
 
 {% block content %}
 
-<div class="container mx-auto p-6 bg-white shadow-lg rounded-lg font-sans">
+<div class="container mx-auto p-6 bg-white shadow-lg rounded-lg font-sans dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
     <div class="flex flex-col sm:flex-row justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4 sm:mb-0">قائمة المجموعات</h2>
         <div class="flex gap-4"> 
             <div class="relative w-full sm:w-64">
-                <input type="text" class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 
-                dark:border-gray-600 rounded-full shadow-sm bg-white 
+                <input type="text" class="search w-full pl-10 pr-4 py-2 border border-gray-300 
+                dark:border-gray-600 rounded-full shadow-sm bg-gray-200 dark:bg-gray-600 
                    text-black dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 
                   focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors 
                   duration-200" data-type="teacher" data-title="ابحث عن مجموعة بإسم التخصص"  placeholder="ابحث عن مجموعة بإسم التخصص..." 
@@ -46,48 +34,13 @@
         <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr class="">
-                    <th scope="col" class="py-3 px-6">المستوى</th>
-                    <th scope="col" class="py-3 px-6">اسم المجموعة</th>
-                    <th scope="col" class="py-3 px-6">عدد الطلاب</th>
-                    <th scope="col" class="py-3 px-6 text-right">الإجراءات</th>
+                    <th scope="col" class="py-3 px-6 text-lg text-start">المستوى</th>
+                    <th scope="col" class="py-3 px-6 text-lg">اسم المجموعة</th>
+                    <th scope="col" class="py-3 px-6 text-lg">عدد الطلاب</th>
+                    <th scope="col" class="py-3 px-6 text-right text-lg">الإجراءات</th>
                 </tr>
             </thead>
             <tbody id="groupsTableBody">
-                {% if groups %}
-                    {% for group in groups %}
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                            {{ group.fk_level.level_name|arabic_level }} [{{ group.fk_level.fk_program.program_name }}]
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">{{ group.group_name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ group.number_students }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button 
-                                data-id="{{ group.id }}" 
-                                data-fk-level="{{ group.fk_level.id }}" 
-                                class="edit-btn text-customBlue hover:text-blue-900 dark:text-customBlue dark:hover:text-blue-400 ml-2 py-1 px-2 rounded transition duration-200">
-                                <i class="fas fa-edit"></i> 
-                            </button>
-                            <button
-                               type="button"
-                               class="delete-btn group text-red-600 hover:text-red-800 dark:text-red-400 
-                               dark:hover:text-red-300 p-2 rounded-full hover:bg-red-100 dark:hover:bg-gray-700 transition-colors duration-150"
-                               data-id="{{ group.id }}"
-                               data-name="{{ group.group_name }}"
-                               data-type="المجموعة" 
-                               data-url="{% url 'groups_delete' 0 %}"
-                               data-form-type="delete"
-                               title="حذف">
-                               <i class="fas fa-trash-alt text-lg group-hover:scale-110 transition-transform"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                <tr id="noGroupsMessageInitial">
-                    <td colspan="4" class="text-center py-4 text-gray-500 dark:text-gray-400">لا توجد مجموعات لعرضها.</td>
-                </tr>
-                {% endif %}
             </tbody>
         </table>
         <p id="noGroupsMessage" class="hidden text-center py-4 text-gray-500 dark:text-gray-400">لا توجد مجموعات لعرضها.</p>
@@ -95,7 +48,8 @@
             <i class="fas fa-spinner fa-spin text-xl"></i> جارٍ التحميل...
         </div>
     </div>
-    {% include "pagination.html" with page_obj=groups %}
+    <div id="pagination-container" class="mt-4"></div>
+    {% comment %} {% include "pagination.html" with page_obj=groups %} {% endcomment %}
 </div>
 
 <!-- Modal for Add/Edit Group -->
@@ -108,7 +62,7 @@
             </button>
         </div>
 
-        <form id="groupForm" method="POST" action="{% url 'groups_management' %}" class="space-y-4">
+        <form id="groupForm" method="POST" class="space-y-4">
             {% csrf_token %}
             <input type="hidden" id="groupId" name="group_id" value=""> <!-- مخفي لتخزين ID المجموعة -->
             <input type="hidden" id="actionType" name="form_type" value="">
@@ -126,12 +80,12 @@
                 <label for="fkLevel" class="block text-sm font-medium text-gray-700 dark:text-gray-300">المستوى:</label>
                 <select id="fkLevel" name="fk_level" required 
                         class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-customBlue focus:border-customBlue dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-                    <option value="">اختر المستوى</option>
-                    {% for level in levels %}
+                    {% comment %} <option value="">اختر المستوى</option> {% endcomment %}
+                    {% comment %} {% for level in levels %}
                         <option value="{{ level.id }}">
                             {{ level.level_name|arabic_level }} [{{ level.fk_program.program_name }}]
                         </option>
-                    {% endfor %}
+                    {% endfor %} {% endcomment %}
                 </select>
             </div>
             <div class="flex justify-start w-full pt-4 border-t mt-4">
@@ -145,12 +99,14 @@
 </div>
 
 {% include "delete_modal.html" %}
+
 {% include "message.html" %}
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'src/js/api_form.js' %}"></script>
 <script src="{% static 'src/js/show_modal_message.js' %}"></script>
+<script src="{% static 'src/js/delete.js' %}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   const groupModal = document.getElementById('groupModal');
@@ -199,6 +155,67 @@ document.addEventListener('DOMContentLoaded', function () {
     closeModal();
   });
 
+    const groupManager = new APIFormManager({
+        formId: "groupForm",
+        listContainerId: "groupsTableBody",
+        paginationContainerId: "pagination-container",
+        endPoints: ["levels/?paginate=false"],
+        endPoint: "groups/",
+
+        getFormData: () => {
+            //const groupId = document.getElementById('groupId').value;
+            const groupName = document.getElementById('groupName').value.trim();
+            const numberStudents = document.getElementById('numberStudents').value;
+            const fkLevel = document.getElementById('fkLevel').value;
+            if (!groupName || !numberStudents || !fkLevel) {
+                throw new Error("يرجى ملء جميع الحقول المطلوبة.");
+            }
+            return {
+                id: groupId || null,
+                group_name: groupName,
+                number_students: parseInt(numberStudents),
+                fk_level_id: parseInt(fkLevel),
+            };
+        },
+
+        populateForm: (group) => {
+            document.getElementById('groupId').value = group.id;
+            document.getElementById('groupName').value = group.group_name || "";
+            document.getElementById('numberStudents').value = group.number_students || "";
+            document.getElementById('fkLevel').value = (group.fk_level && group.fk_level.id) || "";
+            openModal(true);
+        },
+
+        renderItem: (group,levels) => {
+            const select = document.getElementById('fkLevel');
+            select.innerHTML = '<option value="">اختر المستوى</option>';
+            if (levels) {
+                levels.forEach(level => {
+                    const option = document.createElement('option');
+                    option.value = level.id;
+                    option.textContent = `${level.level_name_display} [${level.fk_program.program_name}]`;
+                    select.appendChild(option);
+                });
+            }
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700';
+            
+            const levelName = (group.fk_level && group.fk_level.level_name_display) ? group.fk_level.level_name_display : 'غير محدد';
+            const programName = (group.fk_level && group.fk_level.fk_program && group.fk_level.fk_program.program_name) ? group.fk_level.fk_program.program_name : 'غير محدد';
+            
+            tr.innerHTML = `
+                <td class="px-6 py-4 text-start">${levelName} [${programName}]</td>
+                <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">${group.group_name}</td>
+                <td class="px-6 py-4">${group.number_students}</td>
+                <td class="px-6 py-4 text-right">
+                    <button data-id="${group.id}" class="edit-btn text-blue-600 hover:text-blue-700 p-1.5 dark:text-blue-400"><i class="fas fa-edit text-lg" ></i></button>
+                    <button data-id="${group.id}" data-name="${group.group_name}" data-type="المجموعة" data-url="groups/${group.id}/" class="delete-btn text-red-600 hover:text-red-800 p-1.5 dark:text-red-400"><i class="fas fa-trash-alt text-lg"></i></button>
+                </td>
+            `;
+            return tr;
+        },
+    });
+
   // زر التعديل داخل الجدول
   groupsTableBody.addEventListener('click', (e) => {
     const editBtn = e.target.closest('.edit-btn');
@@ -219,5 +236,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 });
+
 </script>
 {% endblock %}

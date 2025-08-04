@@ -45,7 +45,7 @@
                             <select id="fk_department" name="fk_department" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 
                             bg-gray-300
                             focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
-                                <option value="">اختر القسم...</option>
+                                <option valuhe="">اختر القسم...</option>
                                 {% for department in departments %}
     <option value="{{ department.id }}" {% if program.fk_department.id == department.id %}selected{% endif %}>
       {{ department.name }}
@@ -286,21 +286,24 @@
             }, 100);
 
             levelSubmitButton.textContent = 'تعديل المستوى';
+            
+            levelFormHandler.handleEditStart(level.id);
             showLevelForm(true);
-            if (window.levelFormManager) {
-                window.levelFormManager.handleEditStart(level.id);
-            }
         }
 
         // =================================================================
         // 4. RENDER FUNCTION
         // =================================================================
+        
         function renderProgramForm(program, allLevels) {
+            {% comment %} console.log(allLevels); {% endcomment %}
             const li = document.createElement("li");
             li.className = "bg-white dark:bg-gray-850 p-4 mb-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm";
             li.setAttribute("data-program-id", program.id);
-            
-            const programLevels = allLevels.filter(level => level.fk_program.id === program.id);
+            const programLevels = allLevels.filter(level => 
+                level && level.fk_program && level.fk_program.id === program.id
+            );
+            // ======================================================================
             
             let levelsHtml = '';
             if (programLevels.length > 0) {
@@ -329,12 +332,15 @@
             } else {
                 levelsHtml = `<p class="text-gray-500 text-sm mt-3 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg text-center"><i class="fas fa-exclamation-circle mr-2"></i>لا توجد مستويات مضافة لهذا البرنامج.</p>`;
             }
-
+        
+            // إضافة فحص أمان مشابه عند عرض اسم القسم لتجنب أخطاء مستقبلية
+            const departmentName = (program.fk_department && program.fk_department.name) ? `(${program.fk_department.name})` : '';
+        
             li.innerHTML = `
             <div class="flex justify-between items-center bg-blue-100 dark:bg-blue-900 p-3 rounded-md">
                 <h5 class="font-bold text-lg text-blue-800 dark:text-blue-200 flex items-center">
                     <i class="fas fa-graduation-cap text-blue-600 mr-3"></i>
-                    ${program.program_name} <span class="text-sm font-normal text-blue-700 dark:text-blue-300 mr-2">(${program.fk_department.name})</span>
+                    ${program.program_name} <span class="text-sm font-normal text-blue-700 dark:text-blue-300 mr-2">${departmentName}</span>
                 </h5>
                 <div class="flex gap-2">
                     <a href="/programs/edit/${program.id}/" class="text-green-600 dark:text-green-900 hover:text-green-800 p-1.5 rounded-full bg-green-100 hover:bg-green-300 dark:bg-green-200 dark:hover:bg-green-700 dark:hover:text-green-200" title="تعديل البرنامج">
@@ -354,56 +360,63 @@
         // =================================================================
         // 5. API FORM MANAGERS
         // =================================================================
-        const programApiUrl = `programs/`;
-        const levelApiUrl = `levels/`;
+        const programApiUrl = `programs/?paginate=false`;
+        const levelApiUrl = `levels/?paginate=false`;
 
-
-        window.programFormManager = new APIFormManager({
-            formId: "program-form",
-            listContainerId: "program-lists",
-            endPoints: [programApiUrl, levelApiUrl],
-            endPoint: programApiUrl,
-            getFormData: () => ({
-                program_name: document.getElementById("program_name").value.trim(),
-                department_id: document.getElementById("fk_department").value,
-                
-            }),
-            populateForm: (data) => {
-                document.getElementById("program_name").value = data.program_name || "";
-                document.getElementById("fk_department").value = data.department_id || "";
-                console.log(data);
-            },
-            renderItem: (program, allLevels = []) => {
-                return renderProgramForm(program, allLevels);
-            },
-        });
-                window.levelFormManager = new APIFormManager({
-            formId: "level-form",
-            listContainerId: "program-lists",
-            endPoints: [programApiUrl, levelApiUrl],
-            endPoint: levelApiUrl,
-            getFormData: () => ({
-                level_name: levelNameInput.value.trim(),
-                number_students: numberStudentsInput.value,
-                program_name: fkProgramSelect.value,
-                id: levelIdHiddenInput.value
-            }),
-            populateForm: (data) => {
-                levelNameInput.value = data.level_name || "";
-                numberStudentsInput.value = data.number_students || "";
-                fkProgramSelect.value = data.program_name || "";
-
-            },
+        const listManager = new APIFormManager({
+            listContainerId: "program-lists", // ✅ هذا هو الوحيد الذي يعرض القائمة            
+            endPoint: programApiUrl, 
+            endPoints: [levelApiUrl], 
+            
             renderItem: (program, allLevels = []) => {
                 return renderProgramForm(program, allLevels);
             },
         });
         
+        // --- معالج نموذج البرامج (Program Form Handler) ---
+        const programFormHandler = new APIFormManager({
+            formId: "program-form",
+            endPoint: "programs/",
+            listContainerId: "program-lists", // المسار النظيف لإضافة/تعديل البرامج
+            getFormData: () => ({
+                program_name: document.getElementById("program_name").value.trim(),
+                department_id: document.getElementById("fk_department").value,
+            
+            }),
+            populateForm: (data) => {
+                document.getElementById("program_name").value = data.program_name || "";
+                document.getElementById("fk_department").value = data.department_id || "";
+                //console.log(data);
+            },
+        });
+
+        // --- معالج نموذج المستويات (Level Form Handler) ---
+        const levelFormHandler = new APIFormManager({
+            formId: "level-form",
+            endPoint: "levels/",
+            {% comment %} listContainerId: "program-lists", // المسار النظيف لإضافة/تعديل المستويات {% endcomment %}
+            getFormData: () => ({
+                level_name: levelNameInput.value.trim(),
+                number_students: numberStudentsInput.value,
+                program_name: fkProgramSelect.value,
+                id: levelIdHiddenInput.value
+            
+            }),
+            populateForm: (data) => {
+                levelNameInput.value = data.level_name || "";
+                numberStudentsInput.value = data.number_students || "";
+                fkProgramSelect.value = data.program_name || "";
+            },
+        });
+        document.addEventListener('dataChanged', () => {
+            listManager.fetchItems();
+        });
         const isEditMode = !!programIdInput;
         if (isEditMode) {
             const programId = programIdInput.value;
-            window.programFormManager.handleEditStart(programId);
+            programFormHandler.handleEditStart(programId);
         }
+
         // =================================================================
         // 6. EVENT LISTENERS
         // =================================================================
@@ -450,12 +463,7 @@
         // 7. INITIAL PAGE LOAD LOGIC
         // =================================================================
         hideAllLevelPanels();
-
-
-
-        // Example of an action on a specific input after a short delay
-
-
     });
+    
     </script>
 {% endblock %}

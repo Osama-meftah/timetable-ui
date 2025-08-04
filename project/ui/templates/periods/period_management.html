@@ -70,6 +70,7 @@
         </div>
     </div>
 </div>
+{% include "delete_modal.html" %}
 {% endblock %}
 
 {% block extra_js %}
@@ -96,7 +97,7 @@
         new APIFormManager({
             formId: 'periodSettingsForm',
             listContainerId: 'periodsList',
-            apiBaseUrl: 'http://127.0.0.1:8001/api/periods/',
+            endPoint: 'periods/',
             getFormData: () => {
                 const from = document.getElementById('period_from').value.trim();
                 const to = document.getElementById('period_to').value.trim();
@@ -138,7 +139,7 @@
                 el.className = 'bg-blue-100 dark:bg-blue-800 p-3 rounded-md shadow flex justify-between items-center mb-2';
                 el.innerHTML = `
                     <span class="text-blue-900 dark:text-blue-100 font-semibold">من ${item.period_from} إلى ${item.period_to}</span>
-                    <button class="deletes-btn bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded" data-id="${item.id}">
+                    <button class="delete-btn bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded" data-id="${item.id}" data-name="${item.period_from} - ${item.period_to}" data-type="فترة" data-url="periods/${item.id}/" >
                         <i class="fas fa-trash-alt"></i> حذف
                     </button>
                 `;
