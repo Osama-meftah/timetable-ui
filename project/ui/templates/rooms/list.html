@@ -171,6 +171,7 @@
                     </a>
                     {# Trigger button for the Delete Modal #}
                     <button type="button" data-id="{{ room.id }}" data-type="القاعة"
+                        data-name="{{room.hall_name}}"
                         data-url="{% url 'delete_room' 0 %}" data-form-type="delete"
                         class="delete-btn inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium 
                         rounded-md text-red-600 bg-red-100 hover:bg-red-200 dark:bg-red-700 dark:text-red-100 dark:hover:bg-red-600 
@@ -197,11 +198,13 @@
 </div>
 {% include "upload_modal.html" %}
 {% include "delete_modal.html" %}
+
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'src/js/search.js' %}"></script>
-<script src="{% static 'src/js/show_modal_message.js' %}"></script>
+{% comment %} <script src="{% static 'src/js/show_modal_message.js' %}"></script> {% endcomment %}
+<script src="{% static 'src/js/delete.js' %}"></script>
 <script>
     new SearchComponent({
         inputSelector: ".search-input[data-type='room']",

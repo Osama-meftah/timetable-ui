@@ -125,7 +125,7 @@ class TeacherUploadView(APIView):
         name = str(row.get("teacher_name", "")).strip()
         phone = str(row.get("teacher_phone", "")).strip()
         address = str(row.get("teacher_address", "")).strip()
-        status = str(row.get("teacher_status", "نشط")).strip()
+        status = str(row.get("teacher_status", "")).strip()
         is_staff = False
 
         if not email:
@@ -157,7 +157,7 @@ class TeacherUploadView(APIView):
             "teacher_phone": phone,
             "teacher_address": address,
             "teacher_status": status,
-            "user": user.id  # هذا ما سيتم تمريره للـ serializer
+            "user": user.id  
         }
 
 

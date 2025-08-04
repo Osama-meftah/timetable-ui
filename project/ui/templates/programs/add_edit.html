@@ -1,135 +1,130 @@
-{% extends 'base.html' %} {# Make sure 'base.html' exists and is correctly configured #}
-{% load static %} {# Load static files (if you have any, like custom CSS/JS) #}
+{% extends 'base.html' %}
+{% load static %}
 {% load arabic_filters %}
+
 {% block page_header_title %}
-    {{ page_title }} {# This variable should be passed from your Django view #}
+    {{ page_title }}
 {% endblock %}
 
 {% block content %}
-    {# System messages: Displays success or error alerts from Django's messages framework #}
-    
+    {% comment %} {% include "message.html" %} {% endcomment %}
     <div class="container mx-auto py-6 sm:py-8">
 
         <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6">
             <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6 text-center">
-                {{ page_title }}
+                {% comment %} {{ page_title }} {% endcomment %}
+                إدارة البرامج والمستويات
             </h2>
-
-            ---
 
             {# --- PROGRAM MANAGEMENT SECTION --- #}
             <div class="mb-10 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700 shadow-sm">
-                {% include "message.html" %}
                 <h3 class="text-xl font-semibold text-blue-800 dark:text-blue-200 mb-5 flex items-center">
                     <i class="fas fa-graduation-cap ml-2 text-blue-600"></i>
                     إدارة البرامج
                 </h3>
-
                 <form method="POST" action="." id="program-form">
                     {% csrf_token %}
                     <input type="hidden" name="form_type" value="program_form_submit">
-                    {# Hidden field to send program ID if we are editing an existing program #}
-                    {% if program %}<input type="hidden" name="program_id" value="{{ program.id }}">{% endif %}
+                    {% if program %}
+                    <input type="hidden" name="program_id" id="program_id" value="{{ program.id }}">
+                    {% endif %}
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        {# Program Name Field - Manual Input #}
                         <div>
                             <label for="program_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 اسم البرنامج <span class="text-red-500">*</span>
                             </label>
-                            <input type="text" id="program_name" name="program_name"
-                                   value="{{ program.program_name|default_if_none:'' }}"
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                                   required>
+                            <input type="text" id="program_name" name="program_name" value="{{ program.program_name|default_if_none:'' }}"
+                                   class="mt-1 block w-full rounded-md border-gray-300 bg-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" required>
                         </div>
-                        {# Department Foreign Key Field - Manual Select #}
                         <div>
                             <label for="fk_department" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 القسم التابع له <span class="text-red-500">*</span>
                             </label>
-                            <select id="fk_department" name="fk_department"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none"
-                                    required>
+                            
+                            <select id="fk_department" name="fk_department" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 
+                            bg-gray-300
+                            focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:outline-none" required>
                                 <option value="">اختر القسم...</option>
                                 {% for department in departments %}
-                                    <option value="{{ department.id }}"
-                                        {% if program and program.fk_department.id == department.id %}selected{% endif %}>
+    <option value="{{ department.id }}" {% if program.fk_department.id == department.id %}selected{% endif %}>
+      {{ department.name }}
+    </option>
+{% endfor %}
+                                {% comment %} {% for department in departments %}
+                                
+<option value="{{ department.id }}" {% if program.fk_department.id == department.id %}selected{% endif %}>
+  {{ department.name }}
+</option> {% endcomment %}
+
+                                    {% comment %} <option value="{{ department.name }}" {% if program.fk_department.name == department.name %}selected{% endif %}>
                                         {{ department.name }}
-                                    </option>
-                                {% endfor %}
+                                    </option> {% endcomment %}
+                                {% comment %} {% endfor %} {% endcomment %}
                             </select>
                         </div>
                     </div>
-
                     <div class="flex justify-start gap-3 pt-4 border-t border-blue-200 dark:border-blue-700">
-                        <button type="submit" name="form_type" value="program_form_submit" 
-                                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
-                            {% if program %}تعديل البرنامج{% else %}حفظ البرنامج{% endif %} {# Change text based on action #}
+                        <button type="submit" name="form_type" value="program_form_submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
+                            {% if program %}تعديل البرنامج{% else %}حفظ البرنامج{% endif %}
                         </button>
-                        {# Button to clear fields for adding a new program #}
-                        <button type="button" 
-                        {% comment %} onclick="window.location.href='{% url 'manage_program_and_level_manual' %}'" {% endcomment %}
-                                class="bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:text-gray-200 font-bold py-2 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
+                        {% if program %}
+
+                        <button type="button" onclick="window.location.href='{% url 'add_program' %}'" class="bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:text-gray-200 font-bold py-2 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
                             إضافة برنامج جديد (مسح الحقول)
                         </button>
+                        <a type="button" href="{% url 'departments_management' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:text-gray-200 font-bold py-2 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
+                        الغاء    
+                         </a>
+                        {% else %}
+                        <a type="button" href="{% url 'departments_management' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:text-gray-200 font-bold py-2 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
+                        الغاء    
+                         </a>
+                        {% endif %}
                     </div>
                 </form>
             </div>
 
-            ---
-
-            {# New: Buttons to show/hide level forms #}
+            {# --- ACTION BUTTONS --- #}
             <div class="flex justify-center gap-4 mb-10">
-                <button type="button" id="show_add_level_form"
-                        class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg text-lg">
-                    <i class="fas fa-plus ml-2"></i> إضافة مستوى جديد
+                <button type="button" id="show_add_level_form" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg text-lg">
+                    <i class="fas fa-plus ml-2"></i> إضافة مستوى 
                 </button>
-                <button type="button" id="show_edit_level_selection"
-                        class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg text-lg">
-                    <i class="fas fa-edit ml-2"></i> تعديل مستوى موجود
+                <button type="button" id="show_edit_level_selection" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg text-lg">
+                    <i class="fas fa-edit ml-2"></i> تعديل مستوى 
                 </button>
-                {# Button to trigger file upload modal #}
-                <button type="button"
-                        class="upload-trigger bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md"
-                        data-type="levels"
-                        data-title="رفع ملف بيانات المستويات"
-                        data-description="يجب أن يحتوي الملف على الأعمدة: level_name, program_name,number_students.">
+                <button type="button" class="upload-trigger bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md" data-type="levels" data-title="رفع ملف بيانات المستويات" data-description="يجب أن يحتوي الملف على الأعمدة: level_name, program_name, number_students.">
                     <i class="fas fa-upload ml-2"></i> رفع ملف بيانات المستويات
                 </button>
             </div>
 
-            {# New: Edit Level Selection Dropdown (initially hidden) #}
+            {# --- EDIT LEVEL SELECTION (Initially Hidden) --- #}
             <div id="edit_level_selection_area" class="mb-6 p-6 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700 shadow-sm hidden">
-                <h4 class="text-lg font-medium text-purple-800 dark:text-purple-200 mb-3">
-                    اختر مستوى للتعديل
-                </h4>
-                <div class="flex items-end gap-3">
-                    <div class="flex-grow">
+                <h4 class="text-lg font-medium text-purple-800 dark:text-purple-200 mb-3">اختر مستوى للتعديل</h4>
+                <div class="">
+                    <div class="mb-3">
                         <label for="select_level_to_edit_dropdown" class="sr-only">اختر مستوى للتعديل</label>
-                        <select id="select_level_to_edit_dropdown"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 
-                                focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none">
-                            <option value="">اختر مستوى...</option>
-                                {% for level_option in levels %}
-                                    <option value="{{ level_option.id }}">
-                                        {{ level_option.level_name }} ({{ level_option.fk_program.program_name }})
-                                    </option>
+                        <select id="select_level_to_edit_dropdown" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-gray-300 dark:bg-gray-600 
+                        dark:border-gray-600 dark:text-gray-200">
+                            <option value="">اختر مستوى</option>
+                            {% for level_option in levels %}
+                                <option value="{{ level_option.id }}">{{ level_option.level_name|arabic_level }} ({{ level_option.fk_program.program_name }})</option>
                             {% endfor %}
                         </select>
                     </div>
-                </div>
-                <button type="button" id="load_selected_level_for_edit" name="form_type" value="level_form_submit"
-                        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md 
-                        transition-colors duration-200 shadow-md hover:shadow-lg mx-4">
-                    تحميل للتعديل
-                </button>
-                <button type="button" id="cancel_level_selection" 
-                        class="mt-4 bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:text-gray-200 font-bold py-2 px-4 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
-                    إلغاء
-                </button>
-            </div>
+                    <div class='flex gap-3 items-center flex-wrap '>
 
-            {# --- LEVEL MANAGEMENT SECTION (initially hidden) --- #}
+                        <button type="button" id="load_selected_level_for_edit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md shadow-md">
+                            تحميل للتعديل
+                        </button>
+                        <button type="button" id="cancel_level_selection" class="bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:text-gray-200 font-bold py-2 px-4 rounded-md">
+                            إلغاء
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            {# --- LEVEL MANAGEMENT FORM (Initially Hidden) --- #}
             <div id="level_management_area" class="p-6 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700 shadow-sm hidden">
                 <h3 class="text-xl font-semibold text-green-800 dark:text-green-200 mb-5 flex items-center">
                     <i class="fas fa-layer-group ml-2 text-green-600"></i>
@@ -139,276 +134,328 @@
                     {% csrf_token %}
                     <input type="hidden" name="form_type" value="level_form_submit">
                     <input type="hidden" name="level_id" id="level_id_hidden" value="">
-
+                    <input type="hidden" name='type' id="level_type_hidden" value="">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        {# Level Name Field - Manual Input #}
                         <div>
-                            <label for="level_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                اسم المستوى <span class="text-red-500">*</span>
-                            </label>
-
-                            <input type="text" id="level_name" name="level_name"
-                                   value=""
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                                   required>
+                            <label for="level_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">اسم المستوى <span class="text-red-500">*</span></label>
+                            <select id="level_name" name="level_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 
+                            dark:bg-gray-700 bg-gray-300 dark:border-gray-600 dark:text-gray-200">
+                                <option value="">اختر مستوى</option>
+                                <option value="first">الأول</option>
+                                <option value="second">الثاني</option>
+                                <option value="third">الثالث</option>
+                                <option value="fourth">الرابع</option>
+                            </select>
                         </div>
-                        {# Number of Students Field - Manual Input #}
                         <div>
-                            <label for="number_students" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                عدد الطلاب <span class="text-red-500">*</span>
-                            </label>
-                            <input type="number" id="number_students" name="number_students"
-                                   value=""
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                                   required min="0">
+                            <label for="number_students" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">عدد الطلاب <span class="text-red-500">*</span></label>
+                            <input type="number" id="number_students" name="number_students" value="" class="mt-1 block w-full bg-gray-300 rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" required min="0">
                         </div>
-                        {# Program Foreign Key Field - Manual Select #}
                         <div class="md:col-span-2">
-                            <label for="fk_program" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                البرنامج التابع له <span class="text-red-500">*</span>
-                            </label>
-                            <select id="fk_program" name="fk_program"
-                                    class="mt-1 block w-full text-black rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none 
-                                    focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none"
-                                    required>
+                            <label for="fk_program" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">البرنامج التابع له <span class="text-red-500">*</span></label>
+                            {# FIX: Using program ID for value for reliability #}
+                            <select id="fk_program" name="fk_program" class="mt-1 block w-full 
+                                rounded-md border-gray-300 bg-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 
+                                dark:border-gray-600 dark:text-gray-200" required>
                                 <option value="">اختر البرنامج...</option>
                                 {% for program_option in programs %}
-                                    <option value="{{ program_option.id }}" class="text-bla">
-                                        {{ program_option.program_name }}
-                                    </option>
+                                <option value="{{ program_option.program_name }}">
+                                    {{ program_option.program_name }}
+                                </option>
+                                    {% comment %} <option value="{{program_option.program_name}}">{{program_option.program_name}}</option> {% endcomment %}
                                 {% endfor %}
                             </select>
                         </div>
                     </div>
-
                     <div class="flex justify-start gap-3 pt-4 border-t border-green-200 dark:border-green-700">
-                        <button type="submit" id="level_submit_button" name="form_type" value="level_form_submit"
-                                class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
-                            حفظ المستوى
-                        </button>
-                        <button type="button" id="cancel_level_form"
-                                class="bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:text-gray-200 font-bold py-2 px-6 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg">
-                            إلغاء
-                        </button>
+                        <button type="submit" id="level_submit_button" name="form_type" value="level_form_submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-md shadow-md">حفظ المستوى</button>
+                        <button type="button" id="cancel_level_form" class="bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:text-gray-200 font-bold py-2 px-6 rounded-md shadow-md">إلغاء</button>
                     </div>
                 </form>
             </div>
 
-            ---
-
-
+            {# --- DISPLAY AREA --- #}
             <div class="mt-8 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 shadow-md">
                 <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center justify-center border-b-2 pb-3 border-indigo-500 dark:border-indigo-400">
                     <i class="fas fa-list-alt text-indigo-600 dark:text-indigo-400 mr-3 text-2xl"></i>
                     عرض البرامج والمستويات الحالية
                 </h3>
-            
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-100 dark:border-gray-700">
                     <h4 class="text-xl font-semibold text-blue-700 dark:text-blue-300 mb-4 pb-2 border-b-2 border-blue-200 dark:border-blue-700">البرامج والمستويات</h4>
-                    <ul class="space-y-6">
-                        {% for program in programs %}
-                            <li>
-                                <div class="flex justify-between items-center bg-blue-100 dark:bg-blue-900 p-3 rounded-md shadow-sm border border-blue-200 dark:border-blue-700 transition-all duration-200 hover:shadow-md">
-                                    <h5 class="font-bold text-lg text-blue-800 dark:text-blue-200 flex items-center">
-                                        <i class="fas fa-cube text-blue-600 ml-2"></i>
-                                        {{ program.program_name }} (<span class="text-blue-600 dark:text-blue-400 text-sm">{{ program.fk_department.name }}</span>)
-                                    </h5>
-                                    <div class="flex gap-2">
-                                        <a
-                                            href="{% url 'edit_program' program.id %}"
-                                            class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 p-1.5 rounded-full bg-blue-50 hover:bg-blue-100 dark:bg-blue-950 dark:hover:bg-blue-800 transition-colors duration-200" title="تعديل البرنامج">
-                                            <i class="fas fa-edit text-lg"></i>
-                                        </a>
-                                        <button type="button"
-                                            class="delete-btn text-red-600 hover:text-red-800 dark:text-red-400
-                                            dark:hover:text-red-200 p-1.5 rounded-full bg-red-50 hover:bg-red-100 dark:bg-red-950 dark:hover:bg-red-800
-                                            transition-colors duration-200"
-                                                data-id="{{ program.id }}"
-                                                data-name="{{ program.program_name }}"
-                                                data-type="program"
-                                                data-form-type="delete"
-                                                data-url="{% url 'delete_program' 0 %}"
-                                                title="حذف البرنامج">
-                                                <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </div>
-                                </div>
-            
-                                {% with level_id=program.id %}
-                                    <ul class="mt-3 space-y-2 pl-6 border-l-2 border-gray-200 dark:border-gray-700">
-                                        {% for level in levels %}
-                                            {% if level.fk_program.id == program.id %}
-                                                <li class="flex justify-between items-center bg-white dark:bg-gray-900 p-3 rounded-md shadow-sm border border-gray-100 dark:border-gray-700 transition-all duration-200 hover:shadow-md">
-                                                    <span class="text-base text-gray-800 dark:text-gray-200 flex items-center">
-                                                        <i class="fas fa-circle-notch text-green-500 mr-2"></i>
-                                                        {{ level.level_name|arabic_level }} (<span class="text-gray-600 dark:text-gray-400 text-xs">{{ level.number_students }} طلاب</span>)
-                                                    </span>
-                                                    <div class="flex gap-2">
-                                                        <button type="button" class="text-green-600 hover:text-green-800 dark:text-green-400
-                                                            dark:hover:text-green-200 p-1.5 rounded-full bg-green-50 hover:bg-green-100 dark:bg-green-950 dark:hover:bg-green-800 transition-colors duration-200 edit-level-btn" data-level-id="{{ level.id }}" title="تعديل المستوى">
-                                                            <i class="fas fa-edit text-lg"></i>
-                                                        </button>
-                                                        <button type="button"
-                                                                class="delete-btn text-red-600 hover:text-red-800 dark:text-red-400
-                                                            dark:hover:text-red-200 p-1.5 rounded-full bg-red-50 hover:bg-red-100 dark:bg-red-950 dark:hover:bg-red-800
-                                                            transition-colors duration-200"
-                                                                data-id="{{ level.id }}"
-                                                                data-name="{{ level.level_name }}"
-                                                                data-type="level"
-                                                                data-form-type="delete"
-                                                                data-url="{% url 'delete_program' 0 %}"
-                                                                title="حذف مستوى">
-                                                                <i class="fas fa-trash-alt"></i>
-                                                        </button> 
-            
-                                                    </div>
-                                                </li>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </ul>
-                                    {% if not levels %} {# أو يمكنك استخدام if not program.levels.all if levels is a related manager #}
-                                        <p class="text-gray-500 dark:text-gray-400 text-sm mt-3 p-3 bg-gray-100 dark:bg-gray-750 rounded-lg border border-gray-200 dark:border-gray-600 text-center pl-6">
-                                            <i class="fas fa-exclamation-circle mr-2"></i> لا توجد مستويات مضافة لهذا البرنامج بعد.
-                                        </p>
-                                    {% endif %}
-                                {% endwith %}
-                            </li>
-                        {% empty %}
-                            <li class="text-gray-600 dark:text-gray-400 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-center">
-                                <i class="fas fa-exclamation-triangle mr-2"></i> لا توجد برامج لعرض مستوياتها.
-                            </li>
-                        {% endfor %}
-                    </ul>
+                    <ul class="space-y-6" id="program-lists"></ul>
                 </div>
             </div>
-            
         </div>
     </div>
 
-
-    {% include "delete_modal.html" %}
     {% include "upload_modal.html" %}
+    {% include "delete_modal.html" %}
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'src/js/api_form.js' %}"></script>
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const levelManagementArea = document.getElementById('level_management_area');
-            const editLevelSelectionArea = document.getElementById('edit_level_selection_area');
+    document.addEventListener('DOMContentLoaded', function() {
 
-            const showAddLevelFormBtn = document.getElementById('show_add_level_form');
-            const showEditLevelSelectionBtn = document.getElementById('show_edit_level_selection');
-            const cancelLevelFormBtn = document.getElementById('cancel_level_form');
-            const cancelLevelSelectionBtn = document.getElementById('cancel_level_selection');
+        // =================================================================
+        // 1. CONSTANTS & DOM ELEMENT SELECTIONS
+        // =================================================================
+        const levelManagementArea = document.getElementById('level_management_area');
+        const editLevelSelectionArea = document.getElementById('edit_level_selection_area');
+        const levelForm = document.getElementById('level-form');
+        const programListsContainer = document.getElementById('program-lists');
 
-            const levelForm = document.getElementById('level-form');
-            const levelNameInput = document.getElementById('level_name');
-            const numberStudentsInput = document.getElementById('number_students');
-            const fkProgramSelect = document.getElementById('fk_program');
-            const levelIdHiddenInput = document.getElementById('level_id_hidden');
-            const levelSubmitButton = document.getElementById('level_submit_button');
+        // Buttons
+        const showAddLevelFormBtn = document.getElementById('show_add_level_form');
+        const showEditLevelSelectionBtn = document.getElementById('show_edit_level_selection');
+        const cancelLevelFormBtn = document.getElementById('cancel_level_form');
+        const cancelLevelSelectionBtn = document.getElementById('cancel_level_selection');
+        const levelSubmitButton = document.getElementById('level_submit_button');
+        const loadSelectedLevelForEditBtn = document.getElementById('load_selected_level_for_edit');
 
-            const selectLevelToEditDropdown = document.getElementById('select_level_to_edit_dropdown');
-            const loadSelectedLevelForEditBtn = document.getElementById('load_selected_level_for_edit');
+        // Form Inputs
+        const levelNameInput = document.getElementById('level_name');
+        const numberStudentsInput = document.getElementById('number_students');
+        const fkProgramSelect = document.getElementById('fk_program');
+        const levelIdHiddenInput = document.getElementById('level_id_hidden');
+        const selectLevelToEditDropdown = document.getElementById('select_level_to_edit_dropdown');
+        const programIdInput = document.getElementById("program_id");
 
-            // Data passed from Django view (convert to JS object)
-            const allLevelsData = [
-                {% for levels_list in levels %}
-                    {
-                        id: {{ levels_list.id }},
-                        level_name: "{{ levels_list.level_name|escapejs }}",
-                        number_students: {{ levels_list.number_students }},
-                        fk_program_id: {{ levels_list.fk_program.id }}
-                    },
-                {% endfor %}
-            ];
+        //setTimeout(() => {
+            //const fk_departments = document.getElementById('fk_department').value;
+            //document.getElementById('fk_department').value = fk_departments;
+            //console.log(document.getElementById('fk_department').value);
+        //}, 10);
+        // =================================================================
+        // 2. DATA FROM DJANGO
+        // =================================================================
+        const allLevelsData = [
+            {% for level in levels %}
+                {
+                    id: {{ level.id }},
+                    level_name: "{{ level.level_name }}",
+                    number_students: {{ level.number_students }},
+                    fk_program_id: {{ level.fk_program.id }},
+                    program_name: '{{ level.fk_program.program_name }}'
+                },
+            {% endfor %}
+        ];
 
-            function clearLevelForm() {
-                levelIdHiddenInput.value = '';
-                levelNameInput.value = '';
-                numberStudentsInput.value = '';
-                fkProgramSelect.value = ''; // Select the default "اختر البرنامج..." option
-                levelSubmitButton.textContent = 'حفظ المستوى';
-                // Remove existing messages for the level form if any
-                levelForm.querySelectorAll('.text-red-500').forEach(el => el.remove());
-            }
+        // =================================================================
+        // 3. UI HELPER FUNCTIONS
+        // =================================================================
+        function hideAllLevelPanels() {
+            levelManagementArea.style.display = 'none';
+            editLevelSelectionArea.style.display = 'none';
+        }
 
-            function hideAllLevelPanels() {
-                levelManagementArea.style.display = 'none'; // استخدم style.display لإخفائهما بشكل قاطع
-                editLevelSelectionArea.style.display = 'none';
-            }
+        function clearLevelForm() {
+            document.getElementById('level_type_hidden').value = 'add';
+            levelForm.reset();
+            levelIdHiddenInput.value = '';
+            levelSubmitButton.textContent = 'حفظ المستوى';
+        }
 
-            function showLevelForm(isEditMode = false) {
-                hideAllLevelPanels(); // إخفاء الكل أولاً
-                levelManagementArea.style.display = 'block'; // إظهار فورم الإضافة/التعديل
-                if (!isEditMode) {
-                    clearLevelForm();
-                }
-                // Scroll to the level management area for better UX
-                levelManagementArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-
-            function showEditSelection() {
-                hideAllLevelPanels(); // إخفاء الكل أولاً
-                editLevelSelectionArea.style.display = 'block'; // إظهار منطقة اختيار التعديل
-                selectLevelToEditDropdown.value = ''; // Clear previous selection
-                // Scroll to the edit selection area
-                editLevelSelectionArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-
-            // Event Listeners for main buttons
-            showAddLevelFormBtn.addEventListener('click', function() {
-                showLevelForm(false); // إظهار فورم الإضافة
-            });
-
-            showEditLevelSelectionBtn.addEventListener('click', function() {
-                showEditSelection(); // إظهار منطقة اختيار التعديل
-            });
-
-            cancelLevelFormBtn.addEventListener('click', function() {
-                hideAllLevelPanels(); // إخفاء كل شيء
-                clearLevelForm();
-            });
-
-            cancelLevelSelectionBtn.addEventListener('click', function() {
-                hideAllLevelPanels(); // إخفاء كل شيء
-                selectLevelToEditDropdown.value = ''; // Clear selection
-            });
-
-            // Event Listener for loading selected level into the form
-            loadSelectedLevelForEditBtn.addEventListener('click', function() {
-                const selectedLevelId = selectLevelToEditDropdown.value;
-                if (selectedLevelId) {
-                    const levelToEdit = allLevelsData.find(level => level.id == selectedLevelId);
-
-                    if (levelToEdit) {
-                        levelIdHiddenInput.value = levelToEdit.id;
-                        levelNameInput.value = levelToEdit.level_name;
-                        numberStudentsInput.value = levelToEdit.number_students;
-                        fkProgramSelect.value = levelToEdit.fk_program_id;
-                        levelSubmitButton.textContent = 'تعديل المستوى';
-                        showLevelForm(true); // Show the form with pre-filled data
-                    } else {
-                        alert('حدث خطأ: لم يتم العثور على بيانات المستوى.');
-                    }
-                } else {
-                    alert('الرجاء اختيار مستوى للتعديل.');
-                }
-            });
-
-            document.querySelectorAll('.edit-level-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    const levelId = this.dataset.levelId;
-                    const levelToEdit = allLevelsData.find(level => level.id == levelId);
-                    if (levelToEdit) {
-                        levelIdHiddenInput.value = levelToEdit.id;
-                        levelNameInput.value = levelToEdit.level_name;
-                        numberStudentsInput.value = levelToEdit.number_students;
-                        fkProgramSelect.value = levelToEdit.fk_program_id;
-                        levelSubmitButton.textContent = 'تعديل المستوى';
-                        showLevelForm(true); // Show the form with pre-filled data
-                    }
-                });
-            });
-
+        function showLevelForm(isEditMode = false) {
             hideAllLevelPanels();
+            levelManagementArea.style.display = 'block';
+            if (!isEditMode) {
+                clearLevelForm();
+            }
+        }
+
+        function showEditSelection() {
+            hideAllLevelPanels();
+            editLevelSelectionArea.style.display = 'block';
+            selectLevelToEditDropdown.value = '';
+        }
+
+        function populateLevelForm(level) {
+            levelIdHiddenInput.value = level.id;
+            levelNameInput.value = level.level_name;
+            numberStudentsInput.value = level.number_students;
+
+            setTimeout(() => {
+                const matchedOption = [...fkProgramSelect.options].find(
+                    opt => opt.value.trim() === level.program_name.trim()
+                );
+                if (matchedOption) {
+                    fkProgramSelect.value = matchedOption.value;
+                }
+            }, 100);
+
+            levelSubmitButton.textContent = 'تعديل المستوى';
+            showLevelForm(true);
+            if (window.levelFormManager) {
+                window.levelFormManager.handleEditStart(level.id);
+            }
+        }
+
+        // =================================================================
+        // 4. RENDER FUNCTION
+        // =================================================================
+        function renderProgramForm(program, allLevels) {
+            const li = document.createElement("li");
+            li.className = "bg-white dark:bg-gray-850 p-4 mb-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm";
+            li.setAttribute("data-program-id", program.id);
+            
+            const programLevels = allLevels.filter(level => level.fk_program.id === program.id);
+            
+            let levelsHtml = '';
+            if (programLevels.length > 0) {
+                levelsHtml = `<ul class="mt-3 space-y-2 pl-4 border-l-2 border-gray-200 dark:border-gray-700">`;
+                programLevels.forEach((level) => {
+                    levelsHtml += `
+                    <li class="flex justify-between items-center bg-gray-50 dark:bg-gray-900 p-3 rounded-md border border-gray-100 dark:border-gray-700">
+                        <span class="text-base text-gray-800 dark:text-gray-200 flex items-center">
+                            <i class="fas fa-layer-group text-green-500 mr-3"></i>
+                            ${level.level_name_display} (${level.number_students} طالب)
+                        </span>
+                        <div class="flex gap-2">
+                            <button type="button" class="edit-level-btn text-green-600 hover:text-green-800 p-1.5 rounded-full bg-green-100 hover:bg-green-200 dark:bg-green-200 dark:hover:bg-green-300" 
+                                data-level-id="${level.id}" title="تعديل المستوى">
+                                <i class="fas fa-edit text-md"></i>
+                            </button>
+                            <button type="button" class="delete-btn text-red-600 hover:text-red-200 p-1.5 rounded-full bg-red-100 hover:bg-red-200 dark:bg-red-100 dark:hover:bg-red-800"
+                                data-id="${level.id}" data-name="${level.level_name_display}" data-type="level"
+                                data-url="levels/${level.id}/" data-form-type="delete" title="حذف مستوى">
+                                <i class="fas fa-trash-alt text-md"></i>
+                            </button>
+                        </div>
+                    </li>`;
+                });
+                levelsHtml += `</ul>`;
+            } else {
+                levelsHtml = `<p class="text-gray-500 text-sm mt-3 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg text-center"><i class="fas fa-exclamation-circle mr-2"></i>لا توجد مستويات مضافة لهذا البرنامج.</p>`;
+            }
+
+            li.innerHTML = `
+            <div class="flex justify-between items-center bg-blue-100 dark:bg-blue-900 p-3 rounded-md">
+                <h5 class="font-bold text-lg text-blue-800 dark:text-blue-200 flex items-center">
+                    <i class="fas fa-graduation-cap text-blue-600 mr-3"></i>
+                    ${program.program_name} <span class="text-sm font-normal text-blue-700 dark:text-blue-300 mr-2">(${program.fk_department.name})</span>
+                </h5>
+                <div class="flex gap-2">
+                    <a href="/programs/edit/${program.id}/" class="text-green-600 dark:text-green-900 hover:text-green-800 p-1.5 rounded-full bg-green-100 hover:bg-green-300 dark:bg-green-200 dark:hover:bg-green-700 dark:hover:text-green-200" title="تعديل البرنامج">
+                        <i class="fas fa-edit text-md"></i>
+                    </a>
+                    <button type="button" class="delete-btn text-red-600 hover:text-red-800 p-1.5 rounded-full bg-red-100 hover:bg-red-200 dark:bg-red-200 dark:hover:bg-red-800 dark:hover:text-red-200"
+                        data-id="${program.id}" data-name="${program.program_name}" data-type="program"
+                        data-url="programs/${program.id}/" title="حذف البرنامج">
+                        <i class="fas fa-trash-alt text-md"></i>
+                    </button>
+                </div>
+            </div>
+            ${levelsHtml}`;
+            return li;
+        }
+
+        // =================================================================
+        // 5. API FORM MANAGERS
+        // =================================================================
+        const programApiUrl = `programs/`;
+        const levelApiUrl = `levels/`;
+
+
+        window.programFormManager = new APIFormManager({
+            formId: "program-form",
+            listContainerId: "program-lists",
+            endPoints: [programApiUrl, levelApiUrl],
+            endPoint: programApiUrl,
+            getFormData: () => ({
+                program_name: document.getElementById("program_name").value.trim(),
+                department_id: document.getElementById("fk_department").value,
+                
+            }),
+            populateForm: (data) => {
+                document.getElementById("program_name").value = data.program_name || "";
+                document.getElementById("fk_department").value = data.department_id || "";
+                console.log(data);
+            },
+            renderItem: (program, allLevels = []) => {
+                return renderProgramForm(program, allLevels);
+            },
         });
+                window.levelFormManager = new APIFormManager({
+            formId: "level-form",
+            listContainerId: "program-lists",
+            endPoints: [programApiUrl, levelApiUrl],
+            endPoint: levelApiUrl,
+            getFormData: () => ({
+                level_name: levelNameInput.value.trim(),
+                number_students: numberStudentsInput.value,
+                program_name: fkProgramSelect.value,
+                id: levelIdHiddenInput.value
+            }),
+            populateForm: (data) => {
+                levelNameInput.value = data.level_name || "";
+                numberStudentsInput.value = data.number_students || "";
+                fkProgramSelect.value = data.program_name || "";
+
+            },
+            renderItem: (program, allLevels = []) => {
+                return renderProgramForm(program, allLevels);
+            },
+        });
+        
+        const isEditMode = !!programIdInput;
+        if (isEditMode) {
+            const programId = programIdInput.value;
+            window.programFormManager.handleEditStart(programId);
+        }
+        // =================================================================
+        // 6. EVENT LISTENERS
+        // =================================================================
+        showAddLevelFormBtn.addEventListener('click', () => showLevelForm(false));
+        showEditLevelSelectionBtn.addEventListener('click', showEditSelection);
+
+        cancelLevelFormBtn.addEventListener('click', () => {
+            hideAllLevelPanels();
+            clearLevelForm();
+        });
+
+        cancelLevelSelectionBtn.addEventListener('click', () => {
+            hideAllLevelPanels();
+            selectLevelToEditDropdown.value = '';
+        });
+
+        loadSelectedLevelForEditBtn.addEventListener('click', function() {
+            const selectedLevelId = selectLevelToEditDropdown.value;
+            if (!selectedLevelId) {
+                alert('الرجاء اختيار مستوى للتعديل.');
+                return;
+            }
+            const levelToEdit = allLevelsData.find(level => level.id == selectedLevelId);
+            if (levelToEdit) {
+                populateLevelForm(levelToEdit);
+            } else {
+                alert('حدث خطأ: لم يتم العثور على بيانات المستوى.');
+            }
+        });
+
+        // Event Delegation for dynamically created edit buttons
+        programListsContainer.addEventListener('click', function(event) {
+            const editButton = event.target.closest('.edit-level-btn');
+            if (editButton) {
+                const levelId = editButton.dataset.levelId;
+                const levelToEdit = allLevelsData.find(level => level.id == levelId);
+                if (levelToEdit) {
+                    populateLevelForm(levelToEdit);
+                }
+            }
+        });
+
+        // =================================================================
+        // 7. INITIAL PAGE LOAD LOGIC
+        // =================================================================
+        hideAllLevelPanels();
+
+
+
+        // Example of an action on a specific input after a short delay
+
+
+    });
     </script>
 {% endblock %}

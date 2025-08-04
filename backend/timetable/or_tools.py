@@ -5,6 +5,7 @@ from openpyxl import Workbook
 import random
 from .models import Department, Program, Hall, Level, Group, Subject, Teacher,Period,Today,TeacherTime, Distribution, Table
 from tempfile import NamedTemporaryFile
+import hashlib
 
 class TimeTableScheduler:
     def __init__(self,semester_filter=None):
@@ -65,6 +66,7 @@ class TimeTableScheduler:
                 "available": dict(availability),
                 "name": professor.teacher_name.strip(),
                 "ProfessorId": professor_id,
+                "email":professor.user.email
             }
 
             self.professoresdata.append(professordata)
@@ -72,7 +74,7 @@ class TimeTableScheduler:
             self.lecture_times[tg.id] = {
                 'course': course.subject_name.strip(),
                 'teacher': professordata,
-                'level': level.level_name.strip(),
+                'level': level.get_level_name_display().strip(),
                 'dept': dept.program_name.strip(),
                 'group': group.group_name.strip(),
                 'std_count': group.number_students
@@ -166,84 +168,6 @@ class TimeTableScheduler:
                     if time_slot_vars:
                         self.model.Add(sum(time_slot_vars) <= 1)
     
-
-    # check conflicts before create schedule
-    def check_initial_conflicts(self):
-        total_cells=len(self.available_times)*len(self.rooms)*len(self.days)
-        total_lectures=len(self.lecture_times)
-        # conflicts = []
-        # Group courses by professor
-        professor_courses = {}
-        # conflicts_room=[]
-        max_capacity = max([c.capacity_hall for c in self.rooms])
-    
-        dept_level_courses = defaultdict(list)
-        dept_level_profesor_availability = defaultdict(lambda: defaultdict(list))         
-        for course_id, course_info in self.lecture_times.items():
-            # key = (course_info['dept'], course_info['level'])
-            key = (course_info['dept'],course_info['level'], course_info['group'])
-            std_count=course_info['std_count']
-            professor_name = course_info['teacher']['name']
-            
-            # prof_data={"name":professor_name,"available":course_info['teacher']['available']}
-            dept_level_courses[key].append(std_count)
-            dept_level_profesor_availability[key][professor_name].append(course_info['teacher']['available'])
-            
-        
-        for (dept, level,group), stdcount in dept_level_courses.items():
-            if stdcount[0]>max_capacity:
-                 self.conflicts.append({
-                    'conflicts_type': 'لم يتم تعين قاعة',
-                    'conflicts_detail':f'قسم: {dept} , مستوى:{level} , عدد الطلاب: {stdcount[0]} اكبر من {max_capacity} ',
-                })
-        
-        for course_id, course_info in self.lecture_times.items():
-            professor_name = course_info['teacher']['name']
-            if professor_name not in professor_courses:
-                professor_courses[professor_name] = []
-            professor_courses[professor_name].append({
-                'course': course_info['course'],
-                'available_times': course_info['teacher']['available']
-            })
-        
-        # Check conflicts for each professor
-        for professor_name, courses in professor_courses.items():
-            # Count total available time slots
-            total_available_slots = 0
-            available_times_str = []
-            
-            # Get all available time slots for this professor
-            for course in courses:
-                for day, times in course['available_times'].items():
-                    # day_name = self.days['Day Name'].loc[int(day)]
-                    # day_name= self.days[day].day_name
-                    day_name = [d for d in self.days if d.id == day][0].get_day_name_display()
-                    for time_idx in times:
-                        time_slot = f"{day_name} {self.available_times[time_idx]}"
-                        if time_slot not in available_times_str:
-                            available_times_str.append(time_slot)
-                            total_available_slots += 1
-            
-            # Count number of courses
-            num_courses = len(courses)
-            # If professor has more courses than available time slots
-            if num_courses > total_available_slots and total_available_slots!=0 :
-               self.conflicts.append({
-                    'conflicts_type': 'عدد المواد أكثر من الأوقات المتاحة',
-                    'conflicts_detail':f'اسم الدكتور:{professor_name} ,عدد المواد:{str(num_courses)},عدد الأوقات المتاحة:{str(total_available_slots)}'
-                })
-            
-            # If professor has no available times for some courses
-            if total_available_slots == 0 and num_courses > 0:
-               self.conflicts.append({
-                    'conflicts_type': 'لا يوجد أوقات متاحة',
-                    'conflicts_detail':f'اسم الدكتور:{professor_name} ,عدد المواد:{str(num_courses)},عدد الأوقات المتاحة:0'})
-                
-        if total_lectures>total_cells:
-            self.conflicts.append({
-                    'conflicts_type': 'لا يوجد قاعات كافيه ',
-                    'conflicts_detail':f' عدد المحاضرات كامله : {total_lectures} عدد الخلايا المتاحه في الجدول لاستيعاب المحاضرات : {total_cells}'})
-            
     @staticmethod
     def set_cell_border(cell):
         """
@@ -257,16 +181,24 @@ class TimeTableScheduler:
 
     # save schedule in excel file
     def convert_unscheduled_to_conflicts(self, unscheduled_lectures):
+
+        professor_courses=defaultdict(list)
+        for course_id, course_info in self.lecture_times.items():
+            professor_name = course_info['teacher']['name']
+            professor_courses[professor_name].append(course_info['course'])
+        
         if not unscheduled_lectures:
             return []
 
         converted_conflicts = []
         for info in unscheduled_lectures:
             teacher_name = info['teacher']['name']
+            email=info['teacher']['email']
             course_name = info['course']
             group_info = f"{info['dept']}-{info['level']}-{info['group']}"
             std_count = info['std_count']
             available = info['teacher']['available']
+            num_available_course=f"({len(professor_courses[teacher_name])}) مقرر  -  ({len(available)}) وقت متاح"
 
             # تحويل الأوقات إلى نص مفهوم
             readable_times = []
@@ -282,8 +214,10 @@ class TimeTableScheduler:
 
             detail_text = {
                 "teacher":teacher_name,
+                'email':email,
                 "course":course_name,
                 "group":group_info,
+                "num_available_course":num_available_course,
                 "available":f"{', '.join(readable_times) if readable_times else 'لا توجد'}",
                 "std_count":std_count
             }
@@ -299,59 +233,127 @@ class TimeTableScheduler:
         wb = Workbook()
         ws = wb.active
         ws.title = "جدول المقررات الدراسية"
-        rooms=[]
-        for r in self.rooms:
-            rooms.append(r.hall_name)
-        headers = ['Day', 'Time'] + rooms 
+        rooms = [r.hall_name for r in self.rooms]
+        headers = ['Day', 'Time'] + rooms
         ws.append(headers)
         ws.row_dimensions[1].height = 80
+        ws.column_dimensions['A'].width=15
         for cell in ws[1]:
-            cell.font = Font(size=20,bold=True, color="FFFFFF")
-            cell.fill = PatternFill(start_color="4F81BD", end_color="4F81BD", fill_type="solid")  
-            cell.alignment = Alignment(horizontal="center", vertical="center",)        
-        
+            cell.font = Font(size=20, bold=True, color="FFFFFF")
+            cell.fill = PatternFill(start_color="4F81BD", end_color="4F81BD", fill_type="solid")
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+            self.set_cell_border(cell)
+
         schedule_by_day = defaultdict(list)
         for row in schedule:
             schedule_by_day[row['day']].append(row)
-        # time_slots = ['08:00-10:00', '10:00-12:00', '12:00-02:00']
 
-        row_num = 2  
+        # 🟨 تخصيص لون عشوائي لكل برنامج (قسم)
+        pastel_colors = [
+        "E6F7FF",  # Light Blue
+        "E8F5E9",  # Light Green
+        "FFF3E0",  # Light Orange
+        "F3E5F5",  # Light Purple
+        "FFFDE7",  # Light Yellow
+        "FCE4EC",  # Light Pink
+        "E0F7FA",  # Light Cyan
+        "F9FBE7",  # Light Lime
+        "F5F5F5",  # Light Gray
+        "E1F5FE",  # Pale Blue
+        "FFE0B2",  # Peach
+        "E1BEE7",  # Lavender
+        "D1C4E9",  # Soft Purple
+        "C8E6C9",  # Mint Green
+        "DCEDC8",  # Pastel Green
+        "FFECB3",  # Light Gold
+        "FFCDD2",  # Blush Pink
+        "D7CCC8",  # Soft Brown
+        "F8BBD0",  # Baby Pink
+        "D0F0FD",  # Sky Blue
+        "E6EE9C",  # Lime Pastel
+        "B2EBF2",  # Aqua Pastel
+        "B3E5FC",  # Cool Blue
+        "FFCCBC",  # Apricot
+        "E0F2F1",  # Teal Tint
+        "EDE7F6",  # Violet Gray
+        "FFF9C4",  # Cream Yellow
+        "F3EDE3",  # Light Beige
+        "F0F4C3",  # Lemon Pastel
+        "FFE082",  # Banana Yellow
+        "C5CAE9",  # Steel Lilac
+        "F0F0F0",  # Ultra Light Gray
+        "E3F2FD",  # Icy Blue
+        "F1F8E9",  # Avocado Light
+        "FFEBEE",  # Rose White
+        "FFF8E1",  # Light Custard
+        "F9FBE7",  # Lemon Ice
+        "E3FDFD",  # Cool Mist
+        "FFFAF0",  # Floral White
+        "F0FFFF",  # Azure White
+    ]
+
+        colors_by_program = {}
+        def get_color_for_program(program_name):
+            if program_name in colors_by_program:
+                return colors_by_program[program_name]
+            # استخدم hash ثابت من اسم القسم
+            hash_value = int(hashlib.sha256(program_name.encode('utf-8')).hexdigest(), 16)
+            color_index = hash_value % len(pastel_colors)
+            color = pastel_colors[color_index]
+            colors_by_program[program_name] = color
+            return color
+
+        row_num = 2
         for day, rows in schedule_by_day.items():
-            first_row = True  
+            start_merge_row = row_num
+            end_merge_row = row_num + len(self.available_times) - 1
+            ws.merge_cells(start_row=start_merge_row, start_column=1, end_row=end_merge_row, end_column=1)
+            day_cell = ws.cell(row=start_merge_row, column=1, value=day)
+            day_cell.font = Font(size=20, bold=True)
+            day_cell.alignment = Alignment(horizontal="center", vertical="center")
+            self.set_cell_border(day_cell)
 
-            for slot_id,slot_value in self.available_times.items():
-                if first_row:
-                    ws[f'A{row_num}'] = day  
+            for slot_id, slot_value in self.available_times.items():
                 ws[f'B{row_num}'] = slot_value
+                for col in range(1, len(self.rooms) + 3):
+                    
+                    ws.cell(row=row_num, column=col).alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+                    ws.cell(row=row_num, column=col).font = Font(name="Arial", size=20)
+                    if col!=1:
+                        col_letter = ws.cell(row=1, column=col).column_letter
+                        ws.column_dimensions[col_letter].width = 30
 
-                added = False 
+                added = False
                 for row in rows:
                     if row['time'] == slot_value:
-                        for j, room in enumerate(self.rooms, start=2): 
-                            if row['room'] == room.hall_name:  
-                                # dept = row['Department'].split()
+                        for j, room in enumerate(self.rooms, start=2):
+                            if row['room'] == room.hall_name:
+                                program = row['dept']
+                                fill_color = get_color_for_program(program)
+                                fill_color = colors_by_program[program]
+
                                 cell_value = f"{row['course']}\n{row['dept']}_{row['level']}_{row['group']}\n{row['teatcher']}"
-                                ws.cell(row=row_num, column=j + 1, value=cell_value)
+                                cell = ws.cell(row=row_num, column=j + 1, value=cell_value)
+                                cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type="solid")
                                 added = True
                 if not added:
-                    for j in range(2, len(self.rooms) + 2):  
+                    for j in range(2, len(self.rooms) + 2):
                         ws.cell(row=row_num, column=j + 1, value="")
 
-                first_row = False  
-                for col in range(1, len(self.rooms) + 3):  
+                first_row = False
+                for col in range(1, len(self.rooms) + 3):
                     cell = ws.cell(row=row_num, column=col)
                     self.set_cell_border(cell)
-                    
                     cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
                     cell.font = Font(name="Arial", size=20)
-                    col_letter = ws.cell(row=1, column=col).column_letter  
-                    ws.column_dimensions[col_letter].width = 30  
+                    if col !=1:
+                        col_letter = ws.cell(row=1, column=col).column_letter
+                        ws.column_dimensions[col_letter].width = 30
                 row_num += 1
 
-                
         temp_file = NamedTemporaryFile(delete=False, suffix=".xlsx")
         wb.save(temp_file.name)
-        temp_file.seek(0)  # العودة لبداية الملف
+        temp_file.seek(0)
         return temp_file
     
     def process_solution(self):

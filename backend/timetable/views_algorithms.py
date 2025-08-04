@@ -15,6 +15,8 @@ from collections import defaultdict
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import LectureFilter
+from django.core.mail import send_mail
+from django.conf import settings
 
 
 class TableViewSet(BaseViewSet):
@@ -46,7 +48,6 @@ class TableViewSet(BaseViewSet):
                 random_enabled = True
             elif random_enabled == 'False':
                 random_enabled = False
-            print(f"Random enabled: {random_enabled}")
             if not semester:
                 return Response({'status': 'error', 'message': 'يرجى تحديد الفصل الدراسي'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -60,7 +61,6 @@ class TableViewSet(BaseViewSet):
 
             # التحقق من تكرار الجدول بنفس البيانات
             generated_lectures = scheduler.generated_schedule
-            print(generated_lectures)
 
             existing_tables = Table.objects.filter(semester=semester)
 
@@ -89,6 +89,15 @@ class TableViewSet(BaseViewSet):
             filename = f"schedule_{timestamp}_{unique_id}.xlsx"
 
             if conflict:
+                # for conf in conflict:
+                    # email=conf['conflicts_detail']['email']
+                    # send_mail(
+                    #     subject="⚠️ تعارض في الجدول الدراسي",
+                    #     message="تم العثور على تعارض",
+                    #     from_email=settings.DEFAULT_FROM_EMAIL,
+                    #     recipient_list=[email]
+                    # )
+
                 return Response({
                     'status': 'error',
                     'message': 'تم العثور على تعارضات في الجدول الزمني، يرجى مراجعة البيانات المدخلة.',

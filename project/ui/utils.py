@@ -56,8 +56,9 @@ def show_backend_messages(request, response_json, default_success=""):
         return
 
     collected = {"success": [], "warning": [], "error": []}
-
+    print(collected)
     def add(tag, msg):
+        print(msg)
         if msg:
             collected[tag].append(msg)
 
@@ -226,7 +227,7 @@ def api_get(endpoint, request=None, timeout=60, redirect_to=None, render_templat
             return render(request, render_template, render_context or {})
         return None
 
-def api_post(endpoint, data, request=None, success_message=None, timeout=60, redirect_to=None, render_template=None, render_context=None):
+def api_post(endpoint, data, request=None, success_message="", timeout=60, redirect_to=None, render_template=None, render_context=None):
     headers = {"Content-Type": "application/json"}
     if request and 'token' in request.session:
         headers["Authorization"] = f"Bearer {request.session['token']}"
@@ -246,7 +247,7 @@ def api_post(endpoint, data, request=None, success_message=None, timeout=60, red
                 return render(request, render_template, render_context or {})
             return None
 
-        show_backend_messages(request, data, success_message or "")
+        show_backend_messages(request, data, success_message or "تم الاضافة بنجاح")
 
         if redirect_to:
             return redirect(redirect_to)
@@ -463,6 +464,72 @@ def paginate_queryset(queryset, request, page_key, page_size_key, size=5):
         if hasattr(request, "session"):
             messages.error(request, f"خطأ في التحويل للصفحات: {e}")
         return queryset
+
+# def fetch_paginated_api_data(api_url, request, page_param="page", page_size_param="page_size", default_page_size=10, cache_timeout=60):
+#     """
+#     دالة عامة لجلب بيانات paginated من API يدعم pagination في الـ backend مع استخدام cache.
+#     """
+#     page = request.GET.get(page_param, 1)
+#     page_size = request.GET.get(page_size_param, default_page_size)
+    
+#     try:
+#         page = int(page)
+#     except (ValueError, TypeError):
+#         page = 1
+
+#     try:
+#         page_size = int(page_size)
+#     except (ValueError, TypeError):
+#         page_size = default_page_size
+
+#     # إنشاء مفتاح للكاش بناءً على الرابط والمعاملات
+#     cache_key = f"api_cache:{api_url}:page={page}:page_size={page_size}"
+
+#     # محاولة الحصول من الكاش
+#     cached_data = cache.get(cache_key)
+#     if cached_data is not None:
+#         return cached_data
+
+#     params = {
+#         page_param: page,
+#         page_size_param: page_size,
+#     }
+
+#     try:
+#         response = requests.get(api_url, params=params)
+#         response.raise_for_status()
+#         data = response.json()
+#     except Exception:
+#         # في حالة الخطأ، رجع بيانات فارغة أو من الكاش القديم لو تبي
+#         return {
+#             "results": [],
+#             "count": 0,
+#             "next_url": None,
+#             "prev_url": None,
+#             "current_page": page,
+#             "total_pages": 1,
+#             "page_size": page_size,
+#         }
+
+#     count = data.get("count", 0)
+#     results = data.get("results", [])
+#     next_url = data.get("next")
+#     prev_url = data.get("previous")
+#     total_pages = (count + page_size - 1) // page_size if page_size else 1
+
+#     result_data = {
+#         "results": results,
+#         "count": count,
+#         "next_url": next_url,
+#         "prev_url": prev_url,
+#         "current_page": page,
+#         "total_pages": total_pages,
+#         "page_size": page_size,
+#     }
+#     # حفظ البيانات في الكاش
+#     cache.set(cache_key, result_data, cache_timeout)  # timeout بالثواني
+
+#     return result_data
 
 def get_user_id(request):
     """

@@ -33,7 +33,7 @@ class Program(models.Model):
         verbose_name_plural = "البرامج"
         ordering = ['program_name']
         # إضافة قيد التفرد: لا يمكن أن يتكرر اسم البرنامج ضمن نفس القسم
-        # unique_together = ('program_name', 'fk_department')
+        unique_together = ('program_name', 'fk_department')
 
     def __str__(self):
         return self.program_name
@@ -51,7 +51,7 @@ class Hall(models.Model):
         verbose_name = "قاعة"
         verbose_name_plural = "القاعات"
         ordering = ['-capacity_hall']
-
+        
     def __str__(self):
         return self.hall_name
     
@@ -190,9 +190,6 @@ class Teacher(models.Model):
         ('vacation', 'إجازة')
     ]
     teacher_name = models.CharField(max_length=50, verbose_name="اسم المدرس")
-    teacher_address = models.CharField(max_length=100, verbose_name="عنوان المدرس", blank=True, null=True)
-    teacher_phone = models.CharField(max_length=15, verbose_name="هاتف المدرس", blank=True, null=True)
-    teacher_email = models.EmailField(max_length=100, verbose_name="بريد المدرس الإلكتروني", unique=True) # البريد يجب أن يكون فريداً
     teacher_status = models.CharField(choices=STATUS_CHOICES, verbose_name="حالة المدرس",max_length=100,default='active') # تم تصحيح القيمة الافتراضية 
     class Meta:
         verbose_name = "المدرس"
