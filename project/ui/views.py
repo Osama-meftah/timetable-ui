@@ -151,7 +151,7 @@ class TeachersAvailableView(View):
             "fk_teacher": teacher_id,
         }
 
-        print(time_data)
+        # print(time_data)
         api_post(f"{Endpoints.teacher_times}", time_data, request=request, redirect_to='teachers_availability')
 
         return redirect("teachers_availability")
@@ -322,7 +322,6 @@ class TeacherManagementView(View):
             "teacher_address": request.POST.get("teacher_address", "").strip(),
             "teacher_status": request.POST.get("teacher_status", "").strip(),
         }
-        print(teacher_data)
 
         try: 
             # teachers=cache.get(KeysCach.teachers_data)
@@ -397,7 +396,6 @@ class TeacherAvailabilityAndCoursesView(View):
 
                 all_distributions = api_get(f"{Endpoints.distributions}?paginate=false", request=request) or []
                 teacher_distributions = [d for d in all_distributions if d["fk_teacher"]["id"] == int(id)]
-            print(groups)
             context = {
                 "teacher": teacher,
                 "all_teachers": teachers,
@@ -501,7 +499,6 @@ class CoursesListView(View):
         term= request.GET.get("term")
         subjects = api_get(f"{Endpoints.subjects}", request=request) or []
         # = teachers_data.get('results', [])
-        print(subjects)
         subjects = subjects.get('results', [])
         # subjects= get_or_cache(f"{KeysCach.subjects_data}?term={term}", Endpoints.subjects, request)
         total_courses = len(subjects)
@@ -604,7 +601,6 @@ class RoomsListView(View):
         
         # room_paginated = rooms
         # paginate_queryset(rooms, request, "page", "page_size", 8)
-        print(next_url)
         # next_url = f'{int(next_url) + 1}'
         context = {
             'page_title': 'إدارة القاعات',
@@ -640,7 +636,6 @@ class RoomCreateView(View):
             "hall_status": request.POST.get("status"),
         }
         try:
-            print(new_room_data)
             api_post(Endpoints.halls, new_room_data, request=request)
             # messages.success(request, "✅ تم إضافة القاعة بنجاح.")
         except RuntimeError as e:
@@ -670,7 +665,6 @@ class RoomUpdateView(View):
         return redirect('rooms_management')
 class RoomDeleteView(View):
     def post(self, request, id):
-        print(id)
         try:
             api_delete(f"{Endpoints.halls}{id}/", request=request)
             messages.success(request, "✅ تم حذف القاعة بنجاح.")
@@ -798,7 +792,6 @@ class AddProgramLevelView(View):
         departments = api_get(f"{Endpoints.departments}?paginate=false",request)
         # print(departments)
         # print(programs)
-        print(levels)
         return render(request, 'programs/add_edit.html', {
             "programs": programs,
             "levels": levels,
@@ -873,7 +866,6 @@ class EditProgramLevelView(View):
         # print(levels)
         # levels = api_get(Endpoints.levels)
         # departments = api_get(Endpoints.departments)
-        print(program)
         # print(departments)
         return render(request, 'programs/add_edit.html', {
             "program": program,
@@ -958,7 +950,7 @@ class DeleteProgramLevelView(View):
                 messages.error(request, "❌ نوع العنصر غير معروف.")
         except Exception as e:
             messages.error(request, f"❌ حدث خطأ أثناء الحذف: {e}")
-            print(f"Error deleting item {item_type} with ID {item_id}: {e}")
+            # print(f"Error deleting item {item_type} with ID {item_id}: {e}")
 
         return redirect('add_program')
 
@@ -982,11 +974,13 @@ class PeriodsView(View):
 
 class GroupsView(View):
     def get(self, request, id=None):
-        # gropus = api_get(Endpoints.groups, request=request)
-        # levels = api_get(Endpoints.levels, request=request)
-        # gropus_paginated = paginate_queryset(gropus, request, "page", "page_data_size",5)
-
-        return render(request, 'groups/list.html', { "page_title": "إدارة المجموعات"})
+        response = api_get(Endpoints.programs, request=request)
+        if response['results']:
+            programs=response['results']
+        else:
+            programs=[]
+        print(programs)
+        return render(request, 'groups/list.html', { "page_title": "إدارة المجموعات","program":programs})
 
     def post(self, request):
         # استقبال بيانات الإضافة أو التعديل من المودال (فورم)

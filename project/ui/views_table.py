@@ -49,7 +49,6 @@ class TableDeleteView(View):
 class LecturesView(View):
     def get(self, request, id):
         program_id = request.GET.get('program')
-        print(f"Program ID: {program_id}")
         response = api_get(f"{Endpoints.lectures}{id}/?program={program_id}", request=request)
         # days=api_get(Endpoints.todays, request=request)
         hall=api_get(Endpoints.halls, request=request)

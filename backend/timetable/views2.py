@@ -116,6 +116,8 @@ class ProgramViewSet(BaseViewSet):
 class GroupViewSet(BaseViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = GroupFilter
     success_create_message = "تم إنشاء المجموعة بنجاح."
     success_update_message = "تم تحديث المجموعة بنجاح."
     success_delete_message = "تم حذف المجموعة بنجاح."
@@ -191,6 +193,8 @@ class SubjectViewSet(BaseViewSet):
 class TeacherViewSet(BaseViewSet):
     queryset = Teacher.objects.all()
     serializer_class = TeacherSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = TeacherFilter
     success_create_message = "تم إنشاء المدرس بنجاح."
     success_update_message = "تم تحديث بيانات المدرس بنجاح."
     success_delete_message = "تم حذف المدرس والمستخدم المرتبط بنجاح."
