@@ -479,7 +479,14 @@
             getFormData: null,
             populateForm: null
         });
-        document.addEventListener('DOMContentLoaded', function () {
+        const search = new SearchComponent({
+            inputSelector: '.search',
+            apiManager: teacherManager,     // كائن APIFormManager الذي أنشأته
+            queryKey: 'teacher',            // هذا هو المفتاح المطلوب في API ?group=
+            delay: 300                    // اختياري – تأخير التنفيذ (ms)
+        });
+    });
+    document.addEventListener('DOMContentLoaded', function () {
 
             const teacherDetailsManager = new APIFormManager({
                 listContainerId: "teacher-details-tbody",
@@ -560,13 +567,6 @@
                 },
             });
         });
-        const search = new SearchComponent({
-            inputSelector: '.search',
-            apiManager: teacherManager,     // كائن APIFormManager الذي أنشأته
-            queryKey: 'teacher',            // هذا هو المفتاح المطلوب في API ?group=
-            delay: 300                    // اختياري – تأخير التنفيذ (ms)
-        });
-    });
 </script>
 
 {% endblock %}
