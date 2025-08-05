@@ -3,29 +3,31 @@
 {% load arabic_filters %}
 
 {% block page_header_title %}
-    إدارة المجموعات
+إدارة المجموعات
 {% endblock %}
 
 {% block content %}
 
-<div class="container mx-auto p-6 bg-white shadow-lg rounded-lg font-sans dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+<div
+    class="container mx-auto p-6 bg-white shadow-lg rounded-lg font-sans dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
     <div class="flex flex-col sm:flex-row justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4 sm:mb-0">قائمة المجموعات</h2>
-        <div class="flex gap-4"> 
+        <div class="flex gap-4">
             <div class="relative w-full sm:w-64">
                 <input type="text" class="search w-full pl-10 pr-4 py-2 border border-gray-300 
                 dark:border-gray-600 rounded-full shadow-sm bg-gray-200 dark:bg-gray-600 
                    text-black dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 
                   focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors 
-                  duration-200" data-type="teacher" data-title="ابحث عن مجموعة بإسم التخصص"  placeholder="ابحث عن مجموعة بإسم التخصص..." 
-                aria-label="ابحث عن مجموعة بإسم التخصص"/>
-        
+                  duration-200" data-type="teacher" data-title="ابحث عن مجموعة بإسم التخصص"
+                    placeholder="ابحث عن مجموعة بإسم التخصص..." aria-label="ابحث عن مجموعة بإسم التخصص" />
+
                 <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
                     <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
                 </div>
             </div>
-            <button id="addNewGroupBtn" class="bg-customBlue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out w-full sm:w-auto">
-                <i class="fas fa-plus-circle mr-2"></i> إضافة مجموعة 
+            <button id="addNewGroupBtn"
+                class="bg-customBlue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out w-full sm:w-auto">
+                <i class="fas fa-plus-circle mr-2"></i> إضافة مجموعة
             </button>
         </div>
     </div>
@@ -43,7 +45,8 @@
             <tbody id="groupsTableBody">
             </tbody>
         </table>
-        <p id="noGroupsMessage" class="hidden text-center py-4 text-gray-500 dark:text-gray-400">لا توجد مجموعات لعرضها.</p>
+        <p id="noGroupsMessage" class="hidden text-center py-4 text-gray-500 dark:text-gray-400">لا توجد مجموعات لعرضها.
+        </p>
         <div id="loadingIndicator" class="hidden text-center py-4 text-customBlue">
             <i class="fas fa-spinner fa-spin text-xl"></i> جارٍ التحميل...
         </div>
@@ -54,10 +57,12 @@
 
 <!-- Modal for Add/Edit Group -->
 <div id="groupModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50 hidden p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-md mx-auto transform transition-all duration-300 scale-95 opacity-0">
+    <div
+        class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-md mx-auto transform transition-all duration-300 scale-95 opacity-0">
         <div class="flex justify-between items-center border-b pb-3 mb-4">
             <h3 id="modalTitle" class="text-xl font-semibold text-gray-900 dark:text-gray-100">إضافة مجموعة جديدة</h3>
-            <button id="closeModalBtns" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition duration-200">
+            <button id="closeModalBtns"
+                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition duration-200">
                 <i class="fas fa-times text-2xl"></i>
             </button>
         </div>
@@ -67,31 +72,33 @@
             <input type="hidden" id="groupId" name="group_id" value=""> <!-- مخفي لتخزين ID المجموعة -->
             <input type="hidden" id="actionType" name="form_type" value="">
             <div>
-                <label for="groupName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">اسم المجموعة:</label>
-                <input type="text" id="groupName" name="group_name" required 
-                       class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-customBlue focus:border-customBlue dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                <label for="groupName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">اسم
+                    المجموعة:</label>
+                <input type="text" id="groupName" name="group_name" required
+                    class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-customBlue focus:border-customBlue dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
             </div>
             <div>
-                <label for="numberStudents" class="block text-sm font-medium text-gray-700 dark:text-gray-300">عدد الطلاب:</label>
-                <input type="number" id="numberStudents" name="number_students" min="0" required 
-                       class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-customBlue focus:border-customBlue dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                <label for="numberStudents" class="block text-sm font-medium text-gray-700 dark:text-gray-300">عدد
+                    الطلاب:</label>
+                <input type="number" id="numberStudents" name="number_students" min="0" required
+                    class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-customBlue focus:border-customBlue dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
             </div>
             <div>
                 <label for="fkLevel" class="block text-sm font-medium text-gray-700 dark:text-gray-300">المستوى:</label>
-                <select id="fkLevel" name="fk_level" required 
-                        class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-customBlue focus:border-customBlue dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                <select id="fkLevel" name="fk_level" required
+                    class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-customBlue focus:border-customBlue dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                     {% comment %} <option value="">اختر المستوى</option> {% endcomment %}
                     {% comment %} {% for level in levels %}
-                        <option value="{{ level.id }}">
-                            {{ level.level_name|arabic_level }} [{{ level.fk_program.program_name }}]
-                        </option>
+                    <option value="{{ level.id }}">
+                        {{ level.level_name|arabic_level }} [{{ level.fk_program.program_name }}]
+                    </option>
                     {% endfor %} {% endcomment %}
                 </select>
             </div>
             <div class="flex justify-start w-full pt-4 border-t mt-4">
                 <button type="submit" class="bg-customBlue hover:bg-blue-700 text-white font-bold py-2 px-4 w-full
                 rounded-lg shadow-md transition duration-300 ease-in-out">
-                حفظ
+                    حفظ
                 </button>
             </div>
         </form>
@@ -107,103 +114,108 @@
 <script src="{% static 'src/js/api_form.js' %}"></script>
 <script src="{% static 'src/js/show_modal_message.js' %}"></script>
 <script src="{% static 'src/js/delete.js' %}"></script>
+<script src="{% static 'src/js/my_search.js' %}"></script>
+
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-  const groupModal = document.getElementById('groupModal');
-  const modalTitleElement = document.getElementById('modalTitle');
-  const groupForm = document.getElementById('groupForm');
-  const actionTypeInput = document.getElementById('actionType'); // input مخفي لتخزين نوع العملية
+    document.addEventListener('DOMContentLoaded', function () {
+        const groupModal = document.getElementById('groupModal');
+        const modalTitleElement = document.getElementById('modalTitle');
+        const groupForm = document.getElementById('groupForm');
+        const actionTypeInput = document.getElementById('actionType'); // input مخفي لتخزين نوع العملية
 
-  const groupIdInput = document.getElementById('groupId'); // مخفي لتخزين ID المجموعة
-  const groupNameInput = document.getElementById('groupName');
-  const numberStudentsInput = document.getElementById('numberStudents');
-  const fkLevelSelect = document.getElementById('fkLevel');
+        const groupIdInput = document.getElementById('groupId'); // مخفي لتخزين ID المجموعة
+        const groupNameInput = document.getElementById('groupName');
+        const numberStudentsInput = document.getElementById('numberStudents');
+        const fkLevelSelect = document.getElementById('fkLevel');
 
-  const addNewGroupBtn = document.getElementById('addNewGroupBtn');
-  const closeModalBtn = document.getElementById('closeModalBtns');
-  const groupsTableBody = document.getElementById('groupsTableBody');
+        const addNewGroupBtn = document.getElementById('addNewGroupBtn');
+        const closeModalBtn = document.getElementById('closeModalBtns');
+        const groupsTableBody = document.getElementById('groupsTableBody');
 
-  // فتح المودال مع تعيين نوع العملية والنص المناسب
-  function openModal(type, title) {
-    modalTitleElement.textContent = title;
-    actionTypeInput.value = type;  // "add" أو "edit"
-    groupModal.classList.remove('hidden');
-    setTimeout(() => {
-      groupModal.querySelector('.bg-white').classList.remove('scale-95', 'opacity-0');
-      groupModal.querySelector('.bg-white').classList.add('scale-100', 'opacity-100');
-    }, 10);
-  }
+        // فتح المودال مع تعيين نوع العملية والنص المناسب
+        function openModal(type, title) {
+            modalTitleElement.textContent = title;
+            actionTypeInput.value = type;  // "add" أو "edit"
+            groupModal.classList.remove('hidden');
+            setTimeout(() => {
+                groupModal.querySelector('.bg-white').classList.remove('scale-95', 'opacity-0');
+                groupModal.querySelector('.bg-white').classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
 
-  // إغلاق المودال
-  function closeModal() {
-    groupModal.querySelector('.bg-white').classList.remove('scale-100', 'opacity-100');
-    groupModal.querySelector('.bg-white').classList.add('scale-95', 'opacity-0');
-    groupModal.addEventListener('transitionend', () => {
-      groupModal.classList.add('hidden');
-    }, { once: true });
-  }
+        // إغلاق المودال
+        function closeModal() {
+            groupModal.querySelector('.bg-white').classList.remove('scale-100', 'opacity-100');
+            groupModal.querySelector('.bg-white').classList.add('scale-95', 'opacity-0');
+            groupModal.addEventListener('transitionend', () => {
+                groupModal.classList.add('hidden');
+            }, { once: true });
+        }
 
-  // زر الإضافة
-  addNewGroupBtn.addEventListener('click', () => {
-    groupForm.reset();
-    groupIdInput.value = ''; // لا يوجد id في الإضافة
-    openModal('add', 'إضافة مجموعة جديدة');
-  });
+        // زر الإضافة
+        addNewGroupBtn.addEventListener('click', () => {
+            groupForm.reset();
+            groupIdInput.value = ''; // لا يوجد id في الإضافة
+            openModal('add', 'إضافة مجموعة جديدة');
+        });
 
-  // زر الإغلاق
-  closeModalBtn.addEventListener('click', () => {
-    closeModal();
-  });
+        // زر الإغلاق
+        closeModalBtn.addEventListener('click', () => {
+            closeModal();
+        });
 
-    const groupManager = new APIFormManager({
-        formId: "groupForm",
-        listContainerId: "groupsTableBody",
-        paginationContainerId: "pagination-container",
-        endPoints: ["levels/?paginate=false"],
-        endPoint: "groups/",
 
-        getFormData: () => {
-            //const groupId = document.getElementById('groupId').value;
-            const groupName = document.getElementById('groupName').value.trim();
-            const numberStudents = document.getElementById('numberStudents').value;
-            const fkLevel = document.getElementById('fkLevel').value;
-            if (!groupName || !numberStudents || !fkLevel) {
-                throw new Error("يرجى ملء جميع الحقول المطلوبة.");
-            }
-            return {
-                id: groupId || null,
-                group_name: groupName,
-                number_students: parseInt(numberStudents),
-                fk_level_id: parseInt(fkLevel),
-            };
-        },
 
-        populateForm: (group) => {
-            document.getElementById('groupId').value = group.id;
-            document.getElementById('groupName').value = group.group_name || "";
-            document.getElementById('numberStudents').value = group.number_students || "";
-            document.getElementById('fkLevel').value = (group.fk_level && group.fk_level.id) || "";
-            openModal(true);
-        },
 
-        renderItem: (group,levels) => {
-            const select = document.getElementById('fkLevel');
-            select.innerHTML = '<option value="">اختر المستوى</option>';
-            if (levels) {
-                levels.forEach(level => {
-                    const option = document.createElement('option');
-                    option.value = level.id;
-                    option.textContent = `${level.level_name_display} [${level.fk_program.program_name}]`;
-                    select.appendChild(option);
-                });
-            }
-            const tr = document.createElement('tr');
-            tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700';
-            
-            const levelName = (group.fk_level && group.fk_level.level_name_display) ? group.fk_level.level_name_display : 'غير محدد';
-            const programName = (group.fk_level && group.fk_level.fk_program && group.fk_level.fk_program.program_name) ? group.fk_level.fk_program.program_name : 'غير محدد';
-            
-            tr.innerHTML = `
+        const groupManager = new APIFormManager({
+            formId: "groupForm",
+            listContainerId: "groupsTableBody",
+            paginationContainerId: "pagination-container",
+            endPoints: ["levels/?paginate=false"],
+            endPoint: "groups/",
+
+            getFormData: () => {
+                //const groupId = document.getElementById('groupId').value;
+                const groupName = document.getElementById('groupName').value.trim();
+                const numberStudents = document.getElementById('numberStudents').value;
+                const fkLevel = document.getElementById('fkLevel').value;
+                if (!groupName || !numberStudents || !fkLevel) {
+                    throw new Error("يرجى ملء جميع الحقول المطلوبة.");
+                }
+                return {
+                    id: groupId || null,
+                    group_name: groupName,
+                    number_students: parseInt(numberStudents),
+                    fk_level_id: parseInt(fkLevel),
+                };
+            },
+
+            populateForm: (group) => {
+                document.getElementById('groupId').value = group.id;
+                document.getElementById('groupName').value = group.group_name || "";
+                document.getElementById('numberStudents').value = group.number_students || "";
+                document.getElementById('fkLevel').value = (group.fk_level && group.fk_level.id) || "";
+                openModal(true);
+            },
+
+            renderItem: (group, levels) => {
+                const select = document.getElementById('fkLevel');
+                select.innerHTML = '<option value="">اختر المستوى</option>';
+                if (levels) {
+                    levels.forEach(level => {
+                        const option = document.createElement('option');
+                        option.value = level.id;
+                        option.textContent = `${level.level_name_display} [${level.fk_program.program_name}]`;
+                        select.appendChild(option);
+                    });
+                }
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700';
+
+                const levelName = (group.fk_level && group.fk_level.level_name_display) ? group.fk_level.level_name_display : 'غير محدد';
+                const programName = (group.fk_level && group.fk_level.fk_program && group.fk_level.fk_program.program_name) ? group.fk_level.fk_program.program_name : 'غير محدد';
+
+                tr.innerHTML = `
                 <td class="px-6 py-4 text-start">${levelName} [${programName}]</td>
                 <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">${group.group_name}</td>
                 <td class="px-6 py-4">${group.number_students}</td>
@@ -212,30 +224,36 @@ document.addEventListener('DOMContentLoaded', function () {
                     <button data-id="${group.id}" data-name="${group.group_name}" data-type="المجموعة" data-url="groups/${group.id}/" class="delete-btn text-red-600 hover:text-red-800 p-1.5 dark:text-red-400"><i class="fas fa-trash-alt text-lg"></i></button>
                 </td>
             `;
-            return tr;
-        },
+                return tr;
+            },
+        });
+        const search = new SearchComponent({
+            inputSelector: '.search',
+            apiManager: groupManager,     // كائن APIFormManager الذي أنشأته
+            queryKey: 'group',            // هذا هو المفتاح المطلوب في API ?group=
+            delay: 300                    // اختياري – تأخير التنفيذ (ms)
+        });
+        // زر التعديل داخل الجدول
+        groupsTableBody.addEventListener('click', (e) => {
+            const editBtn = e.target.closest('.edit-btn');
+            if (editBtn) {
+                const tr = editBtn.closest('tr');
+
+                const groupId = editBtn.dataset.id;
+                const fkLevel = editBtn.dataset.fkLevel;
+                const groupName = tr.cells[1].innerText.trim();
+                const numberStudents = tr.cells[2].innerText.trim();
+
+                groupIdInput.value = groupId;
+                groupNameInput.value = groupName;
+                numberStudentsInput.value = numberStudents;
+                fkLevelSelect.value = fkLevel || "";
+
+                openModal('edit', 'تعديل مجموعة');
+            }
+        });
+
     });
-
-  // زر التعديل داخل الجدول
-  groupsTableBody.addEventListener('click', (e) => {
-    const editBtn = e.target.closest('.edit-btn');
-    if (editBtn) {
-      const tr = editBtn.closest('tr');
-
-      const groupId = editBtn.dataset.id;
-      const fkLevel = editBtn.dataset.fkLevel;
-      const groupName = tr.cells[1].innerText.trim();
-      const numberStudents = tr.cells[2].innerText.trim();
-
-      groupIdInput.value = groupId;
-      groupNameInput.value = groupName;
-      numberStudentsInput.value = numberStudents;
-      fkLevelSelect.value = fkLevel || "";
-
-      openModal('edit', 'تعديل مجموعة');
-    }
-  });
-});
 
 </script>
 {% endblock %}

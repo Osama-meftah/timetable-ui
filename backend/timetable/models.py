@@ -190,9 +190,6 @@ class Teacher(models.Model):
         ('vacation', 'إجازة')
     ]
     teacher_name = models.CharField(max_length=50, verbose_name="اسم المدرس")
-    teacher_address = models.CharField(max_length=100, verbose_name="عنوان المدرس", blank=True, null=True)
-    teacher_phone = models.CharField(max_length=15, verbose_name="هاتف المدرس", blank=True, null=True)
-    teacher_email = models.EmailField(max_length=100, verbose_name="بريد المدرس الإلكتروني", unique=True) # البريد يجب أن يكون فريداً
     teacher_status = models.CharField(choices=STATUS_CHOICES, verbose_name="حالة المدرس",max_length=100,default='active') # تم تصحيح القيمة الافتراضية 
     class Meta:
         verbose_name = "المدرس"

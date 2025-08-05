@@ -4,68 +4,75 @@
 
 {% block content %}
 <div class="container mx-auto py-6">
-  <h2 class="text-2xl font-bold mb-4 text-center">الجدول الدراسي</h2>
-  <div>
-    <form method="get" action="{% url 'view_table_lectures' table_id %}" class="mb-4">
-      <div class="w-full sm:w-1/3">
-        <label for="program" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">البرنامج</label>
-        <select id="program" onchange="this.form.submit()" name="program"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 appearance-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 sm:text-sm bg-gray-200 text-gray-900 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none"
-          required>
-          <option value="">اختر برنامج</option>
-          {% for program in programs %}
-          <option value="{{ program.id }}">{{ program.program_name }}</option>
+  <h2 class="text-3xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">الجدول الدراسي</h2>
+
+  <!-- فلتر البرنامج -->
+  <form method="get" action="{% url 'view_table_lectures' table_id %}" class="mb-6">
+    <div class="w-full sm:w-1/3 mx-auto">
+      <label for="program" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">البرنامج</label>
+      <select id="program" onchange="this.form.submit()" name="program"
+        class="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-gray-200 text-gray-900 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm"
+        required>
+        <option value="">اختر برنامج</option>
+        {% for program in programs %}
+        <option value="{{ program.id }}">{{ program.program_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+
+  <!-- الجدول -->
+  <div class="overflow-x-auto">
+    <table class="border p-2 w-full text-center shadow rounded px-2 py-1 mb-1">
+      <thead class="bg-indigo-600 text-white text-sm">
+        <tr>
+          <th class="border p-3 w-24">اليوم</th>
+          <th class="border p-3 w-32">الوقت</th>
+          {% for hall in halls %}
+          <th class="border p-3">{{ hall.hall_name }}</th>
           {% endfor %}
-        </select>
-      </div>
-    </form>
+        </tr>
+      </thead>
+      <tbody class="text-sm bg-white dark:bg-gray-900">
+        {% for day, day_data in schedule.items %}
+          {% for period in periods %}
+          <tr class="hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+            {% if forloop.first %}
+            <td class="border p-2 font-bold align-middle bg-gray-100 dark:bg-gray-800" rowspan="{{ periods|length }}">
+              {{ day }}
+            </td>
+            {% endif %}
+            <td class="border p-2 font-medium bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-100">
+              {{ period.period_from }} - {{ period.period_to }}
+            </td>
+
+            {% for hall in halls %}
+            {% with key=period.period_from|stringformat:"s"|add:"-"|add:period.period_to|stringformat:"s" %}
+            <td class="border p-2 text-right align-top">
+              {% with items=day_data|get_item:key %}
+              {% if items %}
+                {% for lec in items %}
+                  {% if lec.hall == hall.hall_name %}
+                  <div class="bg-indigo-100 dark:bg-indigo-800 text-indigo-900 dark:text-white rounded px-2 py-1 mb-1 shadow-sm">
+                    <span class="font-semibold">{{ lec.course }}</span><br>
+                    <span class="text-xs">{{ lec.program }} - {{ lec.level }} - {{ lec.group }}</span><br>
+                    <small class="text-gray-600 dark:text-gray-300">{{ lec.teacher }}</small>
+                  </div>
+                  {% endif %}
+                {% endfor %}
+              {% else %}
+                <span class="text-gray-300 dark:text-gray-600">---</span>
+              {% endif %}
+              {% endwith %}
+            </td>
+            {% endwith %}
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
-
-  <table class="w-full border text-center border-collapse">
-    <thead>
-      <tr>
-        <th class="border p-2" rowspan="2">اليوم</th>
-        {% comment %} صف القاعات %}{% endcomment %}
-        {% for hall in halls %}
-        <th class="border p-2" colspan="{{ periods|length }}">{{ hall.hall_name }}</th>
-        {% endfor %}
-      </tr>
-      <tr>
-        {% comment %} صف الفترات (تحت كل قاعة) %}{% endcomment %}
-        {% for hall in halls %}
-        {% for period in periods %}
-        <th class="border p-2">{{ period.period_from }} - {{ period.period_to }}</th>
-        {% endfor %}
-        {% endfor %}
-      </tr>
-    </thead>
-    <tbody>
-      {% for day, day_data in schedule.items %}
-      <tr>
-        <td class="border p-2 font-bold">{{ day }}</td>
-
-        {% for hall in halls %}
-        {% for period in periods %}
-        {% with key=period.period_from|stringformat:"s"|add:"-"|add:period.period_to|stringformat:"s" %}
-        <td class="border p-2 text-right align-top">
-          {% for lec in day_data|get_item:key %}
-          {% if lec.hall == hall.hall_name %}
-          <div>
-            <span class="font-semibold">{{ lec.course }}</span><br>
-            <span class="font-semibold">{{lec.program}}-{{ lec.level }}-{{ lec.group }}</span>
-            <small>{{ lec.teacher }}</small>
-          </div>
-          {% endif %}
-          {% empty %}
-          <span class="text-gray-400">---</span>
-          {% endfor %}
-        </td>
-        {% endwith %}
-        {% endfor %}
-        {% endfor %}
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
 </div>
 {% endblock %}
+

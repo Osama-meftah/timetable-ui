@@ -19,85 +19,85 @@ def dashboard(request):
     """
     عرض لوحة التحكم.
     """
-    subjects = api_get(Endpoints.subjects)
-    teachers_data = api_get(Endpoints.teachers)
-    total_teacher = len(teachers_data)
-    total_courses = len(subjects)
-    listName=[ sub.get('subject_name') for sub in subjects]
-    distribution =api_get(Endpoints.distributions)
-    distributionList=[ dist.get("fk_teacher")  for dist in distribution ]
+    # subjects = api_get(Endpoints.subjects)
+    # teachers_data = api_get(Endpoints.teachers)
+    # total_teacher = len(teachers_data)
+    # total_courses = len(subjects)
+    # listName=[ sub.get('subject_name') for sub in subjects]
+    # distribution =api_get(Endpoints.distributions)
+    # distributionList=[ dist.get("fk_teacher")  for dist in distribution ]
     
-    countSubTeacher=[]
-    for teacher in teachers_data:
+    # countSubTeacher=[]
+    # for teacher in teachers_data:
         
-        teacher_id = teacher["id"]
-        count=0
-        for d in distribution:
-            if d["fk_teacher"]["id"] == teacher_id:
-                count+=1
-        if count > 2:
-            countSubTeacher.append({
-                "name":teacher["teacher_name"],
-                "countSub":count,
-                "countHour":2*count
-            })
-    # sorted(countSubTeacher)
-    countSubTeacher.sort(key=lambda item: item['countSub'], reverse=True)
-    allNamesTeachers=[]
-    teacherNotSubject=[]
-    for teach in teachers_data:
-        allNamesTeachers.append(teach["teacher_name"])
-        if teach not in distributionList:
-            teacherNotSubject.append({"key": teach['id'],"val":teach["teacher_name"]})
+    #     teacher_id = teacher["id"]
+    #     count=0
+    #     for d in distribution:
+    #         if d["fk_teacher"]["id"] == teacher_id:
+    #             count+=1
+    #     if count > 2:
+    #         countSubTeacher.append({
+    #             "name":teacher["teacher_name"],
+    #             "countSub":count,
+    #             "countHour":2*count
+    #         })
+    # # sorted(countSubTeacher)
+    # countSubTeacher.sort(key=lambda item: item['countSub'], reverse=True)
+    # allNamesTeachers=[]
+    # teacherNotSubject=[]
+    # for teach in teachers_data:
+    #     allNamesTeachers.append(teach["teacher_name"])
+    #     if teach not in distributionList:
+    #         teacherNotSubject.append({"key": teach['id'],"val":teach["teacher_name"]})
             
-    halls=api_get(Endpoints.halls,request)
-    notActivHall=[]
-    allNamesHalls=[]
-    for hal in halls:
-        allNamesHalls.append(hal["hall_name"])
-        if hal["hall_status"] == "under_maintenance":
-            notActivHall.append({"key": hal["id"],"val":hal["hall_name"]})
+    # halls=api_get(Endpoints.halls,request)
+    # notActivHall=[]
+    # allNamesHalls=[]
+    # for hal in halls:
+    #     allNamesHalls.append(hal["hall_name"])
+    #     if hal["hall_status"] == "under_maintenance":
+    #         notActivHall.append({"key": hal["id"],"val":hal["hall_name"]})
     
-    levels=api_get(Endpoints.levels,request)
-    allNamesLevels=[]
+    # levels=api_get(Endpoints.levels,request)
+    # allNamesLevels=[]
 
-    for level in levels:
-        allNamesLevels.append(level["level_name"]) 
+    # for level in levels:
+    #     allNamesLevels.append(level["level_name"]) 
     
-    lecuters=api_get(Endpoints.lectures,request)
-    taimeTable=[]
-    periods=api_get(Endpoints.periods,request)
-    todays=api_get(Endpoints.todays,request)
-    for lecuter in lecuters:
-        period_id=lecuter['fk_period']
-        for p in periods: 
-            if p["id"] == period_id:   
-                period= f"{p['period_from']} - {p['period_to']}"
-        day_id=lecuter['fk_day']
-        for d in todays: 
-            if d["id"] == day_id:
-                day=  d['day_name_display'] 
-        taimeTable.append({
-            "subject": lecuter["fk_distribution"]["fk_subject"]["subject_name"],
-            "level": lecuter["fk_distribution"]["fk_group"]["fk_level"]["level_name"],
-            "teacher": lecuter["fk_distribution"]["fk_teacher"]["teacher_name"],
-            "hall": lecuter["fk_hall"]["hall_name"],
-            "day": day,
-            "period": period, 
-        })
+    # lecuters=api_get(Endpoints.lectures,request)
+    # taimeTable=[]
+    # periods=api_get(Endpoints.periods,request)
+    # todays=api_get(Endpoints.todays,request)
+    # for lecuter in lecuters:
+    #     period_id=lecuter['fk_period']
+    #     for p in periods: 
+    #         if p["id"] == period_id:   
+    #             period= f"{p['period_from']} - {p['period_to']}"
+    #     day_id=lecuter['fk_day']
+    #     for d in todays: 
+    #         if d["id"] == day_id:
+    #             day=  d['day_name_display'] 
+    #     taimeTable.append({
+    #         "subject": lecuter["fk_distribution"]["fk_subject"]["subject_name"],
+    #         "level": lecuter["fk_distribution"]["fk_group"]["fk_level"]["level_name"],
+    #         "teacher": lecuter["fk_distribution"]["fk_teacher"]["teacher_name"],
+    #         "hall": lecuter["fk_hall"]["hall_name"],
+    #         "day": day,
+    #         "period": period, 
+    #     })
     
-    context={
-        "total_teacher":total_teacher,
-        "total_courses":total_courses,
-        "listName":listName,
-        "teacherNotSubject":teacherNotSubject,
-        "notActivHall":notActivHall,
-        "allNamesTeachers":allNamesTeachers,
-        "allNamesHalls":allNamesHalls,
-        "allNamesLevels":allNamesLevels,
-        "countSubTeacher":countSubTeacher,
-        "taimeTable":taimeTable
-        }
+    # context={
+    #     "total_teacher":total_teacher,
+    #     "total_courses":total_courses,
+    #     "listName":listName,
+    #     "teacherNotSubject":teacherNotSubject,
+    #     "notActivHall":notActivHall,
+    #     "allNamesTeachers":allNamesTeachers,
+    #     "allNamesHalls":allNamesHalls,
+    #     "allNamesLevels":allNamesLevels,
+    #     "countSubTeacher":countSubTeacher,
+    #     "taimeTable":taimeTable
+    #     }
     return render(request, 'dashboard.html')
 
 
@@ -151,7 +151,7 @@ class TeachersAvailableView(View):
             "fk_teacher": teacher_id,
         }
 
-        print(time_data)
+        # print(time_data)
         api_post(f"{Endpoints.teacher_times}", time_data, request=request, redirect_to='teachers_availability')
 
         return redirect("teachers_availability")
@@ -259,7 +259,6 @@ class TeacherManagementView(View):
             "teacher_address": request.POST.get("teacher_address", "").strip(),
             "teacher_status": request.POST.get("teacher_status", "").strip(),
         }
-        print(teacher_data)
 
         try: 
             if id:
@@ -323,7 +322,6 @@ class TeacherAvailabilityAndCoursesView(View):
 
                 all_distributions = api_get(f"{Endpoints.distributions}?paginate=false", request=request) or []
                 teacher_distributions = [d for d in all_distributions if d["fk_teacher"]["id"] == int(id)]
-            # print(groups)
             context = {
                 "teacher": teacher,
                 "all_teachers": teachers,
@@ -383,7 +381,7 @@ class TeacherAvailabilityAndCoursesView(View):
                             "fk_period_id": period_id,
                             "fk_teacher": teacher_id,
                         }
-                        print(time_data)
+                        # print(time_data)
                         try:
                             if availability_id:
                                 api_put(f"{Endpoints.teacher_times}{availability_id}/", time_data, request=request)
@@ -399,7 +397,7 @@ class TeacherAvailabilityAndCoursesView(View):
             
             elif form_type == "delete_distribution":
                 dist_id = request.POST.get("item_id")
-                print(dist_id)
+                # print(dist_id)
                 if dist_id:
                     try:
                         api_delete(f"{Endpoints.distributions}{dist_id}/", request=request)
@@ -410,7 +408,7 @@ class TeacherAvailabilityAndCoursesView(View):
             
             elif form_type == "delete_availability":
                 availability_id = request.POST.get("item_id")
-                print(availability_id)
+                # print(availability_id)
                 if availability_id:
                     try:
                         api_delete(f"{Endpoints.teacher_times}{availability_id}/", request=request)
@@ -434,7 +432,6 @@ class CoursesListView(View):
         term= request.GET.get("term")
         subjects = api_get(f"{Endpoints.subjects}", request=request) or []
         # = teachers_data.get('results', [])
-        print(subjects)
         subjects = subjects.get('results', [])
         # subjects= get_or_cache(f"{KeysCach.subjects_data}?term={term}", Endpoints.subjects, request)
         total_courses = len(subjects)
@@ -520,7 +517,6 @@ class RoomsListView(View):
         
         # room_paginated = rooms
         # paginate_queryset(rooms, request, "page", "page_size", 8)
-        print(next_url)
         # next_url = f'{int(next_url) + 1}'
         context = {
             'page_title': 'إدارة القاعات',
@@ -556,7 +552,6 @@ class RoomCreateView(View):
             "hall_status": request.POST.get("status"),
         }
         try:
-            print(new_room_data)
             api_post(Endpoints.halls, new_room_data, request=request)
             # messages.success(request, "✅ تم إضافة القاعة بنجاح.")
         except RuntimeError as e:
@@ -586,7 +581,6 @@ class RoomUpdateView(View):
         return redirect('rooms_management')
 class RoomDeleteView(View):
     def post(self, request, id):
-        print(id)
         try:
             api_delete(f"{Endpoints.halls}{id}/", request=request)
             messages.success(request, "✅ تم حذف القاعة بنجاح.")
@@ -714,7 +708,6 @@ class AddProgramLevelView(View):
         departments = api_get(f"{Endpoints.departments}?paginate=false",request)
         # print(departments)
         # print(programs)
-        print(levels)
         return render(request, 'programs/add_edit.html', {
             "programs": programs,
             "levels": levels,
@@ -789,7 +782,6 @@ class EditProgramLevelView(View):
         # print(levels)
         # levels = api_get(Endpoints.levels)
         # departments = api_get(Endpoints.departments)
-        print(program)
         # print(departments)
         return render(request, 'programs/add_edit.html', {
             "program": program,
@@ -874,7 +866,7 @@ class DeleteProgramLevelView(View):
                 messages.error(request, "❌ نوع العنصر غير معروف.")
         except Exception as e:
             messages.error(request, f"❌ حدث خطأ أثناء الحذف: {e}")
-            print(f"Error deleting item {item_type} with ID {item_id}: {e}")
+            # print(f"Error deleting item {item_type} with ID {item_id}: {e}")
 
         return redirect('add_program')
 
@@ -882,11 +874,14 @@ class DeleteProgramLevelView(View):
 class TimeTableSettingsView(View):
     def get(self, request, id=None):
         if request.session.get('conflicts'):
+            available_unscheduled=request.session.get('available_unscheduled')
             conflicts= request.session.get('conflicts')
         else:
             conflicts = []
+            available_unscheduled=[]
 
-        return render(request, 'timetables/list.html',{'conflicts': conflicts})
+
+        return render(request, 'timetables/list.html',{'conflicts': conflicts,'available_unscheduled':available_unscheduled})
     
     
 class PeriodsView(View):
@@ -895,11 +890,13 @@ class PeriodsView(View):
 
 class GroupsView(View):
     def get(self, request, id=None):
-        # gropus = api_get(Endpoints.groups, request=request)
-        # levels = api_get(Endpoints.levels, request=request)
-        # gropus_paginated = paginate_queryset(gropus, request, "page", "page_data_size",5)
-
-        return render(request, 'groups/list.html', { "page_title": "إدارة المجموعات"})
+        response = api_get(Endpoints.programs, request=request)
+        if response['results']:
+            programs=response['results']
+        else:
+            programs=[]
+        print(programs)
+        return render(request, 'groups/list.html', { "page_title": "إدارة المجموعات","program":programs})
 
     def post(self, request):
         # استقبال بيانات الإضافة أو التعديل من المودال (فورم)

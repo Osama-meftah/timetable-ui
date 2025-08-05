@@ -46,6 +46,7 @@
     {# Simple Teachers List Section #}
     <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6 mb-8">
         <div class="flex flex-col gap-4 lg:flex-row sm:items-center sm:justify-between mb-8">
+<<<<<<< HEAD
           <!-- العنوان -->
           <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap text-center lg:text-right">
             قائمة المدرسين (مبسطة)
@@ -60,48 +61,56 @@
                 type="text"
                 id="search-teacher"
                 class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-gray-200
+=======
+            <!-- العنوان -->
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap text-center lg:text-right">
+                قائمة المدرسين (مبسطة)
+            </h2>
+
+            <!-- أدوات التحكم -->
+            <div
+                class="flex flex-col lg:flex-row flex-wrap gap-3 sm:gap-4 w-full lg:w-auto justify-center lg:justify-end">
+
+                <!-- حقل البحث -->
+                <div class="relative w-full sm:w-64">
+                    <input type="text"
+                        class="search w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-gray-200
+>>>>>>> origin/recovery-branch2
                 dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400
                 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
-                data-type="teacher"
-                data-title="البحث عن مدرس"
-                placeholder="البحث باسم المدرس..."
-                aria-label="البحث عن مدرس"
-              />
-              <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
-                <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
-              </div>
+                        data-type="teacher" data-title="البحث عن مدرس" placeholder="البحث باسم المدرس..."
+                        aria-label="البحث عن مدرس" />
+                    <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
+                    </div>
+                </div>
+
+                <!-- زر رفع الملف -->
+                <button type="button"
+                    class="upload-trigger flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md w-full sm:w-auto transition-all duration-200"
+                    data-type="teachers" data-title="رفع ملف بيانات المدرسين"
+                    data-description="يجب أن يحتوي الملف على الأعمدة: teacher_name, teacher_email, teacher_phone, teacher_address, teacher_status.">
+                    <i class="fas fa-upload ml-2"></i>
+                    <span class="ml-1">رفع ملف</span>
+                </button>
+
+                <!-- زر إضافة مدرس -->
+                <a href="{% url 'add_teacher' %}?add=1"
+                    class="flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 w-full sm:w-auto group">
+                    <i class="fas fa-plus-circle ml-2"></i>
+                    <span class="group-hover:rotate-6 transition-transform duration-200">إضافة مدرس</span>
+                </a>
+
             </div>
-        
-            <!-- زر رفع الملف -->
-            <button
-              type="button"
-              class="upload-trigger flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md w-full sm:w-auto transition-all duration-200"
-              data-type="teachers"
-              data-title="رفع ملف بيانات المدرسين"
-              data-description="يجب أن يحتوي الملف على الأعمدة: teacher_name, teacher_email, teacher_phone, teacher_address, teacher_status."
-            >
-              <i class="fas fa-upload ml-2"></i>
-              <span class="ml-1">رفع ملف</span>
-            </button>
-        
-            <!-- زر إضافة مدرس -->
-            <a
-              href="{% url 'add_teacher' %}?add=1"
-              class="flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 w-full sm:w-auto group"
-            >
-              <i class="fas fa-plus-circle ml-2"></i>
-              <span class="group-hover:rotate-6 transition-transform duration-200">إضافة مدرس</span>
-            </a>
-        
-          </div>
         </div>
 
         <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700" >
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
                         <th scope="col"
-                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-12" id"teachers-section">
+                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-12"
+                            id"teachers-section">
                             ID</th>
                         <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -117,8 +126,8 @@
                             الإجراءات</th>
                     </tr>
                 </thead>
-                <tbody id="teacher-list-container" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"
-                    data-type="teacher">
+                <tbody id="teacher-list-container"
+                    class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700" data-type="teacher">
                     {# Iterate over the paginated teachers object #}
                     {% comment %} {% for teacher in teachers %}
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row">
@@ -130,8 +139,7 @@
                         </td>
                         <td
                             class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
-
-                            {{ teacher.teacher_email }}
+                            {{ teacher.user.email }}
                         </td>
                         <td
                             class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
@@ -183,42 +191,37 @@
     {# Detailed Teachers List Section (teachers_with_data) #}
     <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6" id="teachers-section_details">
         <div class="flex flex-col center-title gap-4 lg:flex-row sm:items-center sm:justify-between mb-6">
-          <!-- العنوان -->
-          <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 whitespace-nowrap text-center sm:text-right">
-            إدارة المقررات والأوقات للمدرسين
-          </h2>
-        
-          <!-- أدوات التحكم -->
-          <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
-        
-            <!-- حقل البحث -->
-            <div class="relative w-full sm:w-64">
-              <input
-                type="text"
-                class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-gray-200
+            <!-- العنوان -->
+            <h2
+                class="text-2xl font-semibold text-gray-800 dark:text-gray-100 whitespace-nowrap text-center sm:text-right">
+                إدارة المقررات والأوقات للمدرسين
+            </h2>
+
+            <!-- أدوات التحكم -->
+            <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
+
+                <!-- حقل البحث -->
+                <div class="relative w-full sm:w-64">
+                    <input type="text"
+                        class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-gray-200
                 dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400
                 focus:outline-none center-title focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
-                data-type="teacherdetails"
-                data-title="البحث عن مدرس"
-                placeholder="البحث باسم المدرس..."
-                aria-label="البحث عن مدرس"
-              />
-              <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
-                <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
-              </div>
+                        data-type="teacherdetails" data-title="البحث عن مدرس" placeholder="البحث باسم المدرس..."
+                        aria-label="البحث عن مدرس" />
+                    <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
+                    </div>
+                </div>
+
+                <!-- زر ربط مدرس جديد -->
+                <a href="{% url 'add_edit_teacher_with_courses' %}"
+                    class="bg-indigo-600 dark:text-gray-200 hover:bg-indigo-700 hover:text-gray-200
+                     text-white font-bold py-2 px-4 rounded-md flex items-center shadow-md transition-colors duration-200 w-full sm:w-auto justify-center">
+                    <i class="fas fa-plus-circle ml-2"></i>
+                    ربط مدرس بمقرر
+                </a>
+
             </div>
-        
-            <!-- زر ربط مدرس جديد -->
-            <a
-              href="{% url 'add_edit_teacher_with_courses' %}"
-              class="bg-indigo-600 dark:text-gray-200 hover:bg-indigo-700 hover:text-gray-200
-                     text-white font-bold py-2 px-4 rounded-md flex items-center shadow-md transition-colors duration-200 w-full sm:w-auto justify-center"
-            >
-              <i class="fas fa-plus-circle ml-2"></i>
-              ربط مدرس بمقرر 
-            </a>
-        
-          </div>
         </div>
 
         <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
@@ -227,7 +230,7 @@
                     <tr>
                         <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-12">
-                         ID
+                            ID
                         </th>
                         <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -243,7 +246,8 @@
                             الإجراءات</th>
                     </tr>
                 </thead>
-                <tbody id="teacher-details-tbody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"
+                <tbody id="teacher-details-tbody"
+                    class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"
                     data-type="teacherdetails">
                     {% comment %} {% for item in teachers_with_data %}
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row">
@@ -263,11 +267,11 @@
                                             {% if item.teacher.teacher_status == 'active' %}text-green-600 dark:text-green-400
                                             {% elif item.teacher.teacher_status == 'vacation' %}text-yellow-600 dark:text-yellow-400
                                             {% else %}text-gray-500 dark:text-gray-400{% endif %} font-semibold">
-                                             {% if item.teacher.teacher_status == 'active' %}
-                                             نشط
-                                             {% elif item.teacher.teacher_status == 'vacation' %}
-                                             اجازة
-                                             {% endif %}
+                                            {% if item.teacher.teacher_status == 'active' %}
+                                            نشط
+                                            {% elif item.teacher.teacher_status == 'vacation' %}
+                                            اجازة
+                                            {% endif %}
                                         </span>
                                     </div>
                                 </div>
@@ -325,13 +329,17 @@
                     <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">حاول البحث بكلمات مختلفة أو تحقق من
                         التهجئة.</p>
                 </div>
-                
+
             </table>
             <div id="pagination-details-container" class="block"></div>
-        </div>        
+        </div>
         {# Pagination for Detailed List (Updated) #}
-        {% comment %} {% include "pagination.html" with current_page=current_page page_range=page_range total_pages=total_pages prev_url=prev_url next_url=next_url page_id="teacher-details"  %} {% endcomment %}
-        {% comment %} {% include "pagination.html" with page_obj=teachers_with_data page_key="page_detailed" page_id="teachers-section_details" %} {% endcomment %}
+        {% comment %}
+        {% include "pagination.html" with current_page=current_page page_range=page_range total_pages=total_pages prev_url=prev_url next_url=next_url page_id="teacher-details"  %}
+        {% endcomment %}
+        {% comment %}
+        {% include "pagination.html" with page_obj=teachers_with_data page_key="page_detailed" page_id="teachers-section_details" %}
+        {% endcomment %}
     </div>
 </div>
 
@@ -344,7 +352,10 @@
 {% block extra_js %}
 <script src="{% static 'src/js/show_modal_message.js' %}"></script>
 <script src="{% static 'src/js/api_form.js' %}"></script>
+<script src="{% static 'src/js/my_search.js' %}"></script>
+
 <script>
+<<<<<<< HEAD
     {% comment %} document.addEventListener("DOMContentLoaded", () => {
        new SearchComponent({
             inputSelector: ".search-input[data-type='teacher']",
@@ -373,76 +384,101 @@
         `
         });
     }); {% endcomment %}
+=======
+    // document.addEventListener("DOMContentLoaded", () => {
+    //     new SearchComponent({
+    //         inputSelector: ".search-input[data-type='teacher']",
+    //         rowSelector: "tbody[data-type='teacher']",
+    //         noResultSelector: ".no-results-message[data-type='teacher']",
+    //         apiEndpoint: "http://127.0.0.1:8001/api/searchteachers/",
+    //         renderItemFn: (teacher, index) => `
+    //       <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+    //         <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-200">${index + 1}</td>
+    //         <td class="px-4 py-4 text-sm font-medium text-gray-900 dark:text-gray-200">${teacher.teacher_name}</td>
+    //         <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">${teacher.teacher_phone}</td>
+    //         <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">${teacher.teacher_email}</td>
+    //         <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">${teacher.teacher_status}</td>
+    //         <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">${teacher.teacher_address}</td>
+    //         <td class="px-8 py-4 text-sm font-medium flex items-center justify-end gap-2">
+    //           <a href="/teachers/edit/${teacher.id}/" class="text-indigo-600 hover:text-indigo-900">
+    //             <i class="fas fa-edit text-lg"></i>
+    //           </a>
+    //         </td>
+    //       </tr>
+    //     `
+    //     });
+    // });
+>>>>>>> origin/recovery-branch2
 
-    
-    document.addEventListener("DOMContentLoaded", () => {
-        new SearchComponent({
-            inputSelector: ".search-input[data-type='teacherdetails']",
-            rowSelector: "tbody[data-type='teacherdetails']",
-            noResultSelector: ".no-results-message[data-type='teacherdetails']",
-            apiEndpoint: "http://127.0.0.1:8001/api/searchteachersdistribution/",
-            renderItemFn: (item, index) => {
-                const teacher = item.teacher;
 
-                const statusColor = teacher.teacher_status === 'active'
-                    ? 'text-green-600 dark:text-green-400'
-                    : teacher.teacher_status === 'vacation'
-                        ? 'text-yellow-600 dark:text-yellow-400'
-                        : 'text-gray-500 dark:text-gray-400';
+    // document.addEventListener("DOMContentLoaded", () => {
+    //     new SearchComponent({
+    //         inputSelector: ".search-input[data-type='teacherdetails']",
+    //         rowSelector: "tbody[data-type='teacherdetails']",
+    //         noResultSelector: ".no-results-message[data-type='teacherdetails']",
+    //         apiEndpoint: "http://127.0.0.1:8001/api/searchteachersdistribution/",
+    //         renderItemFn: (item, index) => {
+    //             const teacher = item.teacher;
 
-                const coursesHTML = item.courses && item.courses.length
-                    ? item.courses.map(c => `<p>${c.subject_name} (${c.level} - ${c.group})</p>`).join("")
-                    : `<span class="text-gray-400 dark:text-gray-500">غير محدد</span>`;
+    //             const statusColor = teacher.teacher_status === 'active'
+    //                 ? 'text-green-600 dark:text-green-400'
+    //                 : teacher.teacher_status === 'vacation'
+    //                     ? 'text-yellow-600 dark:text-yellow-400'
+    //                     : 'text-gray-500 dark:text-gray-400';
 
-                const availabilityHTML = item.availability && item.availability.length
-                    ? `<ul class="list-disc list-inside space-y-1">` +
-                    item.availability.map(a => `<li><span class="font-medium">${a.day}:</span> ${a.period}</li>`).join("") +
-                    `</ul>`
-                    : `<span class="text-gray-400 dark:text-gray-500">غير متاح حالياً</span>`;
+    //             const coursesHTML = item.courses && item.courses.length
+    //                 ? item.courses.map(c => `<p>${c.subject_name} (${c.level} - ${c.group})</p>`).join("")
+    //                 : `<span class="text-gray-400 dark:text-gray-500">غير محدد</span>`;
 
-                return `
-              <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row">
-                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">${index + 1}</td>
-                <td class="px-4 py-4 whitespace-nowrap">
-                  <div class="flex items-center">
-                    <div class="mr-4">
-                      <div class="text-sm font-medium text-gray-900 dark:text-gray-200">${teacher.teacher_name}</div>
-                      <div class="text-xs text-gray-500 dark:text-gray-400">
-                        الحالة:
-                        <span class="${statusColor} font-semibold">${teacher.teacher_status}</span>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                {% comment %} <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
-                  ${teacher.teacher_email}
-                </td>
-                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden lg:table-cell">
-                  ${teacher.teacher_phone}
-                </td> {% endcomment %}
-                <td class="px-4 py-4 whitespace-normal text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
-                  ${coursesHTML}
-                </td>
-                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                  ${availabilityHTML}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <a href="/teachers/edit/${teacher.id}/" class="inline-flex items-center justify-center
-                    w-10 h-10 rounded-full
-                    bg-blue-600 hover:bg-blue-700 text-white
-                    shadow-md hover:shadow-lg hover:text-gray-200
-                    transition-all duration-300 ease-in-out
-                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75
-                    dark:bg-blue-700 dark:hover:bg-blue-600 dark:text-gray-100 dark:hover:text-gray-200" title="تعديل البرنامج">
-                    <i class="fas fa-edit text-lg"></i>
-                  </a>
-                </td>
-              </tr>
-            `;
-            }
-        });
-    });
-    
+    //             const availabilityHTML = item.availability && item.availability.length
+    //                 ? `<ul class="list-disc list-inside space-y-1">` +
+    //                 item.availability.map(a => `<li><span class="font-medium">${a.day}:</span> ${a.period}</li>`).join("") +
+    //                 `</ul>`
+    //                 : `<span class="text-gray-400 dark:text-gray-500">غير متاح حالياً</span>`;
+
+    //             return `
+    //           <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row">
+    //             <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">${index + 1}</td>
+    //             <td class="px-4 py-4 whitespace-nowrap">
+    //               <div class="flex items-center">
+    //                 <div class="mr-4">
+    //                   <div class="text-sm font-medium text-gray-900 dark:text-gray-200">${teacher.teacher_name}</div>
+    //                   <div class="text-xs text-gray-500 dark:text-gray-400">
+    //                     الحالة:
+    //                     <span class="${statusColor} font-semibold">${teacher.teacher_status}</span>
+    //                   </div>
+    //                 </div>
+    //               </div>
+    //             </td>
+    //             {% comment %} <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
+    //               ${teacher.teacher_email}
+    //             </td>
+    //             <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden lg:table-cell">
+    //               ${teacher.teacher_phone}
+    //             </td> {% endcomment %}
+    //             <td class="px-4 py-4 whitespace-normal text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
+    //               ${coursesHTML}
+    //             </td>
+    //             <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+    //               ${availabilityHTML}
+    //             </td>
+    //             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+    //               <a href="/teachers/edit/${teacher.id}/" class="inline-flex items-center justify-center
+    //                 w-10 h-10 rounded-full
+    //                 bg-blue-600 hover:bg-blue-700 text-white
+    //                 shadow-md hover:shadow-lg hover:text-gray-200
+    //                 transition-all duration-300 ease-in-out
+    //                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75
+    //                 dark:bg-blue-700 dark:hover:bg-blue-600 dark:text-gray-100 dark:hover:text-gray-200" title="تعديل البرنامج">
+    //                 <i class="fas fa-edit text-lg"></i>
+    //               </a>
+    //             </td>
+    //           </tr>
+    //         `;
+    //         }
+    //     });
+    // });
+
     document.addEventListener("DOMContentLoaded", () => {
          new APIFormManager({
         listContainerId: 'teacher-list-container',
@@ -558,7 +594,5 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 </script>
-
-<script src="{% static 'src/js/search.js' %}"></script> 
 
 {% endblock %}

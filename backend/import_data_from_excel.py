@@ -298,6 +298,8 @@ def import_all_data():
     # import_groups_from_excel(folder_path + "groups.xlsx")
     import_distributions(folder_path + "teaching_group - Copy.xlsx")
     # import_distributions(folder_path + "teaching_group.xlsx")
+    import_from_availability_excel(folder_path + "ProDayTimes copy.xlsx")
+
 
 
 # الاستخدام:
@@ -317,7 +319,7 @@ def import_all_data():
 # Hall.objects.all().delete()
 # Today.objects.all().delete()
 # Distribution.objects.all().delete()
-# TeacherTime.objects.all().delete()
+TeacherTime.objects.all().delete()
 # Level.objects.all().delete()
 # for model in apps.get_models():
 #     model.objects.all().delete()

@@ -12,9 +12,9 @@ from django.core.cache import cache
 class TableView(View):
     def get(self, request):
         response= api_get(Endpoints.tables, request=request)
-        if response:
+        if response['results']:
             context = {
-                'tables': response
+                'tables':response['results']
             }
             return render(request, 'timetables/tables_list.html', context)
         return render(request, 'timetables/tables_list.html')
@@ -27,11 +27,18 @@ class TableView(View):
         response=api_post(Endpoints.tables, data={"semester":semester,"random":random_enabled},request=request)
         if response:
             conflict = response.get('conflicts', [])
+            available_unscheduled=response.get('available_unscheduled',[])
+            
             request.session['conflicts'] = conflict
+            request.session['available_unscheduled']=available_unscheduled
         else:
-            request.session.remove('conflicts')
+            # if request.session.get('conflicts') and request.session.get('available_unscheduled'):
+            #     request.session.remove('conflicts')
+            #     request.session.remove('available_unscheduled')
+                
             conflict = []
-        return render(request,'timetables/list.html',{"selected_random":random_enabled,"selected_semester":semester,"conflicts":conflict})
+            available_unscheduled=[]
+        return render(request,'timetables/list.html',{"selected_random":random_enabled,"selected_semester":semester,"conflicts":conflict,'available_unscheduled':available_unscheduled})
 
 class TableDeleteView(View):
     def post(self, request, id):
@@ -42,7 +49,6 @@ class TableDeleteView(View):
 class LecturesView(View):
     def get(self, request, id):
         program_id = request.GET.get('program')
-        print(f"Program ID: {program_id}")
         response = api_get(f"{Endpoints.lectures}{id}/?program={program_id}", request=request)
         # days=api_get(Endpoints.todays, request=request)
         hall=api_get(Endpoints.halls, request=request)

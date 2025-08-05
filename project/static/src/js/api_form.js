@@ -493,4 +493,16 @@ if (this.listContainer && this.renderItem) {
       );
     }, 5000);
   }
+  fetchData(params = {}) {
+    let url = this.apiBaseUrl + this.endPoint;
+
+    // إضافة المعاملات (parameters) إذا كانت موجودة
+    const query = new URLSearchParams(params).toString();
+    if (query) {
+        url += `?${query}`;
+    }
+
+    this.fetchItems(url) // استخدم fetchItems مع الرابط الجديد
+}
+
 }

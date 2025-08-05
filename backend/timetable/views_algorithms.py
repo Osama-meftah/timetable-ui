@@ -15,6 +15,8 @@ from collections import defaultdict
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import LectureFilter
+from django.core.mail import send_mail
+from django.conf import settings
 
 
 class TableViewSet(BaseViewSet):
@@ -46,15 +48,16 @@ class TableViewSet(BaseViewSet):
                 random_enabled = True
             elif random_enabled == 'False':
                 random_enabled = False
-            print(f"Random enabled: {random_enabled}")
             if not semester:
                 return Response({'status': 'error', 'message': 'يرجى تحديد الفصل الدراسي'}, status=status.HTTP_400_BAD_REQUEST)
 
             # تشغيل الجدولة
             scheduler = TimeTableScheduler(semester_filter=semester)
             scheduler.random_enabled = random_enabled
-            conflict = scheduler.conflicts
             scheduler.run()
+            conflict = scheduler.conflicts
+            available_unscheduled=scheduler.available_unscheduled_slots
+
 
             # التحقق من تكرار الجدول بنفس البيانات
             generated_lectures = scheduler.generated_schedule
@@ -86,13 +89,23 @@ class TableViewSet(BaseViewSet):
             filename = f"schedule_{timestamp}_{unique_id}.xlsx"
 
             if conflict:
+                # for conf in conflict:
+                    # email=conf['conflicts_detail']['email']
+                    # send_mail(
+                    #     subject="⚠️ تعارض في الجدول الدراسي",
+                    #     message="تم العثور على تعارض",
+                    #     from_email=settings.DEFAULT_FROM_EMAIL,
+                    #     recipient_list=[email]
+                    # )
+
                 return Response({
                     'status': 'error',
                     'message': 'تم العثور على تعارضات في الجدول الزمني، يرجى مراجعة البيانات المدخلة.',
-                    'conflicts': conflict
+                    'conflicts': conflict,
+                    'available_unscheduled':available_unscheduled
                 })
             if not scheduler.temp_file:
-                return Response({'status': 'error', 'message': 'لم يتم إنشاء ملف الجدول الزمني، يرجى التحقق من البيانات المدخلة.'})
+                return Response({'status': 'error', 'message': 'لم يتم إنشاء ملف الجدول الزمني، يرجى التحقق من البيانات المدخلة.','lpg':scheduler.log})
             django_file = File(scheduler.temp_file)
             if django_file.size == 0:
                 return Response({'status': 'error', 'message': 'الملف الناتج فارغ، يرجى التحقق من البيانات المدخلة.'}, status=status.HTTP_400_BAD_REQUEST)

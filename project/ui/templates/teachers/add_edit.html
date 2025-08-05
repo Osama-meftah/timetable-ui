@@ -43,7 +43,7 @@
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">البريد
                         الإلكتروني</label>
                     <input type="email" name="teacher_email" id="teacher_email"
-                        value="{% if data %}{{ data.teacher_email }}{% endif %}"
+                        value="{% if data %}{{ data.user.email }}{% endif %}"
                         {# Populated with teacher's email for editing #} required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm py-2 px-3
                         focus:border-indigo-500 focus:ring-indigo-500 sm:text-base bg-gray-200 text-gray-900 dark:bg-gray-700
                         dark:border-gray-600 dark:text-gray-200 transition duration-150 ease-in-out" />
