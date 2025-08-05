@@ -35,7 +35,7 @@
                 </a>
             {% else %}
                 {% if i >= current_page|add:"-2" and i <= current_page|add:"2" %}
-                    <a href="?{{page_key}}={{ i }}#{{page_id}}" class="relative dark:text-gray-200 inline-flex items-center px-4 py-2 text-sm font-medium rounded-md
+                    <a href="?page={{ i }}#{{page_id}}" class="relative dark:text-gray-200 inline-flex items-center px-4 py-2 text-sm font-medium rounded-md
                         {% if page_num == i %}
                             bg-indigo-600 text-white
                         {% else %}
@@ -96,10 +96,10 @@
       const pageParam = new URL(paginationPrevLink.href).searchParams.get("page");
       console.log(pageParam);
       if (pageParam) {
-        window.location.href = `/rooms/?page=${pageParam}`;
+        window.location.href = `/?page=${pageParam}`;
       }
       else {
-          window.location.href = `/rooms/?page=${1}`;
+          window.location.href = `/?page=${1}`;
       }
     });
   }
@@ -109,7 +109,7 @@
       event.preventDefault();
       const pageParam = new URL(link.href).searchParams.get("page");
       if (pageParam) {
-        window.location.href = `/rooms/?page=${pageParam}`;
+        window.location.href = `?page=${pageParam}`;
       }
     });
   });
