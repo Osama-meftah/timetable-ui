@@ -1,35 +1,3 @@
-// document.querySelectorAll(".search-input").forEach((input) => {
-//   const type = input.getAttribute("data-type");
-
-//   input.addEventListener("keyup", () => {
-//     const searchTerm = input.value.toLowerCase().trim();
-//     let resultsFound = false;
-
-//     const rows = document.querySelectorAll(`.search-row[data-type="${type}"]`);
-//     const noResults = document.querySelector(
-//       `.no-results-message[data-type="${type}"]`
-//     );
-
-//     rows.forEach((row) => {
-//       const name = row.querySelector(".search-name").textContent.toLowerCase();
-//       if (name.includes(searchTerm)) {
-//         row.style.display = "";
-//         resultsFound = true;
-//       } else {
-//         row.style.display = "none";
-//       }
-//     });
-
-//     if (noResults) {
-//       if (resultsFound) {
-//         noResults.classList.add("hidden");
-//       } else {
-//         noResults.classList.remove("hidden");
-//       }
-//     }
-//   });
-// });
-
 class SearchComponent {
   constructor(params) {
     this.input = document.querySelector(params.inputSelector);
@@ -38,26 +6,27 @@ class SearchComponent {
     this.apiEndpoint = params.apiEndpoint;
     this.renderItemFn = params.renderItemFn;
 
-    // ✅ حفظ الصفوف الأصلية لإعادة عرضها لاحقًا
-    this.defaultRowsHTML = this.rowsContainer
-      ? this.rowsContainer.innerHTML
-      : "";
+    this.defaultRowsHTML = null; // ❌ لا نحفظ الآن
 
     if (!this.input || !this.rowsContainer) return;
 
+    // الاستماع لحقل الإدخال
     this.input.addEventListener("input", () => this.handleInput());
   }
+
+  // ✅ تُستدعى هذه بعد ملء المحتوى الأصلي (يدويًا أو من API)
+  captureDefaultRows() {
+    if (this.rowsContainer && this.defaultRowsHTML === null) {
+      this.defaultRowsHTML = this.rowsContainer.innerHTML;
+    }
+  }
+
   async handleInput() {
     const query = this.input.value.trim();
 
-    // إذا كان الحقل فارغًا، اجلب البيانات من API بدلًا من إرجاع النسخة الأصلية
     if (!query) {
-      try {
-        const res = await fetch(this.apiEndpoint);
-        const data = await res.json();
-        this.updateResults(data.results || []);
-      } catch (error) {
-        console.error("فشل الاسترجاع الافتراضي:", error);
+      if (this.defaultRowsHTML !== null) {
+        this.resetToDefault();
       }
       return;
     }
@@ -72,25 +41,6 @@ class SearchComponent {
       console.error("فشل البحث:", error);
     }
   }
-
-  // async handleInput() {
-  //   const query = this.input.value.trim();
-  //   if (!query) {
-  //     this.resetToDefault();
-  //     return;
-  //   }
-
-  //   try {
-  //     const res = await fetch(
-  //       `${this.apiEndpoint}?q=${encodeURIComponent(query)}`
-  //     );
-  //     const data = await res.json();
-  //     this.updateResults(data.results || []);
-  //   } catch (error) {
-  //     console.error("فشل البحث:", error);
-  //     this.resetToDefault();
-  //   }
-  // }
 
   resetToDefault() {
     this.rowsContainer.innerHTML = this.defaultRowsHTML;

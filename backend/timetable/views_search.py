@@ -90,10 +90,11 @@ class SearchTeacherDistributionAPIView(APIView):
 
             # استخراج التوفر الزمني
             availability = []
+            print(teacher_times)
             for t in teacher_times:
                 if t.fk_teacher.id == teacher_id:
                     availability.append({
-                        "day": t.fk_today.day_name_display,
+                        "day": t.fk_today.get_day_name_display(),
                         "period": f"{t.fk_period.period_from} - {t.fk_period.period_to}"
                     })
 

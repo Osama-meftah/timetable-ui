@@ -58,6 +58,7 @@
             <div class="relative w-full sm:w-64">
               <input
                 type="text"
+                id="search-teacher"
                 class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-gray-200
                 dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400
                 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
@@ -344,8 +345,8 @@
 <script src="{% static 'src/js/show_modal_message.js' %}"></script>
 <script src="{% static 'src/js/api_form.js' %}"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        new SearchComponent({
+    {% comment %} document.addEventListener("DOMContentLoaded", () => {
+       new SearchComponent({
             inputSelector: ".search-input[data-type='teacher']",
             rowSelector: "tbody[data-type='teacher']",
             noResultSelector: ".no-results-message[data-type='teacher']",
@@ -371,7 +372,7 @@
           </tr>
         `
         });
-    });
+    }); {% endcomment %}
 
     
     document.addEventListener("DOMContentLoaded", () => {
@@ -443,135 +444,118 @@
     });
     
     document.addEventListener("DOMContentLoaded", () => {
-        var teacher_count = 1;
-        const teacherManager = new APIFormManager({
-            formId: null, 
-            
-            listContainerId: 'teacher-list-container', 
-            paginationContainerId: 'teacher-pagination-container',
-            endPoint: 'teachers/',
-            renderItem: (teacher, index =1) => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row';
-                tr.innerHTML = `
-                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
-                        ${teacher_count++}
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
-                        ${teacher.teacher_name}
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
-                        ${teacher.teacher_email}
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
-                        <span class="${teacher.teacher_status === 'active' ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'} font-semibold">
-                            ${teacher.teacher_status_display}
-                        </span>
-                    </td>
-                    <td class="px-8 py-4 whitespace-nowrap text-right text-sm font-medium flex items-center justify-end gap-2">
-                        <a href="/teachers/edit/${teacher.id}/"
-                            class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-700 transition-colors duration-150"
-                            title="تعديل">
-                            <i class="fas fa-edit text-lg"></i>
-                        </a>
-                        <button type="button" class="delete-btn group text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300" 
-                                data-id="${teacher.id}" 
-                                data-name="${teacher.teacher_name}"
-                                data-type="المدرس" 
-                                data-url="teachers/${teacher.id}/">
-                            <i class="fas fa-trash-alt text-lg group-hover:scale-110 transition-transform"></i>
-                        </button>
-                    </td>
-                `;
-                return tr;
-            },
-    
-            getFormData: null,
-            populateForm: null
-        });
-    });
-
-document.addEventListener('DOMContentLoaded', function () {
-
-    const teacherDetailsManager = new APIFormManager({
-        listContainerId: "teacher-details-tbody",
-        paginationContainerId: "pagination-details-container",
+         new APIFormManager({
+        listContainerId: 'teacher-list-container',
+        paginationContainerId: 'teacher-pagination-container',
         apiBaseUrl: "http://127.0.0.1:8001/api/",
-        endPoint: "distributions/",
-        endPoints: ['teachers/?paginate=false', 'teacherTimes/?paginate=false'],
-
-        renderItem: (distribution, allTeachers, allTeacherTimes, index) => {
-            if (!distribution.fk_teacher?.id) return null;
-
-            const teacherId = distribution.fk_teacher.id;
-            const rowId = `teacher-row-${teacherId}`;
-            
-            let existingRow = document.getElementById(rowId);
-
-            const teacherInfo = allTeachers.find(t => t.id === teacherId);
-            if (!teacherInfo) return null;
-
-            const courseHtml = `<p>${distribution.fk_subject?.subject_name || 'N/A'} (${distribution.fk_group?.fk_level?.level_name_display || 'N/A'} - ${distribution.fk_group?.group_name || 'N/A'})</p>`;
-
-            if (existingRow) {
-                const coursesCell = existingRow.querySelector('.courses-cell');
-                if (coursesCell) {
-                    coursesCell.insertAdjacentHTML('beforeend', courseHtml);
-                }
-                return null; 
-            } else {
-                const availability = allTeacherTimes.filter(time => time.fk_teacher === teacherId);
-                
-                // ✅✅ هذا هو الكود المُصحح الذي يطابق تصميمك ✅✅
-                const availabilityHtml = availability.length > 0
-                    ? `<ul class="list-disc list-inside space-y-1">${availability.map(time => `<li><span class="font-medium">${time.fk_today?.day_name_display || 'N/A'}:</span> ${time.fk_period?.period_from} - ${time.fk_period?.period_to}</li>`).join('')}</ul>`
-                    : '<span class="text-gray-400 dark:text-gray-500">غير متاح حالياً</span>';
-                
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150';
-                tr.id = rowId;
-
-                const statusClass = teacherInfo.teacher_status === 'active' ? 'text-green-600 dark:text-green-400' :
-                                    teacherInfo.teacher_status === 'vacation' ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-500';
-                const statusText = teacherInfo.teacher_status === 'active' ? 'نشط' :
-                                   teacherInfo.teacher_status === 'vacation' ? 'اجازة' : 'غير معروف';
-
-                // استخدام innerHTML مع كل الكلاسات والبنيات الأصلية
-                tr.innerHTML = `
-                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
-                        ${index + 1}
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                            <div class="mr-4">
-                                <div class="text-sm font-medium text-gray-900 dark:text-gray-200">
-                                    ${teacherInfo.teacher_name || 'N/A'}
-                                </div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400">
-                                    الحالة: <span class="${statusClass} font-semibold">${statusText}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="courses-cell px-4 py-4 whitespace-normal text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
-                        ${courseHtml}
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        ${availabilityHtml}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <a href="/teacherswithcourses/edit/${teacherInfo.id}/"
-                           class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-md" 
-                           title="تعديل">
-                            <i class="fas fa-edit text-lg"></i>
-                        </a>
-                    </td>
-                `;
-                return tr;
-            }
+        endPoint: 'teachers/',
+        
+        // ✅ تمرير إعدادات البحث مباشرة هنا
+        searchInputSelector: '#search-teacher',
+        searchEndPoint: 'searchteachers/',
+        
+        renderItem: (teacher, index) => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700';
+            const statusClass = teacher.teacher_status === 'active' ? 'text-green-600' : 'text-yellow-600';
+            tr.innerHTML = `
+                <td class="px-4 py-4">${index + 1}</td>
+                <td class="px-4 py-4 font-medium text-gray-900 dark:text-white">${teacher.teacher_name}</td>
+                <td class="px-4 py-4 hidden sm:table-cell">${teacher.teacher_email}</td>
+                <td class="px-4 py-4 hidden sm:table-cell">
+                    <span class="${statusClass} font-semibold">${teacher.teacher_status_display}</span>
+                </td>
+                <td class="px-8 py-4 text-right flex items-center justify-end gap-2">
+                    <a href="/teachers/edit/${teacher.id}/" class="text-indigo-600 p-2" title="تعديل"><i class="fas fa-edit text-lg"></i></a>
+                    <button type="button" class="delete-btn text-red-600 p-2" data-id="${teacher.id}" data-name="${teacher.teacher_name}" data-type="المدرس" data-url="teachers/${teacher.id}/"><i class="fas fa-trash-alt text-lg"></i></button>
+                </td>
+            `;
+            return tr;
         },
     });
 });
+document.addEventListener("DOMContentLoaded", () => {
+    
+
+    new APIFormManager({
+            listContainerId: "teacher-details-tbody",
+            paginationContainerId: "pagination-details-container",
+            endPoint: "distributions/",
+            endPoints: ['teachers/?paginate=false', 'teacherTimes/?paginate=false'],
+            searchInputSelector: '#detailed-teacher-search',
+            searchEndPoint: 'searchteachersdistribution/',
+            renderItem: (distribution, allTeachers, allTeacherTimes, index) => {
+                if (!distribution.fk_teacher?.id) return null;
+    
+                const teacherId = distribution.fk_teacher.id;
+                const rowId = `teacher-row-${teacherId}`;
+                
+                let existingRow = document.getElementById(rowId);
+    
+                const teacherInfo = allTeachers.find(t => t.id === teacherId);
+                if (!teacherInfo) return null;
+    
+                const courseHtml = `<p>${distribution.fk_subject?.subject_name || 'N/A'} (${distribution.fk_group?.fk_level?.level_name_display || 'N/A'} - ${distribution.fk_group?.group_name || 'N/A'})</p>`;
+    
+                if (existingRow) {
+                    const coursesCell = existingRow.querySelector('.courses-cell');
+                    if (coursesCell) {
+                        coursesCell.insertAdjacentHTML('beforeend', courseHtml);
+                    }
+                    return null; 
+                } else {
+                    const availability = allTeacherTimes.filter(time => time.fk_teacher === teacherId);
+                    
+                    // ✅✅ هذا هو الكود المُصحح الذي يطابق تصميمك ✅✅
+                    const availabilityHtml = availability.length > 0
+                        ? `<ul class="list-disc list-inside space-y-1">${availability.map(time => `<li><span class="font-medium">${time.fk_today?.day_name_display || 'N/A'}:</span> ${time.fk_period?.period_from} - ${time.fk_period?.period_to}</li>`).join('')}</ul>`
+                        : '<span class="text-gray-400 dark:text-gray-500">غير متاح حالياً</span>';
+                    
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150';
+                    tr.id = rowId;
+    
+                    const statusClass = teacherInfo.teacher_status === 'active' ? 'text-green-600 dark:text-green-400' :
+                                        teacherInfo.teacher_status === 'vacation' ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-500';
+                    const statusText = teacherInfo.teacher_status === 'active' ? 'نشط' :
+                                       teacherInfo.teacher_status === 'vacation' ? 'اجازة' : 'غير معروف';
+    
+                    // استخدام innerHTML مع كل الكلاسات والبنيات الأصلية
+                    tr.innerHTML = `
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
+                            ${index + 1}
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="mr-4">
+                                    <div class="text-sm font-medium text-gray-900 dark:text-gray-200">
+                                        ${teacherInfo.teacher_name || 'N/A'}
+                                    </div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                                        الحالة: <span class="${statusClass} font-semibold">${statusText}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="courses-cell px-4 py-4 whitespace-normal text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
+                            ${courseHtml}
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                            ${availabilityHtml}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a href="/teacherswithcourses/edit/${teacherInfo.id}/"
+                               class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-md" 
+                               title="تعديل">
+                                <i class="fas fa-edit text-lg"></i>
+                            </a>
+                        </td>
+                    `;
+                    return tr;
+                }
+            },
+        });
+    });
 
 </script>
 
