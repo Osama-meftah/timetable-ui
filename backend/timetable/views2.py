@@ -8,15 +8,44 @@ from .utils import create_random_password, extract_username_from_email, send_pas
 from rest_framework.permissions import IsAuthenticated
 from .filters import *
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
 
-# ViewSet الأساسي الذي يتعامل مع كل العمليات
+class StandardResultsSetPagination(PageNumberPagination):
+    # عدد العناصر في كل صفحة. يمكن للعميل تغييره باستخدام ?page_size=X
+    page_size = 8
+    
+    # اسم پارامتر الاستعلام الذي يسمح للعميل بتحديد حجم الصفحة.
+    # مثال: /api/teachers/?page_size=20
+    page_size_query_param = 'page_size'
+    
+    # أقصى حجم للصفحة يمكن للعميل طلبه.
+    max_page_size = 100
+
+    def get_paginated_response(self, data):
+        return Response({
+            'links': {
+                'next': self.get_next_link(),
+                'previous': self.get_previous_link()
+            },
+            'count': self.page.paginator.count,
+            'total_pages': self.page.paginator.num_pages,
+            'results': data
+        })
+        
 class BaseViewSet(ModelViewSet):
+    pagination_class = StandardResultsSetPagination
     success_create_message = "تم الإنشاء بنجاح."
     success_update_message = "تم التحديث بنجاح."
     success_delete_message = "تم الحذف بنجاح."
 
     error_create_message = "خطأ في بيانات الإدخال."
     error_update_message = "فشل التحديث."
+    @property
+    def paginator(self):
+        if self.request.query_params.get('paginate', 'true').lower() == 'false':
+            return None # إلغاء الترقيم لهذه الطلب
+        return super().paginator
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -67,7 +96,6 @@ class BaseViewSet(ModelViewSet):
         }, status=status.HTTP_204_NO_CONTENT)
 
 
-# جميع الكلاسات المتفرعة تستخدم BaseViewSet وتعدل الرسائل فقط
 
 class DepartmentViewSet(BaseViewSet):
     queryset = Department.objects.all()

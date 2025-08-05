@@ -114,25 +114,25 @@ def handle_response(request, response):
         return "unexpected", None
 
 
-def show_backend_messages(request, response_json, default_success=""):
-    if not request:
-        return
-    if isinstance(response_json, dict):
-        if "message" in response_json:
-            messages.success(request, response_json["message"])
-        else:
-            messages.success(request, default_success)
+# def show_backend_messages(request, response_json, default_success=""):
+#     if not request:
+#         return
+#     if isinstance(response_json, dict):
+#         if "message" in response_json:
+#             messages.success(request, response_json["message"])
+#         else:
+#             messages.success(request, default_success)
 
-        if "warnings" in response_json and isinstance(response_json["warnings"], list):
-            for warning in response_json["warnings"]:
-                messages.warning(request, f"⚠️ {warning}")
-        if "errors" in response_json and isinstance(response_json["errors"], list):
-            for error in response_json["errors"]:
-                messages.error(request, f"❌ {error}")
-        if "detail" in response_json:
-            messages.error(request, f"❌ {response_json['detail']}")
-    else:
-        messages.success(request, default_success)
+#         if "warnings" in response_json and isinstance(response_json["warnings"], list):
+#             for warning in response_json["warnings"]:
+#                 messages.warning(request, f"⚠️ {warning}")
+#         if "errors" in response_json and isinstance(response_json["errors"], list):
+#             for error in response_json["errors"]:
+#                 messages.error(request, f"❌ {error}")
+#         if "detail" in response_json:
+#             messages.error(request, f"❌ {response_json['detail']}")
+#     else:
+#         messages.success(request, default_success)
         
 def handle_exception(request, message, exception):
     full_message = f"{message}"
@@ -180,7 +180,37 @@ def api_get_with_token(endpoint,token):
     except requests.exceptions.RequestException as e:
         raise RuntimeError(f"POST request failed: {e}")
 
+def api_get_all_pages(endpoint_url, request):
+    """
+    تجلب كل العناصر من نقطة نهاية مرقمة (paginated) عن طريق متابعة روابط 'next'.
+    """
+    all_results = []
+    # نبدأ بالرابط الأول الذي تم تمريره
+    url = endpoint_url
 
+    while url:
+        try:
+            # استخدم دالة api_get الحالية لجلب صفحة واحدة
+            # قد تحتاج لتعديل api_get لتقبل روابط كاملة إذا لم تكن تفعل ذلك بالفعل
+            response_data = api_get(url, request=request, is_full_url=True) 
+
+            # تحقق مما إذا كانت الاستجابة مرقمة وتحتوي على مفتاح 'results'
+            if isinstance(response_data, dict) and 'results' in response_data:
+                all_results.extend(response_data['results'])
+                # احصل على رابط الصفحة التالية للمتابعة، أو None إذا كانت هذه هي الأخيرة
+                url = response_data.get('next')
+            else:
+                # إذا لم تكن الاستجابة مرقمة، افترض أنها القائمة الكاملة
+                if isinstance(response_data, list):
+                    all_results.extend(response_data)
+                # توقف عن الحلقة لأننا وصلنا إلى النهاية أو البيانات غير مرقمة
+                break
+
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching page {url}: {e}")
+            # في حالة حدوث خطأ، توقف عن المحاولة
+            break
+        
 def api_get(endpoint, request=None, timeout=60, redirect_to=None, render_template=None, success_message=None, render_context=None):
     headers = {}
     if request and 'token' in request.session:
@@ -464,72 +494,6 @@ def paginate_queryset(queryset, request, page_key, page_size_key, size=5):
         if hasattr(request, "session"):
             messages.error(request, f"خطأ في التحويل للصفحات: {e}")
         return queryset
-
-# def fetch_paginated_api_data(api_url, request, page_param="page", page_size_param="page_size", default_page_size=10, cache_timeout=60):
-#     """
-#     دالة عامة لجلب بيانات paginated من API يدعم pagination في الـ backend مع استخدام cache.
-#     """
-#     page = request.GET.get(page_param, 1)
-#     page_size = request.GET.get(page_size_param, default_page_size)
-    
-#     try:
-#         page = int(page)
-#     except (ValueError, TypeError):
-#         page = 1
-
-#     try:
-#         page_size = int(page_size)
-#     except (ValueError, TypeError):
-#         page_size = default_page_size
-
-#     # إنشاء مفتاح للكاش بناءً على الرابط والمعاملات
-#     cache_key = f"api_cache:{api_url}:page={page}:page_size={page_size}"
-
-#     # محاولة الحصول من الكاش
-#     cached_data = cache.get(cache_key)
-#     if cached_data is not None:
-#         return cached_data
-
-#     params = {
-#         page_param: page,
-#         page_size_param: page_size,
-#     }
-
-#     try:
-#         response = requests.get(api_url, params=params)
-#         response.raise_for_status()
-#         data = response.json()
-#     except Exception:
-#         # في حالة الخطأ، رجع بيانات فارغة أو من الكاش القديم لو تبي
-#         return {
-#             "results": [],
-#             "count": 0,
-#             "next_url": None,
-#             "prev_url": None,
-#             "current_page": page,
-#             "total_pages": 1,
-#             "page_size": page_size,
-#         }
-
-#     count = data.get("count", 0)
-#     results = data.get("results", [])
-#     next_url = data.get("next")
-#     prev_url = data.get("previous")
-#     total_pages = (count + page_size - 1) // page_size if page_size else 1
-
-#     result_data = {
-#         "results": results,
-#         "count": count,
-#         "next_url": next_url,
-#         "prev_url": prev_url,
-#         "current_page": page,
-#         "total_pages": total_pages,
-#         "page_size": page_size,
-#     }
-#     # حفظ البيانات في الكاش
-#     cache.set(cache_key, result_data, cache_timeout)  # timeout بالثواني
-
-#     return result_data
 
 def get_user_id(request):
     """

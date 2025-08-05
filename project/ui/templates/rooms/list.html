@@ -113,7 +113,7 @@
                     href="{% url 'add_room' %}?add=1"
                     class="flex items-center justify-center center-title bg-indigo-600 hover:bg-indigo-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 w-full sm:w-auto group">
                     <i class="fas fa-plus-circle"></i>
-                    <span class="mr-2  group-hover:rotate-6 transition-transform duration-200">إضافة قاعة جديدة</span>
+                    <span class="mr-2  group-hover:rotate-6 transition-transform duration-200">إضافة قاعة</span>
                 </a>
             </div>
         </div>
@@ -172,7 +172,7 @@
                     {# Trigger button for the Delete Modal #}
                     <button type="button" data-id="{{ room.id }}" data-type="القاعة"
                         data-name="{{room.hall_name}}"
-                        data-url="{% url 'delete_room' 0 %}" data-form-type="delete"
+                        data-url="{% url 'delete_room' room.id %}" data-form-type="delete"
                         class="delete-btn inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium 
                         rounded-md text-red-600 bg-red-100 hover:bg-red-200 dark:bg-red-700 dark:text-red-100 dark:hover:bg-red-600 
                         focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 group w-full sm:w-auto">
@@ -193,7 +193,8 @@
             <p class="text-lg font-medium text-gray-500 dark:text-gray-400">لا توجد قاعات مطابقة لبحثك.</p>
             <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">حاول البحث بكلمات مختلفة أو تحقق من التهجئة.</p>
         </div>
-        {% include "pagination.html" with page_obj=rooms %}
+        {% include "pagination.html" with current_page=current_page page_range=page_range total_pages=total_pages prev_url=prev_url next_url=next_url page_id="rooms-section"  %}
+        {% comment %} {% include "pagination.html" with page_obj=rooms %} {% endcomment %}
     </div>
 </div>
 {% include "upload_modal.html" %}
@@ -208,7 +209,7 @@
 <script>
     new SearchComponent({
         inputSelector: ".search-input[data-type='room']",
-        rowSelector: "div[data-type='room'] .search-row", // Target the individual room cards with search-row class
+        rowSelector: "div[data-type='room']", // Target the individual room cards with search-row class
         noResultSelector: ".no-results-message[data-type='room']",
         apiEndpoint: "http://127.0.0.1:8001/api/searchhalls/",
         renderItemFn: (room, index) => {

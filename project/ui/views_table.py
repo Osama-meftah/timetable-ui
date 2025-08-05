@@ -12,9 +12,9 @@ from django.core.cache import cache
 class TableView(View):
     def get(self, request):
         response= api_get(Endpoints.tables, request=request)
-        if response:
+        if response['results']:
             context = {
-                'tables': response
+                'tables':response['results']
             }
             return render(request, 'timetables/tables_list.html', context)
         return render(request, 'timetables/tables_list.html')

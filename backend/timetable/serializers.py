@@ -157,16 +157,21 @@ class TeacherBriefSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     teacher = TeacherBriefSerializer(read_only=True)  # اسم الحقل لازم يطابق اسم العلاقة في الموديل
-
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'is_staff', 'teacher']
+class UserBriefSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'email']
+
 
 class TeacherSerializer(serializers.ModelSerializer):
     teacher_status_display = serializers.CharField(source='get_teacher_status_display', read_only=True)
+    user=UserBriefSerializer()
     class Meta:
         model = Teacher
-        fields = ['id', 'teacher_name', 'teacher_email', 'teacher_status','teacher_status_display']
+        fields = ['id', 'teacher_name', 'teacher_status','teacher_status_display','user']
 
 class TeacherSerializer2(serializers.ModelSerializer):
     teacher_status_display = serializers.CharField(source='get_teacher_status_display', read_only=True)
