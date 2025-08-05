@@ -20,7 +20,7 @@ urlpatterns = [
     path('teachers/', views.TeacherManagementView.as_view(), name='teachers_management'),
     path('teachers/add/', views.TeacherManagementView.as_view(), name='add_teacher'),
     path('teachers/edit/<int:id>/', views.TeacherManagementView.as_view(), name='edit_teacher'),
-    path('teachers/delete/<int:id>/', views.TeacherDeleteView.as_view(), name='delete_teacher'),  
+    # path('teachers/delete/<int:id>/', views.TeacherDeleteView.as_view(), name='delete_teacher'),  
  
       
     path('teacherswithcourses/add/', views.TeacherAvailabilityAndCoursesView.as_view(), name='add_edit_teacher_with_courses'),
@@ -30,7 +30,7 @@ urlpatterns = [
     path('courses/', views.CoursesListView.as_view(), name='courses_management'),
     path('courses/add/', views.CourseCreateView.as_view(), name='add_course'),
     path('courses/edit/<int:id>/', views.CourseUpdateView.as_view(), name='edit_course'),
-    path('courses/delete/<int:id>/', views.CourseDeleteView.as_view(), name='delete_course'),
+    # path('courses/delete/<int:id>/', views.CourseDeleteView.as_view(), name='delete_course'),
     
     
     path('rooms/', views.RoomsListView.as_view(), name='rooms_management'),

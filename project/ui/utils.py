@@ -180,37 +180,56 @@ def api_get_with_token(endpoint,token):
     except requests.exceptions.RequestException as e:
         raise RuntimeError(f"POST request failed: {e}")
 
-def api_get_all_pages(endpoint_url, request):
-    """
-    تجلب كل العناصر من نقطة نهاية مرقمة (paginated) عن طريق متابعة روابط 'next'.
-    """
-    all_results = []
-    # نبدأ بالرابط الأول الذي تم تمريره
-    url = endpoint_url
+# def api_get_all_pages(endpoint_url, request):
+#     """
+#     تجلب كل العناصر من نقطة نهاية مرقمة (paginated) عن طريق متابعة روابط 'next'.
+#     """
+#     all_results = []
+#     # نبدأ بالرابط الأول الذي تم تمريره
+#     url = endpoint_url
 
-    while url:
-        try:
-            # استخدم دالة api_get الحالية لجلب صفحة واحدة
-            # قد تحتاج لتعديل api_get لتقبل روابط كاملة إذا لم تكن تفعل ذلك بالفعل
-            response_data = api_get(url, request=request, is_full_url=True) 
+#     while url:
+#         try:
+#             # استخدم دالة api_get الحالية لجلب صفحة واحدة
+#             # قد تحتاج لتعديل api_get لتقبل روابط كاملة إذا لم تكن تفعل ذلك بالفعل
+#             response_data = api_get(url, request=request, is_full_url=True) 
 
-            # تحقق مما إذا كانت الاستجابة مرقمة وتحتوي على مفتاح 'results'
-            if isinstance(response_data, dict) and 'results' in response_data:
-                all_results.extend(response_data['results'])
-                # احصل على رابط الصفحة التالية للمتابعة، أو None إذا كانت هذه هي الأخيرة
-                url = response_data.get('next')
-            else:
-                # إذا لم تكن الاستجابة مرقمة، افترض أنها القائمة الكاملة
-                if isinstance(response_data, list):
-                    all_results.extend(response_data)
-                # توقف عن الحلقة لأننا وصلنا إلى النهاية أو البيانات غير مرقمة
-                break
+#             # تحقق مما إذا كانت الاستجابة مرقمة وتحتوي على مفتاح 'results'
+#             if isinstance(response_data, dict) and 'results' in response_data:
+#                 all_results.extend(response_data['results'])
+#                 # احصل على رابط الصفحة التالية للمتابعة، أو None إذا كانت هذه هي الأخيرة
+#                 url = response_data.get('next')
+#             else:
+#                 # إذا لم تكن الاستجابة مرقمة، افترض أنها القائمة الكاملة
+#                 if isinstance(response_data, list):
+#                     all_results.extend(response_data)
+#                 # توقف عن الحلقة لأننا وصلنا إلى النهاية أو البيانات غير مرقمة
+#                 break
 
-        except requests.exceptions.RequestException as e:
-            print(f"Error fetching page {url}: {e}")
-            # في حالة حدوث خطأ، توقف عن المحاولة
-            break
-        
+#         except requests.exceptions.RequestException as e:
+#             print(f"Error fetching page {url}: {e}")
+#             # في حالة حدوث خطأ، توقف عن المحاولة
+#             break
+
+
+from urllib.parse import urlparse, parse_qs
+
+def get_data_details(data):
+    links = data.get("links", {})
+    return (
+        data.get("results", []),
+        data.get("count", 0),
+        data.get("total_pages", 0),
+        links.get("next"),
+        links.get("previous"),
+        data.get("current_page", 1)  # ✅ استخراج رقم الصفحة الحالية
+    )
+def get_current_page(url):
+    if not url:
+        return 1
+    query = parse_qs(urlparse(url).query)
+    # هذا هو السطر السحري
+    return int(query.get("page", [1])[0]) 
 def api_get(endpoint, request=None, timeout=60, redirect_to=None, render_template=None, success_message=None, render_context=None):
     headers = {}
     if request and 'token' in request.session:

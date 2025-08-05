@@ -172,63 +172,76 @@ class TeacherManagementView(View):
                                render_template="teachers/add_edit.html")
             elif "add" in request.GET:
                 return render(request, "teachers/add_edit.html", {"page_title": "إضافة مدرس"})
-         
-            default_paginated_response = {'results': [], 'count': 0}
-            teachers_data = api_get(Endpoints.teachers, request=request) or default_paginated_response
-            teacher_times_data = api_get(Endpoints.teacher_times, request=request) or default_paginated_response
-            distributions_data = api_get(Endpoints.distributions, request=request) or default_paginated_response
+            # page = request.GET.get("page")
+            # if page:
+            #     page = int(page)
+            # else:
+            #     page = 1
+            # default_paginated_response = {'results': [], 'count': 0}
+            # teachers_data = api_get(Endpoints.teachers, request=request) or default_paginated_response
+            # teacher_times_data = api_get(Endpoints.teacher_times, request=request) or default_paginated_response
+            # distribution_data = api_get(f"{Endpoints.distributions}?page={page}", request=request) or default_paginated_response
+            # distributions_list, total_distributions, total_pages, next_url, prev_url, current_page = get_data_details(distribution_data)
+            # # print(distributions_list)
+            # current_page = get_current_page(prev_url) + 1 if prev_url else 1
+            # teachers_list = teachers_data.get('results', [])
+            # times_list = teacher_times_data.get('results', [])
+            # # distributions_list = distributions_data.get('results', [])
+            # distributions_by_teacher = {}
+            # for d in distributions_list:
+            #     teacher_id = d.get("fk_teacher", {}).get("id")
+            #     if teacher_id:
+            #         course_info = {
+            #             "subject_name": d.get("fk_subject", {}).get("subject_name", "N/A"),
+            #             "group": d.get("fk_group", {}).get("group_name", "N/A"),
+            #             "level": d.get("fk_group", {}).get("fk_level", {}).get("level_name", "N/A"),
+            #             "program": d.get("fk_group", {}).get("fk_level", {}).get("fk_program", {}).get("program_name", "N/A"),
+            #         }
+            #         distributions_by_teacher.setdefault(teacher_id, []).append(course_info)
 
-            teachers_list = teachers_data.get('results', [])
-            times_list = teacher_times_data.get('results', [])
-            distributions_list = distributions_data.get('results', [])
-            distributions_by_teacher = {}
-            for d in distributions_list:
-                teacher_id = d.get("fk_teacher", {}).get("id")
-                if teacher_id:
-                    course_info = {
-                        "subject_name": d.get("fk_subject", {}).get("subject_name", "N/A"),
-                        "group": d.get("fk_group", {}).get("group_name", "N/A"),
-                        "level": d.get("fk_group", {}).get("fk_level", {}).get("level_name", "N/A"),
-                        "program": d.get("fk_group", {}).get("fk_level", {}).get("fk_program", {}).get("program_name", "N/A"),
-                    }
-                    distributions_by_teacher.setdefault(teacher_id, []).append(course_info)
-
-            times_by_teacher = {}
-            for t in times_list:
-                teacher_id = t.get("fk_teacher") # في هذا النموذج، المعرّف مباشر
-                if teacher_id:
-                    time_info = {
-                        "day": t.get("fk_today", {}).get("day_name_display", "N/A"),
-                        "period": f"{t.get('fk_period', {}).get('period_from', '')} - {t.get('fk_period', {}).get('period_to', '')}"
-                    }
-                    times_by_teacher.setdefault(teacher_id, []).append(time_info)            
-            teachers_with_data = []
-            for teacher in teachers_list:
-                teacher_id = teacher.get("id")
+            # times_by_teacher = {}
+            
+            # for t in times_list:
+            #     teacher_id = t.get("fk_teacher") # في هذا النموذج، المعرّف مباشر
+            #     if teacher_id:
+            #         time_info = {
+            #             "day": t.get("fk_today", {}).get("day_name_display", "N/A"),
+            #             "period": f"{t.get('fk_period', {}).get('period_from', '')} - {t.get('fk_period', {}).get('period_to', '')}"
+            #         }
+            #         times_by_teacher.setdefault(teacher_id, []).append(time_info)            
+            # teachers_with_data = []
+            # for teacher in teachers_list:
+            #     teacher_id = teacher.get("id")
                 
-                courses = distributions_by_teacher.get(teacher_id, [])
-                times = times_by_teacher.get(teacher_id, [])
-                if courses:
-                    teachers_with_data.append({
-                        "teacher": teacher,
-                        "courses": courses,
-                        "availability": times,
-                    })
+            #     courses = distributions_by_teacher.get(teacher_id, [])
+            #     times = times_by_teacher.get(teacher_id, [])
+            #     if courses:
+            #         teachers_with_data.append({
+            #             "teacher": teacher,
+            #             "courses": courses,
+            #             "availability": times,
+            #         })
 
-            total_teachers = teachers_data.get('count', 0)
-            active_teachers_on_page = len([t for t in teachers_list if t.get("teacher_status") == "active"])
-            on_leave_teachers_on_page = len([t for t in teachers_list if t.get("teacher_status") == "vacation"])
+            # total_teachers = teachers_data.get('count', 0)
+            # active_teachers_on_page = len([t for t in teachers_list if t.get("teacher_status") == "active"])
+            # on_leave_teachers_on_page = len([t for t in teachers_list if t.get("teacher_status") == "vacation"])
 
-            context = {
-                "page_title": "إدارة المدرسين",
-                # "teachers": teachers_data, # مرر كائن الترقيم الكامل إلى القالب
-                "teachers_with_data": teachers_with_data, # هذه القائمة يجب ترقيمها بشكل منفصل إذا كانت كبيرة
-                "total_teachers": total_teachers,
-                "active_teachers": active_teachers_on_page, 
-                "on_leave_teachers": on_leave_teachers_on_page,
-            }
-            return render(request, "teachers/list.html", context)
-
+            # context = {
+            #     "page_title": "إدارة المدرسين",
+            #     # "teachers": teachers_data, # مرر كائن الترقيم الكامل إلى القالب
+            #     "teachers_with_data": teachers_with_data, # هذه القائمة يجب ترقيمها بشكل منفصل إذا كانت كبيرة
+            #     "total_teachers": total_teachers,
+            #     "active_teachers": active_teachers_on_page, 
+            #     "on_leave_teachers": on_leave_teachers_on_page,
+            #     'next_url': next_url,
+            #     'prev_url': prev_url,
+            #     'total_pages': total_pages,
+            #     "current_page": current_page,
+            #     }
+            # context['page_range'] = range(1, total_pages + 1)
+            
+            
+            return render(request, "teachers/list.html")
         except Exception as e:
             handle_exception(request, "فشل في جلب بيانات المدرسين", e)
             return render(request, "teachers/list.html", {
@@ -236,82 +249,6 @@ class TeacherManagementView(View):
                 "teachers_with_data": [],
                 "error": "فشل في جلب بيانات المدرسين."
             })
-        
-# class TeacherManagementView(View):
-#     def get(self, request, id=None):
-#         # user = request.session.get("user")
-#         try:
-#             if id:
-#                 return api_get(f"{Endpoints.teachers}{id}/", request=request, 
-#                                render_template="teachers/add_edit.html")
-#             elif "add" in request.GET:
-#                 return render(request, "teachers/add_edit.html", {"page_title": "إضافة مدرس"})
-
-#             # جلب البيانات
-#             # teachers_data = get_or_cache(KeysCach.teachers_data, Endpoints.teachers, request)
-#             # teacher_times_data = get_or_cache(KeysCach.teacher_times_data, Endpoints.teacher_times, request)
-#             # distributions_data = get_or_cache(KeysCach.distributions_data, Endpoints.distributions, request)
-            
-#             teachers_data = api_get(Endpoints.teachers, request=request) or []
-#             teacher_times_data = api_get(Endpoints.teacher_times, request=request) or []
-#             distributions_data = api_get(Endpoints.distributions, request=request) or []
-#             # print(teachers_data['results'])
-#             teachers_with_data = []
-#             for teacher in teachers_data['results']:
-#                 teacher_id = teacher["id"]
-#                 courses = [
-#                     {
-#                         "subject_name": d["fk_subject"]["subject_name"],
-#                         "group": d["fk_group"]["group_name"],
-#                         "level": d["fk_group"]["fk_level"]["level_name"],
-#                         "program": d["fk_group"]["fk_level"]["fk_program"]["program_name"],
-#                     }
-#                     for d in distributions_data['results']
-#                     if d["fk_teacher"]["id"] == teacher_id
-#                 ]
-#                 times = [
-#                     {
-#                         "day": t["fk_today"]["day_name_display"],
-#                         "period": f"{t['fk_period']['period_from']} - {t['fk_period']['period_to']}"
-#                     }
-#                     for t in teacher_times_data['results']
-#                     if t["fk_teacher"] == teacher_id
-#                 ]
-
-#                 if courses:
-#                     teachers_with_data.append({
-#                         "teacher": teacher,
-#                         "courses": courses,
-#                         "availability": times,
-#                     })
-#                     print(courses)
-            
-#             total_teachers = len(teachers_data)
-#             active_teachers = len([t for t in teachers_data if t.get("teacher_status") == "active"])
-#             on_leave_teachers = len([t for t in teachers_data if t.get("teacher_status") == "vacation"])
-
-#             # teachers_paginated = paginate_queryset(teachers_data, request, "page", "page_size", 5)
-#             print(teachers_with_data)
-#             # teachers_data_paginated = paginate_queryset(teachers_with_data, request, "page_detailed", "page_data_size",5)
-
-#             context = {
-#                 "page_title": "إدارة المدرسين",
-#                 # "teachers": teachers_paginated,
-#                 "teachers_with_data": teachers_with_data,
-#                 "total_teachers": total_teachers,
-#                 "active_teachers": active_teachers,
-#                 "on_leave_teachers": on_leave_teachers
-#             }
-#             return render(request, "teachers/list.html", context)
-
-#         except Exception as e:
-#             handle_exception(request, "فشل في جلب بيانات المدرسين", e)
-#             return render(request, "teachers/list.html", {
-#                 "teachers": [],
-#                 "teachers_with_data": [],
-#                 "error": "فشل في جلب بيانات المدرسين."
-#             })
-
     def post(self, request, id=None):
         form_type = request.POST.get("form_type")
         teacher_data = {
@@ -324,20 +261,9 @@ class TeacherManagementView(View):
         }
 
         try: 
-            # teachers=cache.get(KeysCach.teachers_data)
             if id:
-                # تعديل باستخدام api_put مع إعادة عرض الصفحة بعد التعديل
-                # response= 
                 api_put(f"{Endpoints.teachers}{id}/", teacher_data, request=request)
-                            #    redirect_to='teachers_management',
-                            #    render_template="teachers/add_edit.html",
-                            #    render_context={"teacher": teacher_data})
-                # if response['teacher']:
-                #     for i, teacher in enumerate(teachers):
-                #         if str(teacher['id']) == str(id):
-                #             teachers[i].update(response['teacher'])
-                #             cache.set(KeysCach.teachers_data, teachers, timeout=KeysCach.timeout)
-                #             break
+                         
                 return redirect(request.path)
             
             elif form_type == "upload_teachers":
@@ -363,14 +289,14 @@ class TeacherManagementView(View):
             return redirect("teachers_management")
 
 
-class TeacherDeleteView(View):
-    def post(self, request, id):
-        try:
-            api_delete(f"{Endpoints.teachers}{id}/", request=request)
-            return redirect("teachers_management")
-        except Exception as e:
-            handle_exception(request, "حدث خطأ أثناء حذف المدرس", e)
-        return redirect("teachers_management")
+# class TeacherDeleteView(View):
+#     def post(self, request, id):
+#         try:
+#             api_delete(f"{Endpoints.teachers}{id}/", request=request)
+#             return redirect("teachers_management")
+#         except Exception as e:
+#             handle_exception(request, "حدث خطأ أثناء حذف المدرس", e)
+#         return redirect("teachers_management")
 
 class TeacherAvailabilityAndCoursesView(View):
     def get(self, request, id=None):
@@ -418,6 +344,8 @@ class TeacherAvailabilityAndCoursesView(View):
     def post(self, request, id=None):
         form_type = request.POST.get('form_type')
         teacher_id = request.POST.get('selected_teacher_id')
+        path = request.path  # يعيد: "/teacherswithcourses/add/"
+        last_segment = path.strip('/').split('/')[-1]
         try:
             if form_type == "courses_form":
                 for i in range(1, 100):
@@ -438,8 +366,8 @@ class TeacherAvailabilityAndCoursesView(View):
                                 api_post(Endpoints.distributions, dist_data, request=request)
                         except Exception as e:
                             handle_exception(request, f"فشل حفظ توزيع رقم {i}", e)
-
-                return redirect("add_edit_teacher_with_courses", id=teacher_id)
+                
+                # return redirect("add_edit_teacher_with_courses", id=teacher_id)
             
             elif form_type == "times_form":
                 for i in range(1, 100):
@@ -451,8 +379,9 @@ class TeacherAvailabilityAndCoursesView(View):
                         time_data = {
                             "fk_today_id": day_id,
                             "fk_period_id": period_id,
-                            "fk_teacher_id": teacher_id,
+                            "fk_teacher": teacher_id,
                         }
+                        # print(time_data)
                         try:
                             if availability_id:
                                 api_put(f"{Endpoints.teacher_times}{availability_id}/", time_data, request=request)
@@ -464,28 +393,32 @@ class TeacherAvailabilityAndCoursesView(View):
                     else:
                         break
                 
-                return redirect("add_edit_teacher_with_courses", id=teacher_id)
+                # return redirect("add_edit_teacher_with_courses", id=teacher_id)
             
             elif form_type == "delete_distribution":
                 dist_id = request.POST.get("item_id")
+                # print(dist_id)
                 if dist_id:
                     try:
                         api_delete(f"{Endpoints.distributions}{dist_id}/", request=request)
                         messages.success(request, "تم حذف توزيع المقرر بنجاح.")
                     except Exception as e:
                         handle_exception(request, "فشل في حذف توزيع المقرر", e)
-                return redirect("add_edit_teacher_with_courses", id=teacher_id)
+                # return redirect("add_edit_teacher_with_courses", id=teacher_id)
             
             elif form_type == "delete_availability":
                 availability_id = request.POST.get("item_id")
+                # print(availability_id)
                 if availability_id:
                     try:
                         api_delete(f"{Endpoints.teacher_times}{availability_id}/", request=request)
                         messages.success(request, "تم حذف وقت التوفر بنجاح.")
                     except Exception as e:
                         handle_exception(request, "فشل في حذف وقت التوفر", e)
+            if last_segment == "add":
+                return redirect("add_edit_teacher_with_courses")
+            elif last_segment == "edit":
                 return redirect("add_edit_teacher_with_courses", id=teacher_id)
-            
             else:
                 messages.error(request, "نوع النموذج غير معروف.")
                 return redirect(request.path_info)
@@ -541,37 +474,20 @@ class CourseUpdateView(View):
             return redirect("courses_management")
         return render(request, "courses/add_edit.html", {"subject": subject, "page_title": "تعديل"})
     
-class CourseDeleteView(View):
-    def post(self, request, id):
-        api_delete(f"{Endpoints.subjects}{id}/", request=request)
-        subjects = cache.get(KeysCach.subjects_data)
-        for i, subject in enumerate(subjects):
-            if str(subject['id']) == str(id):
-                del subjects[i]
-                cache.set(KeysCach.subjects_data, subjects, timeout=KeysCach.timeout)
-                break
-        return redirect("courses_management")
+# class CourseDeleteView(View):
+#     def post(self, request, id):
+#         api_delete(f"{Endpoints.subjects}{id}/", request=request)
+#         subjects = cache.get(KeysCach.subjects_data)
+#         for i, subject in enumerate(subjects):
+#             if str(subject['id']) == str(id):
+#                 del subjects[i]
+#                 cache.set(KeysCach.subjects_data, subjects, timeout=KeysCach.timeout)
+#                 break
+#         return redirect("courses_management")
 
 
 
-from urllib.parse import urlparse, parse_qs
 
-def get_data_details(data):
-    links = data.get("links", {})
-    return (
-        data.get("results", []),
-        data.get("count", 0),
-        data.get("total_pages", 0),
-        links.get("next"),
-        links.get("previous"),
-        data.get("current_page", 1)  # ✅ استخراج رقم الصفحة الحالية
-    )
-def get_current_page(url):
-    if not url:
-        return 1
-    query = parse_qs(urlparse(url).query)
-    # هذا هو السطر السحري
-    return int(query.get("page", [1])[0]) 
 class RoomsListView(View):
     def get(self, request):
         page = request.GET.get("page")

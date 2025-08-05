@@ -13,10 +13,21 @@ function prepareDeleteModal(btn) {
   const name = btn.getAttribute("data-name");
   const type = btn.getAttribute("data-type");
   const formType = btn.getAttribute("data-form-type");
+  const mainId = btn.getAttribute("data-main-id");
+  let url;
+  //  = btn.getAttribute("data-url").replace("0", id);
+  if (mainId) {
+    url = btn.getAttribute("data-url").replace("0", mainId);
+  }
+  else {
+    url = btn.getAttribute("data-url").replace("0", id);
+  }
+  console.log(url);
   // const url = btn.getAttribute("data-url").replace("0", id);
-  const url = btn.getAttribute("data-url");
-  const teacherIdInput =
-    document.getElementById("selected_teachers_id")?.value || null;
+  // const teacherIdInput =
+  //   document.getElementById("selected_teacher_id")?.value || null;
+  // const studentIdInput =
+  //   document.getElementById("deleteItemIdInput")?.value || null;
   console.log(`Preparing to delete item with ID: ${id}, Name: ${name}, Type: ${type}, Form Type: ${formType}, URL: ${url}`);
   if (!id || !name || !type || !formType || !url) {
     showMessageModal(
@@ -27,10 +38,10 @@ function prepareDeleteModal(btn) {
     return;
   }
 
-  if (document.getElementById("selectedTeacherId")) {
-    document.getElementById("selectedTeacherId").value = teacherIdInput;
-  }
-
+  // if (document.getElementById("selectedTeacherId")) {
+  //   document.getElementById("selectedTeacherId").value = teacherIdInput;
+  // }
+  // console.log(`teacherIdInput: ${teacherIdInput}`);
   currentActionUrl = url;
   itemIdInput.value = id;
   itemName.textContent = name;
