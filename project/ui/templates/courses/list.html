@@ -38,7 +38,6 @@
     <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6 sm:p-8">
         {% include "message.html" %}
         <div class="flex flex-col center-title gap-4 lg:flex-row sm:items-center sm:justify-between mb-8">
-<<<<<<< HEAD
           <!-- العنوان -->
           <h2 class="text-2xl  font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap text-center sm:text-right">
             إدارة المقررات الدراسية
@@ -68,32 +67,6 @@
             <button
               type="button"
               class="upload-trigger center-title flex items-center justify-center
-=======
-            <!-- العنوان -->
-            <h2
-                class="text-2xl  font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap text-center sm:text-right">
-                إدارة المقررات الدراسية
-            </h2>
-            <!-- أدوات التحكم -->
-            <div
-                class="flex flex-col lg:flex-row flex-wrap gap-3 sm:gap-4 w-full lg:w-auto justify-center sm:justify-end">
-
-                <!-- حقل البحث -->
-                <div class="relative md:w-1/3 lg:w-64 sm:w-full">
-                    <input type="text"
-                        class="search w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-gray-200
-                dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400
-                focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
-                        data-type="teacher" data-title="البحث عن مقرر" placeholder="البحث باسم المقرر..."
-                        aria-label="البحث عن مقرر" />
-                    <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
-                        <i class="fas fa-search text-gray-600 dark:text-gray-400"></i>
-                    </div>
-                </div>
-
-                <!-- زر رفع الملف -->
-                <button type="button" class="upload-trigger center-title flex items-center justify-center
->>>>>>> origin/recovery-branch2
                bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 
                rounded-md shadow-md w-full sm:w-auto transition-all duration-200" data-type="courses"
                     data-title="رفع ملف بيانات المقررات" data-description="يجب أن يحتوي الملف على الأعمدة: subject_name,
@@ -157,11 +130,9 @@
 {% block extra_js %}
 
 <!-- <script src="{% static 'src/js/search.js' %}"></script> -->
-<script src="{% static 'src/js/my_search.js' %}"></script>
 <script src="{% static 'src/js/api_form.js' %}"></script>
 
 <script>
-<<<<<<< HEAD
     
       // --- APIFormManager الجديد والمعدّل للمقررات ---
       document.addEventListener("DOMContentLoaded", () => {
@@ -182,62 +153,6 @@
                   const termDisplay = course.term === 'term1' ? 'الأول' : 'الثاني';
                   
                   tr.innerHTML = `
-=======
-    // document.addEventListener("DOMContentLoaded", () => {
-    // new SearchComponent({
-    //     inputSelector: ".search-input[data-type='courses']",
-    //     rowSelector: "tbody[data-type='courses']",
-    //     noResultSelector: ".no-results-message[data-type='courses']",
-    //     apiEndpoint: "http://127.0.0.1:8001/api/searchcourses/",
-    //     renderItemFn: (course, index) => {
-    //         return ` <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row" data-type="courses">
-    //         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">${index + 1}</td>
-    //         <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">${course.subject_name}</td>
-    //         <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200"> ${course.term === 'term1' ? 'الأول' : 'الثاني'}</td>
-    //         <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium flex items-center justify-start w-1/3 gap-4">
-    //           <a href="/courses/edit/${course.id}/" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 
-    //             dark:hover:text-indigo-300 p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-700 transition-colors duration-150" 
-    //             title="تعديل">
-    //             <i class="fas fa-edit text-lg"></i>
-    //           </a>
-    //           <button type="button"
-    //             class="delete-btn group text-red-600 hover:text-red-800 dark:text-red-400 
-    //             dark:hover:text-red-300"
-    //             data-id="${course.id}"
-    //             data-name="${course.subject_name}"
-    //             data-type="المقرر"
-    //             data-url="subjects/${course.id}/"
-    //             data-form-type="delete">
-    //             <i class="fas fa-trash-alt text-lg group-hover:scale-110 transition-transform"></i>
-    //           </button>
-    //         </td>
-    //       </tr>
-    //     `;
-    //     }
-
-    // });
-
-    // });
-    // --- APIFormManager الجديد والمعدّل للمقررات ---
-    document.addEventListener("DOMContentLoaded", () => {
-        // لا نحتاج إلى عداد خارجي، الـ index من renderItem يكفي
-        const courseManager = new APIFormManager({
-            // لا يوجد نموذج لإضافة/تعديل في هذه الصفحة
-            formId: null,
-            listContainerId: 'course-list-container',
-            paginationContainerId: 'course-pagination-container',
-            apiBaseUrl: 'http://127.0.0.1:8001/api/',
-            endPoint: 'subjects/',
-
-            // دالة مسؤولة عن إنشاء صف <tr> لكل مقرر
-            renderItem: (course, index) => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row';
-
-                const termDisplay = course.term === 'term1' ? 'الأول' : 'الثاني';
-
-                tr.innerHTML = `
->>>>>>> origin/recovery-branch2
                       <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
                           ${index + 1}
                       </td>
@@ -272,12 +187,6 @@
             populateForm: null
         });
 
-        const search = new SearchComponent({
-            inputSelector: '.search',
-            apiManager: courseManager,     // كائن APIFormManager الذي أنشأته
-            queryKey: 'subject',            // هذا هو المفتاح المطلوب في API ?group=
-            delay: 300                    // اختياري – تأخير التنفيذ (ms)
-        });
     });
 </script>
 

@@ -502,7 +502,9 @@ if (this.listContainer && this.renderItem) {
         url += `?${query}`;
     }
 
-    this.fetchItems(url) // استخدم fetchItems مع الرابط الجديد
-}
+    this.fetchItems(url) // استخدم fetchItems مع الرابط الجديد
+  }
+  // استخدم fetchItems مع الرابط الجديد
+
 
 }

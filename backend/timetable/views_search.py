@@ -60,8 +60,7 @@ class SearchTeacherDistributionAPIView(APIView):
         teachers = Teacher.objects.all()
         if query:
             teachers = teachers.filter(
-                Q(teacher_name__icontains=query) |
-                Q(teacher_email__icontains=query)
+                Q(teacher_name__icontains=query) 
             )
 
         distributions = Distribution.objects.select_related(

@@ -135,6 +135,8 @@ class TeacherTimeViewSet(BaseViewSet):
 class DistributionViewSet(BaseViewSet):
     queryset = Distribution.objects.all()
     serializer_class = DistributionSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class=DistributionFilter
     success_create_message = "تم إنشاء التوزيع بنجاح."
     success_update_message = "تم تحديث التوزيع بنجاح."
     success_delete_message = "تم حذف التوزيع بنجاح."

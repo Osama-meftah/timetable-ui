@@ -31,3 +31,10 @@ class TeacherFilter(django_filters.FilterSet):
     class Meata:
         model=Teacher
         fields=['tacher']
+
+class DistributionFilter(django_filters.FilterSet):
+    teacher=django_filters.CharFilter(field_name='fk_teacher__teacher_name', lookup_expr='icontains')
+
+    class Mata:
+        model=Distribution
+        fields=['teacher']
