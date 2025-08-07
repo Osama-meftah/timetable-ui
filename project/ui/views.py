@@ -314,14 +314,18 @@ class TeacherAvailabilityAndCoursesView(View):
             teacher_distributions = []
 
             if id:
-                teacher = api_get(f"{Endpoints.teachers}{id}/?paginate=false", request=request)
+                # teacher = api_get(f"{Endpoints.teachers}{id}/?paginate=false", request=request)
+                # all_times = api_get(f"{Endpoints.teacher_times}?paginate=false", request=request) or []
+                # # teacher_times = [t for t in all_times if t["fk_teacher"]["id"] == int(id)]
+                # teacher_times = [t for t in all_times if t["fk_teacher"] == int(id)]
+                # all_distributions = api_get(f"{Endpoints.distributions}?paginate=false", request=request) or []
+                # teacher_distributions = [d for d in all_distributions if d["fk_teacher"]["id"] == int(id)]
+                response = api_get(f"{Endpoints.distributions}?teacherId={id}", request=request) or []
+                teacher_distributions=response['results']
+                teacher=teacher_distributions[0]['fk_teacher']
+                teacher_times=teacher_distributions[0]['fk_teacher']['available_times']
 
-                all_times = api_get(f"{Endpoints.teacher_times}?paginate=false", request=request) or []
-                # teacher_times = [t for t in all_times if t["fk_teacher"]["id"] == int(id)]
-                teacher_times = [t for t in all_times if t["fk_teacher"] == int(id)]
 
-                all_distributions = api_get(f"{Endpoints.distributions}?paginate=false", request=request) or []
-                teacher_distributions = [d for d in all_distributions if d["fk_teacher"]["id"] == int(id)]
             context = {
                 "teacher": teacher,
                 "all_teachers": teachers,

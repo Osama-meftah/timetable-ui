@@ -135,6 +135,8 @@ class TeacherTimeViewSet(BaseViewSet):
 class DistributionViewSet(BaseViewSet):
     queryset = Distribution.objects.all()
     serializer_class = DistributionSerializer
+    filter_backends=[DjangoFilterBackend]
+    filterset_class=DistributionFilter
     success_create_message = "تم إنشاء التوزيع بنجاح."
     success_update_message = "تم تحديث التوزيع بنجاح."
     success_delete_message = "تم حذف التوزيع بنجاح."
@@ -203,7 +205,7 @@ class TeacherViewSet(BaseViewSet):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             password = create_random_password()
-            email = serializer.validated_data.get('teacher_email')
+            email = request.data.get('teacher_email')
             teacher_name = serializer.validated_data.get('teacher_name')
             teacher_status = serializer.validated_data.get('teacher_status')
             is_staff = serializer.validated_data.get('is_staff', False)
@@ -226,7 +228,6 @@ class TeacherViewSet(BaseViewSet):
                 user=user,
                 teacher_name=teacher_name,
                 teacher_status=teacher_status,
-                teacher_email=email
             )
 
             if teacher_status == 'active':
@@ -254,6 +255,7 @@ class TeacherViewSet(BaseViewSet):
             "status": "success",
             "message": self.success_delete_message
         }, status=status.HTTP_204_NO_CONTENT)
+
         
 # class TeacherViewSet(ModelViewSet):
 #     queryset=Teacher.objects.all()
