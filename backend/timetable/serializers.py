@@ -200,21 +200,6 @@ class UserBriefSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'email']
-
-
-class TeacherSerializer(serializers.ModelSerializer):
-    teacher_status_display = serializers.CharField(source='get_teacher_status_display', read_only=True)
-    user=UserBriefSerializer()
-    class Meta:
-        model = Teacher
-        fields = ['id', 'teacher_name', 'teacher_status','teacher_status_display','user']
-
-class TeacherSerializer2(serializers.ModelSerializer):
-    teacher_status_display = serializers.CharField(source='get_teacher_status_display', read_only=True)
-    class Meta:
-        model = Teacher
-        fields = ['id', 'teacher_name', 'teacher_status','teacher_status_display', 'teacher_address']
-
 class TodaySerializer(serializers.ModelSerializer):
     day_name_display = serializers.CharField(source='get_day_name_display', read_only=True)
     class Meta:
@@ -225,6 +210,34 @@ class PeriodSerializer(serializers.ModelSerializer):
     class Meta:
         model = Period
         fields = ['id', 'period_from', 'period_to']
+    
+class TeacherTimeSerializer2(serializers.ModelSerializer):
+    fk_today = TodaySerializer(read_only=True)
+    fk_period = PeriodSerializer(read_only=True)
+    fk_today_id = serializers.PrimaryKeyRelatedField(
+        queryset=Today.objects.all(), source='fk_today', write_only=True
+    )
+    fk_period_id = serializers.PrimaryKeyRelatedField(
+        queryset=Period.objects.all(), source='fk_period', write_only=True
+    )
+
+    class Meta:
+        model = TeacherTime
+        fields = '__all__'
+
+class TeacherSerializer(serializers.ModelSerializer):
+    teacher_status_display = serializers.CharField(source='get_teacher_status_display', read_only=True)
+    user = UserBriefSerializer(read_only=True)
+    class Meta:
+        model = Teacher
+        fields = ['id', 'teacher_name', 'teacher_status','teacher_status_display','user']
+
+class TeacherSerializer2(serializers.ModelSerializer):
+    teacher_status_display = serializers.CharField(source='get_teacher_status_display', read_only=True)
+    available_times = TeacherTimeSerializer2(many=True, read_only=True)
+    class Meta:
+        model = Teacher
+        fields = ['id', 'teacher_name', 'teacher_status','teacher_status_display','available_times']
 
 class TeacherTimeSerializer(serializers.ModelSerializer):
     # للقراءة
@@ -276,7 +289,7 @@ class TeacherTimeSerializer(serializers.ModelSerializer):
 # Serializer للنموذج Distribution
 class DistributionSerializer(serializers.ModelSerializer):
     fk_group = GroupSerializer(read_only=True)
-    fk_teacher = TeacherSerializer(read_only=True)
+    fk_teacher = TeacherSerializer2(read_only=True)
     fk_subject = SubjectSerializer(read_only=True)
 
     fk_group_id = serializers.PrimaryKeyRelatedField(

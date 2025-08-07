@@ -18,8 +18,6 @@ class SearchComponent {
         this.input.addEventListener('input', () => {
             clearTimeout(this.timer);
             const value = this.input.value.trim();
-            console.log(value)
-
             this.timer = setTimeout(() => {
                 const query = {};
                 query[this.queryKey] = value;

@@ -28,7 +28,7 @@ function prepareDeleteModal(btn) {
   //   document.getElementById("selected_teacher_id")?.value || null;
   // const studentIdInput =
   //   document.getElementById("deleteItemIdInput")?.value || null;
-  console.log(`Preparing to delete item with ID: ${id}, Name: ${name}, Type: ${type}, Form Type: ${formType}, URL: ${url}`);
+  console.log(`Preparing to delete item with ID: ${id}, main id: ${mainId}, Type: ${type}, Form Type: ${formType}, URL: ${url}`);
   if (!id || !name || !type || !formType || !url) {
     showMessageModal(
       "error", // نوع الرسالة (error, success, warning, info)

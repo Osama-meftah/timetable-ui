@@ -131,7 +131,6 @@
                 </h3>
                 <div id="availability-container" class="space-y-4">
                     {% for item in teacher_times %}
-                    {{item.fk_teacher}}
                     <div
                         class="availability-item relative flex flex-col sm:flex-row items-center gap-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600">
                         <input type="hidden" name="availability_id_{{ forloop.counter }}" value="{{ item.id }}">

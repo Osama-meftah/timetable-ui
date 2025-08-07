@@ -57,10 +57,10 @@ class LecturesView(View):
         if response.get('lecture'):
             context = {
                 'schedule': response.get('lecture'),
-                'periods': periods,
+                'periods': periods['results'],
                 'table_id': id,
-                'halls': hall,
-                'programs': programs,
+                'halls': hall['results'],
+                'programs': programs['results'],
             }
             return render(request, 'timetables/lecture_list.html', context)
         messages.error(request, "لا توجد محاضرات لهذا الجدول")
