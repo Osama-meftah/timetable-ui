@@ -127,6 +127,8 @@ class TeacherTimeViewSet(BaseViewSet):
     # permission_classes = [IsAuthenticated]
     queryset = TeacherTime.objects.all()
     serializer_class = TeacherTimeSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = TeacherTimeFilter
     success_create_message = "تم إنشاء وقت الأستاذ بنجاح."
     success_update_message = "تم تحديث وقت الأستاذ بنجاح."
     success_delete_message = "تم حذف وقت الأستاذ بنجاح."

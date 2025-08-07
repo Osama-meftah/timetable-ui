@@ -50,14 +50,6 @@
                 </span>
             </a>
             
-            {# أيقونة الإشعارات (مثال من التصميم الأصلي) #}
-            <a href="{% url "teacher_dashboard" %}" class="nav-item">
-                <i class="fas fa-bell nav-icon">
-                </i>
-                <span >الاشعارات</span>
-
-                <span class="user-notification-badge notification-red -mt-2 -mr-1">3</span>
-            </a>
             {# أيقونة المستخدم مع إشعار (مثال من التصميم الأصلي) #}
             <a href="{% url "teacher_dashboard" %}" class="nav-item">
                 <i class="fas fa-user nav-icon">
@@ -65,6 +57,16 @@
                 <span>الحساب</span>
                 <span class="user-notification-badge notification-yellow -mt-1 -mr-1">3</span>        
             </a>
+            {# أيقونة الإشعارات (مثال من التصميم الأصلي) #}
+            {% if teacher.is_staff %}
+            
+            <a href="{% url "dashboard" %}" class="nav-item">
+                <i class="fas fa-home nav-icon">
+                </i>
+                <span >لوحة التحكم</span>
+
+            </a>
+            {% endif %}
             {# رابط تسجيل الخروج #}
             <a href="{% url 'logout' %}" class="nav-item">
                 <i class="fas fa-sign-out-alt nav-icon ">

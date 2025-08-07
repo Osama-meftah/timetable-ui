@@ -17,6 +17,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.conf import settings
 from rest_framework import status
+from rest_framework import generics
+from rest_framework.views import APIView
+from django.contrib.auth.models import User, Permission
+from .serializers import UserCreateSerializer, PermissionSerializer
 
 @api_view(['POST'])
 def Login(request):
@@ -105,3 +109,26 @@ def getuseer(requset):
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
+class UserListAPIView(generics.ListAPIView):
+    queryset = User.objects.all().order_by('username')
+    serializer_class = UserSerializer
+    
+class UserCreateAPIView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserCreateSerializer
+
+
+from rest_framework import generics
+from rest_framework.permissions import IsAdminUser # استيراد هام لحماية الواجهة
+from .serializers import UserRoleSerializer # استيراد الـ Serializer الجديد
+from django.contrib.auth.models import User
+
+# ... (باقي الـ Views لديك)
+
+class UserDetailAPIView(generics.RetrieveUpdateAPIView):
+    """
+    واجهة API لجلب (GET) وتحديث (PATCH) بيانات مستخدم معين.
+    """
+    queryset = User.objects.all()
+    serializer_class = UserRoleSerializer
+    permission_classes = [IsAdminUser] 

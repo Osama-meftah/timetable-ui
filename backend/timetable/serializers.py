@@ -4,24 +4,52 @@ from .models import (
     Today, Period, TeacherTime, Distribution, Table, Lecture,Department
 )
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from django.contrib.auth.models import User
 from django.db.models import Sum
+from django.contrib.auth.models import User, Permission
+# في ملف serializers.py
 
+from django.contrib.auth.models import User
+from rest_framework import serializers
+
+# ... (باقي الـ Serializers لديك مثل UserCreateSerializer)
+
+class UserRoleSerializer(serializers.ModelSerializer):
+    """
+    Serializer مخصص لجلب وتحديث حقل is_staff فقط.
+    """
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'is_staff']
+        read_only_fields = ['id', 'username']
+class UserCreateSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True) # كلمة المرور للكتابة فقط
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'password']
+    
+    def create(self, validated_data):
+        # نستخدم create_user لضمان تجزئة كلمة المرور بشكل صحيح
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            password=validated_data['password']
+        )
+        return user
+
+class PermissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Permission
+        fields = ['id', 'name','codename']
+        
+        
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
         fields = ['id', 'name', 'description']
         
         
-# class ProgramSerializer(serializers.ModelSerializer):
-#     fk_department = DepartmentSerializer(read_only=True) 
-#     department_id = serializers.PrimaryKeyRelatedField(
-#         queryset=Department.objects.all(), write_only=True, source='fk_department'
-#     )
 
-#     class Meta:
-#         model = Program
-#         fields = ['id', 'program_name', 'fk_department', 'department_id']
 class ProgramSerializer(serializers.ModelSerializer):
     # عرض القسم كمعلومة فقط (قراءة)
     fk_department = DepartmentSerializer(read_only=True)
@@ -156,10 +184,18 @@ class TeacherBriefSerializer(serializers.ModelSerializer):
         fields = ['id','teacher_name','teacher_status']
 
 class UserSerializer(serializers.ModelSerializer):
-    teacher = TeacherBriefSerializer(read_only=True)  # اسم الحقل لازم يطابق اسم العلاقة في الموديل
+    teacher = TeacherBriefSerializer(read_only=True)
+    # username= serializers.CharField(source='username', read_only=True)# اسم الحقل لازم يطابق اسم العلاقة في الموديل
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'is_staff', 'teacher']
+        fields = ['id', 'username', 'email', 'is_staff','is_superuser', 'teacher']
+# class UserSerializer(serializers.ModelSerializer):
+#     teacher = TeacherBriefSerializer(read_only=True)
+#     login_name 
+
+#     class Meta:
+#         model = User
+#         fields = ['id', 'login_name', 'email', 'is_staff', 'is_superuser', 'teacher']
 class UserBriefSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

@@ -7,7 +7,6 @@
 
 {% block content %}
 
-{% include 'message.html' %} 
 
 {# The main content container, now centered horizontally and vertically #}
 <div class="container mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8 flex flex-col flex-grow items-center justify-center"> {# Added flex flex-col flex-grow items-center justify-center #}    
@@ -74,8 +73,8 @@
                 </form>
             </div>
 
-            {% if availabilities %}
-            {% for entry in availabilities %}
+            {% comment %} {% if availabilities %}
+            {% for entry in availabilities %} {% endcomment %}
             <div class="overflow-x-auto shadow-lg rounded-lg border border-gray-200 dark:border-gray-700">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-700">
@@ -87,27 +86,23 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        {% for avail in entry.availability %}
+                        {% for avail in availabilities %}
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                                 <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
-                                    {{ avail.day.day_name_display }}
+                                    {{ avail.fk_today.day_name_display }}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
-                                    {{ avail.period.period_from }}
+                                    {{ avail.fk_period.period_from }}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
-                                    {{ avail.period.period_to }}
+                                    {{ avail.fk_period.period_to }}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-left font-medium flex items-center gap-2">
-                                    <button type="button" data-id="{{ avail.id }}"
-                                    data-day="{{ avail.day.id }}"
-                                    data-period-id="{{ avail.period.id }}"
-                                    class="edit-availability-btn text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-2 rounded-full hover:bg-blue-100 dark:hover:bg-gray-700"
-                                    title="تعديل وقت التواجد">
-                                <i class="fas fa-edit text-lg"></i>
-                            </button>
-                                    <button type="button" data-id="{{ avail.period.id }}" data-type="وقت التواجد"
+                                   {{avail.id}}
+                                    <button type="button" data-id="{{ avail.id }}" data-type="وقت التواجد"
                                             data-url="{% url 'teachers_availability_delete' 0 %}" data-form-type="delete"
+                                            data-name="{{ avail.fk_period.period_from }} - {{ avail.fk_period.period_to }}"
+                                            data-name="{{ avail.fk_period.period_from }} - {{ avail.fk_period.period_to }}"
                                             class="delete-btn group text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 p-2 rounded-full hover:bg-red-100 dark:hover:bg-gray-700 transition-colors duration-150"
                                             title="حذف وقت التواجد">
                                         <i class="fas fa-trash-alt text-lg group-hover:scale-110 transition-transform"></i>
@@ -122,22 +117,28 @@
                         </tbody>
                     </table>
                 </div>
-              {% endfor %}
-            {% else %}
+              {% comment %} {% endfor %} {% endcomment %}
+            {% comment %} {% else %}
             <div class="text-center py-10 bg-gray-50 dark:bg-gray-700 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
                 <i class="fas fa-calendar-times text-gray-400 text-5xl mb-4"></i>
                 <p class="text-xl font-medium text-gray-500 dark:text-gray-400">لا توجد أوقات تواجد مسجلة حالياً.</p>
                 <p class="text-md text-gray-400 dark:text-gray-500 mt-2">اضغط على "إضافة وقت تواجد جديد" لتبدأ.</p>
             </div>
-            {% endif %}
+            {% endif %} {% endcomment %}
         </div>
     </div>
+
+{% include 'message.html' %} 
+{% include "messagejs.html" %}
+
 
 {% include "delete_modal.html" %} {# تضمين نموذج الحذف #}
 
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'src/js/show_modal_message.js' %}"></script>
+<script src="{% static 'src/js/delete.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const addAvailabilityBtn = document.getElementById('addAvailabilityBtn');
@@ -147,25 +148,15 @@
         const availabilityIdInput = document.getElementById('availabilityId');
         const dayInput = document.getElementById('day');
         const periodInput = document.getElementById('periodInput');
-        //const startTimeInput = document.getElementById('start_time');
-        //const endTimeInput = document.getElementById('end_time');
         const cancelAvailabilityBtn = document.getElementById('cancelAvailabilityBtn');
-        const editAvailabilityButtons = document.querySelectorAll('.edit-availability-btn');
-        const deleteButtons = document.querySelectorAll('.delete-btn'); // لزر الحذف العام
         function showAvailabilityForm(isEdit = false, availabilityData = {}) {
             availabilityFormContainer.classList.remove('hidden');
         
-            if (isEdit) {
-                availabilityFormTitle.textContent = 'تعديل وقت التواجد';
-                availabilityIdInput.value = availabilityData.id;
-                dayInput.value = availabilityData.day;
-                periodInput.value = availabilityData.periodId;  // استخدام periodId
-            } else {
                 availabilityFormTitle.textContent = 'إضافة وقت تواجد';
                 availabilityIdInput.value = '';
                 dayInput.value = '';
                 periodInput.value = '';
-            }
+            
         }
 
 
@@ -175,43 +166,11 @@
             availabilityForm.reset(); // إعادة تعيين حقول النموذج
         }
 
-        // عند النقر على زر "إضافة وقت تواجد جديد"
-        if (addAvailabilityBtn) {
-            addAvailabilityBtn.addEventListener('click', () => showAvailabilityForm(false));
-        }
 
         if (cancelAvailabilityBtn) {
             cancelAvailabilityBtn.addEventListener('click', hideAvailabilityForm);
         }
-
-        editAvailabilityButtons.forEach(button => {
-            button.addEventListener('click', (event) => {
-                const id = event.currentTarget.dataset.id;
-                const day = event.currentTarget.dataset.day;
-                const periodId = event.currentTarget.dataset.periodId;
-                showAvailabilityForm(true, { id, day, periodId });
-                //showAvailabilityForm(true, { id, day, startTime, endTime });
-            });
-        });
-
-        // منطق أزرار الحذف (يجب أن يتم التعامل معها بواسطة delete_modal.html و JS الخاص به)
-        // هذا الجزء يفترض أن لديك DeleteModalComponent أو منطق مشابه في ملف خارجي
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', (event) => {
-                const id = event.currentTarget.dataset.id;
-                const type = event.currentTarget.dataset.type;
-                const urlTemplate = event.currentTarget.dataset.url;
-                const deleteUrl = urlTemplate.replace('0', id); // استبدال 0 بالـ ID الفعلي
-
-                // هنا يمكنك فتح الـ modal الخاص بالحذف وتمرير deleteUrl إليه
-                // مثال (إذا كان لديك وظيفة لفتح المودال):
-                // openDeleteModal(deleteUrl, type);
-                // أو ببساطة:
-                 if (confirm(`هل أنت متأكد أنك تريد حذف ${type} هذا؟`)) {
-                     window.location.href = deleteUrl; // أو إرسال طلب AJAX
-                 }
-            });
-        });
+ 
     });
 </script>
 {% endblock %}

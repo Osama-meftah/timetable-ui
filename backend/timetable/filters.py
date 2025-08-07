@@ -38,3 +38,10 @@ class DistributionFilter(django_filters.FilterSet):
     class Mata:
         model=Distribution
         fields=['teacher']
+
+class TeacherTimeFilter(django_filters.FilterSet):
+    teacher=django_filters.CharFilter(field_name='fk_teacher__id', lookup_expr='icontains')
+
+    class Mata:
+        model=TeacherTime
+        fields=['teacher']

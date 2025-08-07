@@ -19,85 +19,7 @@ def dashboard(request):
     """
     عرض لوحة التحكم.
     """
-    # subjects = api_get(Endpoints.subjects)
-    # teachers_data = api_get(Endpoints.teachers)
-    # total_teacher = len(teachers_data)
-    # total_courses = len(subjects)
-    # listName=[ sub.get('subject_name') for sub in subjects]
-    # distribution =api_get(Endpoints.distributions)
-    # distributionList=[ dist.get("fk_teacher")  for dist in distribution ]
     
-    # countSubTeacher=[]
-    # for teacher in teachers_data:
-        
-    #     teacher_id = teacher["id"]
-    #     count=0
-    #     for d in distribution:
-    #         if d["fk_teacher"]["id"] == teacher_id:
-    #             count+=1
-    #     if count > 2:
-    #         countSubTeacher.append({
-    #             "name":teacher["teacher_name"],
-    #             "countSub":count,
-    #             "countHour":2*count
-    #         })
-    # # sorted(countSubTeacher)
-    # countSubTeacher.sort(key=lambda item: item['countSub'], reverse=True)
-    # allNamesTeachers=[]
-    # teacherNotSubject=[]
-    # for teach in teachers_data:
-    #     allNamesTeachers.append(teach["teacher_name"])
-    #     if teach not in distributionList:
-    #         teacherNotSubject.append({"key": teach['id'],"val":teach["teacher_name"]})
-            
-    # halls=api_get(Endpoints.halls,request)
-    # notActivHall=[]
-    # allNamesHalls=[]
-    # for hal in halls:
-    #     allNamesHalls.append(hal["hall_name"])
-    #     if hal["hall_status"] == "under_maintenance":
-    #         notActivHall.append({"key": hal["id"],"val":hal["hall_name"]})
-    
-    # levels=api_get(Endpoints.levels,request)
-    # allNamesLevels=[]
-
-    # for level in levels:
-    #     allNamesLevels.append(level["level_name"]) 
-    
-    # lecuters=api_get(Endpoints.lectures,request)
-    # taimeTable=[]
-    # periods=api_get(Endpoints.periods,request)
-    # todays=api_get(Endpoints.todays,request)
-    # for lecuter in lecuters:
-    #     period_id=lecuter['fk_period']
-    #     for p in periods: 
-    #         if p["id"] == period_id:   
-    #             period= f"{p['period_from']} - {p['period_to']}"
-    #     day_id=lecuter['fk_day']
-    #     for d in todays: 
-    #         if d["id"] == day_id:
-    #             day=  d['day_name_display'] 
-    #     taimeTable.append({
-    #         "subject": lecuter["fk_distribution"]["fk_subject"]["subject_name"],
-    #         "level": lecuter["fk_distribution"]["fk_group"]["fk_level"]["level_name"],
-    #         "teacher": lecuter["fk_distribution"]["fk_teacher"]["teacher_name"],
-    #         "hall": lecuter["fk_hall"]["hall_name"],
-    #         "day": day,
-    #         "period": period, 
-    #     })
-    
-    # context={
-    #     "total_teacher":total_teacher,
-    #     "total_courses":total_courses,
-    #     "listName":listName,
-    #     "teacherNotSubject":teacherNotSubject,
-    #     "notActivHall":notActivHall,
-    #     "allNamesTeachers":allNamesTeachers,
-    #     "allNamesHalls":allNamesHalls,
-    #     "allNamesLevels":allNamesLevels,
-    #     "countSubTeacher":countSubTeacher,
-    #     "taimeTable":taimeTable
-    #     }
     return render(request, 'dashboard.html')
 
 
@@ -106,37 +28,41 @@ class TeachersAvailableView(View):
     def get(self, request, id=None):
         user = get_user_id(request)
         teacher = user.get('teacher') if user else None
-        availabilities = []
-        if teacher:
-            teacher_name = teacher.get('teacher_name')
-            availabilities = api_search_items(Endpoints.searchteacherstimes, teacher_name, request=request) or []
-            print("اسم المدرس:", teacher_name)
-        else:
-            print("لا يوجد مدرس مرتبط بالمستخدم")
-
-        days = api_get(Endpoints.todays, request=request) or []
-        periods = api_get(Endpoints.periods, request=request) or []
-
-        if isinstance(availabilities, dict):
-            availabilities = [availabilities]
+        if not teacher:
+            print("===========================================================================")
+            messages.error(request,"جب تسجيل الدخول كمعلم.")
+            return redirect('teacher_dashboard') 
+        
+        availabilitie= api_get(f"{Endpoints.teacher_times}?teacher={teacher['id']}", request=request) or []
+        availability = availabilitie.get("results", [])
+        print(availability)
+        days = api_get(f"{Endpoints.todays}", request=request) or []
+        periods = api_get(f"{Endpoints.periods}", request=request) or []
+        days = days.get("results", []) 
+        periods = periods.get("results", [])
 
         context = {
-            "availabilities": availabilities,
+            "availabilities": availability,
             "days": days,
             "periods": periods,
             "page_title": "أوقات التواجد",
         }
         return render(request, 'teachers_management/list.html', context)
 
-    def post(self, request, id=None):
-        availability_id = request.POST.get("availability_id")
+    def post(self, request, id):
         day_id = request.POST.get("day")
         period_id = request.POST.get("period")
-
         user = get_user_id(request)
         teacher = user.get("teacher") if user else None
         teacher_id = teacher.get("id") if teacher else None
 
+        print(id,"=========================================================")
+        if id:
+            try:
+                api_delete(f"{Endpoints.teacher_times}{id}/", request=request)
+            except RuntimeError as e:
+                messages.error(request, f"❌ فشل حذف الوقت: {e}")
+            return redirect("teachers_availability")
         if not teacher_id:
             messages.error(request, "❌ يجب تسجيل الدخول أولاً.")
             return redirect("teachers_availability")
@@ -144,7 +70,6 @@ class TeachersAvailableView(View):
         if not day_id or not period_id:
             messages.error(request, "❌ جميع الحقول مطلوبة.")
             return redirect("teachers_availability")
-
         time_data = {
             "fk_today_id": day_id,
             "fk_period_id": period_id,
@@ -159,7 +84,7 @@ class TeachersAvailableView(View):
 
 def teacher_dashboard_view(request):
     user=request.session.get('user')
-    # print(user)
+    print(user)
     # user=User.objects.get(id=user_id)
     return render(request, 'teachers_management/dashboard_teatcher.html', {'teacher': user})
 
@@ -287,16 +212,6 @@ class TeacherManagementView(View):
         except Exception as e:
             messages.error(request, f"❌ حدث خطأ أثناء حفظ بيانات المدرس: {str(e)}")
             return redirect("teachers_management")
-
-
-# class TeacherDeleteView(View):
-#     def post(self, request, id):
-#         try:
-#             api_delete(f"{Endpoints.teachers}{id}/", request=request)
-#             return redirect("teachers_management")
-#         except Exception as e:
-#             handle_exception(request, "حدث خطأ أثناء حذف المدرس", e)
-#         return redirect("teachers_management")
 
 class TeacherAvailabilityAndCoursesView(View):
     def get(self, request, id=None):
@@ -474,19 +389,6 @@ class CourseUpdateView(View):
             return redirect("courses_management")
         return render(request, "courses/add_edit.html", {"subject": subject, "page_title": "تعديل"})
     
-# class CourseDeleteView(View):
-#     def post(self, request, id):
-#         api_delete(f"{Endpoints.subjects}{id}/", request=request)
-#         subjects = cache.get(KeysCach.subjects_data)
-#         for i, subject in enumerate(subjects):
-#             if str(subject['id']) == str(id):
-#                 del subjects[i]
-#                 cache.set(KeysCach.subjects_data, subjects, timeout=KeysCach.timeout)
-#                 break
-#         return redirect("courses_management")
-
-
-
 
 class RoomsListView(View):
     def get(self, request):

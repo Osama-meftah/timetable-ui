@@ -2,10 +2,13 @@ from django.urls import path
 from . import views
 from .views_acount import *
 from .views_table import *
+from .views_create_user import *
 
 urlpatterns = [
     path('login/', LoginView, name='login'),
     path('logout/', logout_view, name='logout'),
+    path('users/create/', CreateAdmin.as_view(), name='create_user'),
+    
     path('dashboard/', views.dashboard, name='dashboard'),
     # path()
     

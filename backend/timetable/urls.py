@@ -49,7 +49,13 @@ urlpatterns =[
     path("send_reseat_email/",send_reset_email,name="send_reseat_email"),
     path("send_forget_password_email/",send_forget_password_email,name="send_forget_password_email"),
 
-    path("user/",getuseer,name="user")
+    path("user/",getuseer,name="user"),
+    
+    
+    path('usersCreate/', UserCreateAPIView.as_view(), name='api_create_user'),
+    path('users/', UserListAPIView.as_view(), name='users'),
+    path('users/<int:pk>/', UserDetailAPIView.as_view(), name='user-detail'),
+    
 
 ]
  
