@@ -6,7 +6,7 @@
 
 {% block content %}
 <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">نظرة عامة على النظام</h2>
-{% include "message.html" %}
+
 {# لوحة التحكم - البطاقات الإحصائية الرئيسية #}
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <div class="info-card flex flex-col items-start p-6 rounded-lg">
@@ -30,7 +30,7 @@
             <i class="fas fa-door-closed fa-2x"></i>
         </div>
         <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300">القاعات المتاحة (الآن)</h3>
-        <p class="text-4xl font-bold card-yellow mt-2">15 / 20</p>
+        <p class="text-4xl font-bold card-yellow mt-2"> {{ hall_available }} </p>
     </div>
 
     <div class="info-card flex flex-col items-start p-6 rounded-lg">
@@ -38,7 +38,7 @@
             <i class="fas fa-calendar-check fa-2x"></i>
         </div>
         <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300">جداول نشطة (هذا الفصل)</h3>
-        <p class="text-4xl font-bold card-purple mt-2">5</p>
+        <p class="text-4xl font-bold card-purple mt-2"> {{ total_table_activ }} </p>
     </div>
 </div>
 
@@ -85,6 +85,10 @@
     </ul>
 </div>
 
+
+
+
+
 {# قسم الجدول الزمني الشامل للفصل الدراسي #}
 <div class="bg-white p-6 rounded-lg shadow-md mb-8">
     <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">الجدول الزمني للفصل الدراسي</h3>
@@ -99,6 +103,7 @@
                 {% for name in listName %}
                 <option value="{{name}}"> {{ name }} </option>
                 {% endfor %}
+               
             </select>
         </div>
 
@@ -111,6 +116,8 @@
                  {% for name in allNamesTeachers %}
                 <option value="{{name}}"> {{ name }} </option>
                 {% endfor %}
+
+               
             </select>
         </div>
 
@@ -122,6 +129,7 @@
                  {% for hall in allNamesHalls %}
                 <option value="{{hall}}">{{hall}}</option>
                  {% endfor %}
+                
             </select>
         </div>
 
@@ -133,13 +141,14 @@
                  {% for level in allNamesLevels %}
                 <option value="{{level}}">{{level}}</option>
                 {% endfor %}
+               
             </select>
         </div>
     </div>
 
     <div class="overflow-x-auto max-h-[70vh] overflow-y-auto">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600" id="fullScheduleTable">
-            <thead class="bg-gray-50 dark:bg-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0">
                 <tr>
                     <th scope="col"
                         class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -169,10 +178,10 @@
                         class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         الحالة
                     </th>
-                    <th scope="col"
+                    {% comment %} <th scope="col"
                         class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         إجراء
-                    </th>
+                    </th> {% endcomment %}
                 </tr>
             </thead>
             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -191,14 +200,15 @@
                             active
                         </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    {% comment %} <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <a href="#"
                             class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">عرض</a>
                         <a href="#"
                             class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 mr-2">تعديل</a>
-                    </td>
+                    </td> {% endcomment %}
                 </tr>
                 {% endfor %}
+                
             </tbody>
         </table>
     </div>
@@ -206,90 +216,76 @@
 
 {# قسم القاعات حسب التوافر والمقررات حسب المستوى #}
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-    <div class="bg-white p-6 rounded-lg shadow-md">
-        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">القاعات حسب التوافر (ملخص)</h3>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
-                <thead class="bg-gray-50 dark:bg-gray-700">
-                    <tr>
-                        <th scope="col"
-                            class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            القاعة
-                        </th>
-                        <th scope="col"
-                            class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            الحالة (الآن)
-                        </th>
-                        <th scope="col"
-                            class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            المشغولية (هذا الفصل)
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
 
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
-                            القاعة 101</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span
-                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                available
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">60%</td>
-                    </tr>
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
-                            القاعة 102</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span
-                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                مشغولة
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">85%</td>
-                    </tr>
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
-                            القاعة 201</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span
-                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                available
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">70%</td>
-                    </tr>
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
-                            القاعة 203</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span
-                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                مشغولة
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">90%</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+    <div class="bg-white p-6 rounded-lg shadow-md">
+    <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">القاعات حسب التوافر (ملخص)</h3>
+
+    <!-- حاوية التمرير -->
+    <div class="overflow-x-auto max-h-[70vh] overflow-y-auto">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+           
+            <!-- أضف الكلاسات هنا -->
+            <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0">
+                <tr>
+                    <th scope="col"
+                        class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        القاعة
+                    </th>
+                    <th scope="col"
+                        class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        الحالة (الآن)
+                    </th>
+                    <th scope="col"
+                        class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        المشغولية (هذا الفصل)
+                    </th>
+                </tr>
+            </thead> 
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            
+                {% for item in busyHallList %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
+                       {{ item.hallName }} </td>
+                {% if item.hallBusy < 85 %}
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span
+                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            available
+                        </span>
+                    </td>
+                 {% else %}
+                   <td class="px-6 py-4 whitespace-nowrap">
+                        <span
+                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                            مشغولة
+                        </span>
+                    </td>
+                {% endif %}
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"> {{ item.hallBusy }} %</td>
+                
+                </tr>
+                {% endfor %} 
+               
+            </tbody>
+        </table>
     </div>
+</div>
+ 
 
     <div class="bg-white p-6 rounded-lg shadow-md">
         <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">المقررات حسب المستويات</h3>
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto max-h-[70vh] overflow-y-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
-                <thead class="bg-gray-50 dark:bg-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0">
                     <tr>
                         <th scope="col"
                             class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            المستوى
+                            البرنامج
                         </th>
                         <th scope="col"
                             class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            عدد المقررات
+                           المستويات/المقررات
                         </th>
                         <th scope="col"
                             class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -298,30 +294,44 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            
+                    {% for info in levelSubjectInfo  %}
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
-                            المستوى الأول</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">30</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">2</td>
+                             {{info.program}} </td>
+                            
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                             {% if info.levelInfo %}
+                                <ul class="list-disc pr-5 space-y-1 text-xs">
+                                    {% for level in info.levelInfo %}
+                                        <li>
+                                            <span class="font-medium text-gray-800 dark:text-gray-200">{{ level.levelName }}</span>
+                                            (<span class="text-indigo-600 dark:text-indigo-400">{{ level.countSubjet }}</span> مقرر)
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <span class="text-gray-500 dark:text-gray-400">لا توجد مستويات محددة</span>
+                            
+                            {% endif %}
+                        </td>
+                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                             {% if info.groupInfo %}
+                                <ul class="list-disc pr-5 space-y-1 text-xs">
+                                    {% for group in info.groupInfo %}
+                                        <li>
+                                            <span class="font-medium text-gray-500 text-sm dark:text-gray-400">{{ group }}</span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <span class="text-gray-500 text-sm dark:text-gray-400">لا توجد مجموعات محددة</span>
+                                
+                            {% endif %}
+                        </td>
+                    
                     </tr>
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
-                            المستوى الثاني</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">45</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">1</td>
-                    </tr>
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
-                            المستوى الثالث</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">25</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">1</td>
-                    </tr>
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
-                            المستوى الرابع</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">20</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">1</td>
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
