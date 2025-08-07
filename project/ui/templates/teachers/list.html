@@ -216,14 +216,14 @@
 <script>
 
     document.addEventListener("DOMContentLoaded", () => {
-        const teacherManager= new APIFormManager({
+        const teacherManager = new APIFormManager({
             listContainerId: 'teacher-list-container',
             paginationContainerId: 'teacher-pagination-container',
-            endPoint: 'teachers/',
-            renderItem: (teacher, index = 1) => {
-                if (!loadedTeachers.some(t => t.id === teacher.id)) {
-                    loadedTeachers.push(teacher);
-                }
+            endPoint: 'teachers/',            
+            searchInputSelector: '#search-teacher',
+            searchEndPoint: 'searchteachers/',
+
+            renderItem: (teacher, index) => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700';
                 const statusClass = teacher.teacher_status === 'active' ? 'text-green-600' : 'text-yellow-600';
@@ -242,21 +242,13 @@
                 return tr;
             },
         });
-        const search = new SearchComponent({
-            inputSelector: '.search-dist',
-            apiManager: teacherManager,     // كائن APIFormManager الذي أنشأته
-            queryKey: 'teacher',            // هذا هو المفتاح المطلوب في API ?group=
-            delay: 300                    // اختياري – تأخير التنفيذ (ms)
-        });
     });
     document.addEventListener('DOMContentLoaded', function () {
 
         const teacherDetailsManager = new APIFormManager({
             listContainerId: "teacher-details-tbody",
             paginationContainerId: "pagination-details-container",
-            apiBaseUrl: "http://127.0.0.1:8001/api/",
             endPoint: "distributions/",
-            // endPoints: ['distributions/?paginate=false'],
 
             renderItem: (distribution, index) => {
                 if (!distribution.fk_teacher?.id) return null;
