@@ -61,27 +61,27 @@ class TableViewSet(BaseViewSet):
 
             # التحقق من تكرار الجدول بنفس البيانات
             generated_lectures = scheduler.generated_schedule
+            if not conflict:
+                existing_tables = Table.objects.filter(semester=semester)
 
-            existing_tables = Table.objects.filter(semester=semester)
+                for table in existing_tables:
+                    existing_lectures = Lecture.objects.filter(fk_table=table)
+                    match_count = 0
 
-            for table in existing_tables:
-                existing_lectures = Lecture.objects.filter(fk_table=table)
-                match_count = 0
+                    for row in generated_lectures:
+                        if existing_lectures.filter(
+                            fk_hall_id=row['room_id'],
+                            fk_day_id=row['day_id'],
+                            fk_period_id=row['time_id'],
+                            fk_distribution_id=row['course_id']
+                        ).exists():
+                            match_count += 1
 
-                for row in generated_lectures:
-                    if existing_lectures.filter(
-                        fk_hall_id=row['room_id'],
-                        fk_day_id=row['day_id'],
-                        fk_period_id=row['time_id'],
-                        fk_distribution_id=row['course_id']
-                    ).exists():
-                        match_count += 1
-
-                if match_count == len(generated_lectures):
-                    return Response({
-                        'status': 'error',
-                        'message': f"تم إنشاء جدول مشابه مسبقًا لنفس الفصل الدراسي ({semester})"
-                    }, status=status.HTTP_409_CONFLICT)
+                    if match_count == len(generated_lectures):
+                        return Response({
+                            'status': 'error',
+                            'message': f"تم إنشاء جدول مشابه مسبقًا لنفس الفصل الدراسي ({semester})"
+                        }, status=status.HTTP_409_CONFLICT)
 
             # إنشاء اسم الملف
             timestamp = datetime.now().strftime("%Y-%m-%d_%I-%M-%p")

@@ -25,19 +25,27 @@ class TableView(View):
         if not semester:
             messages.error(request, "يرجى تحديد الفصل الدراسي")
         response=api_post(Endpoints.tables, data={"semester":semester,"random":random_enabled},request=request)
+        conflict = []
+        available_unscheduled = []
         if response:
             conflict = response.get('conflicts', [])
-            available_unscheduled=response.get('available_unscheduled',[])
+            available_unscheduled = response.get('available_unscheduled', [])
             
-            request.session['conflicts'] = conflict
-            request.session['available_unscheduled']=available_unscheduled
+            # حفظ في الجلسة فقط إذا كانت البيانات غير فارغة
+            if conflict:
+                request.session['conflicts'] = conflict
+            else:
+                request.session.pop('conflicts', None)
+
+            if available_unscheduled:
+                request.session['available_unscheduled'] = available_unscheduled
+            else:
+                request.session.pop('available_unscheduled', None)
+
         else:
-            # if request.session.get('conflicts') and request.session.get('available_unscheduled'):
-            #     request.session.remove('conflicts')
-            #     request.session.remove('available_unscheduled')
-                
-            conflict = []
-            available_unscheduled=[]
+            # لا يوجد استجابة، احذف أي بيانات قديمة من الجلسة
+            request.session.pop('conflicts', None)
+            request.session.pop('available_unscheduled', None)
         return render(request,'timetables/list.html',{"selected_random":random_enabled,"selected_semester":semester,"conflicts":conflict,'available_unscheduled':available_unscheduled})
 
 class TableDeleteView(View):

@@ -301,6 +301,16 @@ class DistributionSerializer(serializers.ModelSerializer):
         model = Distribution
         fields = '__all__'
 
+class DistributionBriefSerializer(serializers.ModelSerializer):
+    fk_subject = SubjectSerializer(read_only=True)
+    fk_subject_id = serializers.PrimaryKeyRelatedField(
+        queryset=Subject.objects.all(), source='fk_subject', write_only=True
+    )
+
+    class Meta:
+        model = Distribution
+        fields = ['fk_subject', 'fk_subject_id','fk_teacher'] 
+
 
 class TableSerializer(serializers.ModelSerializer):
     semester_display = serializers.CharField(source='get_semester_display', read_only=True)

@@ -420,6 +420,8 @@ class TimeTableScheduler:
             return scheduled, unscheduled # Return the new list
     def solve(self):
         
+        print(self.random_enabled)
+        
         if self.random_enabled:
             self.solver.parameters.random_seed=random.randint(1,10000)
         else:

@@ -10,6 +10,7 @@ urlpatterns = [
     path('users/create/', CreateAdmin.as_view(), name='create_user'),
     
     path('dashboard/', views.dashboard, name='dashboard'),
+    
     # path()
     
     path('teachers_availability/', views.TeachersAvailableView.as_view(), name='teachers_availability'),

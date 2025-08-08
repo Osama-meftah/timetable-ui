@@ -10,6 +10,7 @@ from .filters import *
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 class StandardResultsSetPagination(PageNumberPagination):
     # عدد العناصر في كل صفحة. يمكن للعميل تغييره باستخدام ?page_size=X
@@ -144,6 +145,17 @@ class DistributionViewSet(BaseViewSet):
     success_delete_message = "تم حذف التوزيع بنجاح."
 
 
+class DistributionBriefViewSet(BaseViewSet):
+    queryset = Distribution.objects.all()
+    serializer_class = DistributionBriefSerializer
+    # filter_backends=[DjangoFilterBackend]
+    # filterset_class=DistributionFilter
+    success_create_message = "تم إنشاء التوزيع بنجاح."
+    success_update_message = "تم تحديث التوزيع بنجاح."
+    success_delete_message = "تم حذف التوزيع بنجاح."
+
+
+
 # class LectureViewSet(BaseViewSet):
 #     queryset = Lecture.objects.all()
 #     serializer_class = LectureSerializer
@@ -199,6 +211,7 @@ class TeacherViewSet(BaseViewSet):
     serializer_class = TeacherSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = TeacherFilter
+    # permission_classes=[IsAuthenticated]
     success_create_message = "تم إنشاء المدرس بنجاح."
     success_update_message = "تم تحديث بيانات المدرس بنجاح."
     success_delete_message = "تم حذف المدرس والمستخدم المرتبط بنجاح."
