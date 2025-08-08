@@ -18,9 +18,11 @@ router.register('groups',GroupViewSet )
 router.register('todays',TodayViewSet )  # تسجيل ViewSet
 router.register('periods',PeriodViewSet )  # تسجيل ViewSet
 router.register('teacherTimes',TeacherTimeViewSet) 
-router.register('distributions',DistributionViewSet )  
+router.register('distributions',DistributionViewSet ) 
+router.register('distributions-brief', DistributionBriefViewSet, basename='distribution-brief')
 router.register('lectures',LecturesViewSet )  
 router.register('tables',TableViewSet )
+
 
 urlpatterns =[
     path('',include(router.urls)),

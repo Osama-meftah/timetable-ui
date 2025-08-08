@@ -1,0 +1,177 @@
+
+.top-main {
+    transition: margin-right 0.5s ease;
+}
+
+.nav-icon {
+    flex-shrink: 0;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    /* px-2 py-1 */
+    cursor: pointer;
+    border-radius: 0.25rem;
+    /* rounded */
+    transition-property: background-color, color;
+    transition-duration: 200ms;
+    transition-timing-function: ease-in-out;
+    font-size: 0.875rem;
+    /* text-sm */
+    line-height: 1.25rem;
+    margin-bottom: 0;
+    /* إزالة mb-5 من الروابط الفردية */
+    color: #1f2937;
+    /* Default text color for light mode */
+}
+
+.dark .nav-item {
+    color: #ffffff;
+    /* Default text color for dark mode */
+}
+
+.nav-item:hover {
+    background-color: #f3f4f6;
+    /* hover:bg-gray-100 */
+    color: #4b5563;
+    /* hover:text-gray-700 */
+}
+
+.dark .nav-item:hover {
+    background-color: #374151;
+    /* dark:hover:bg-gray-700 */
+    color: #d1d5db;
+    /* dark:hover:text-gray-300 */
+}
+
+.nav-item i {
+    padding: 0.5rem;
+    /* p-2 */
+    border-radius: 9999px;
+    /* rounded-full */
+    margin-left: 0.5rem;
+    /* ml-2 */
+    background-color: #e5e7eb;
+    /* bg-gray-200 */
+}
+
+.dark .nav-item i {
+    background-color: #4b5563;
+    /* dark:bg-gray-600 */
+}
+
+.nav-item span {
+    margin-right: 0.25rem;
+    /* mx-1 */
+}
+
+/* ضبط أيقونة المستخدم والاشعارات */
+.user-notification-icon {
+    position: relative;
+}
+
+.user-notification-badge {
+    position: absolute;
+    right: 3;
+    top: 3;
+    transform: translate(50%, -50%);
+    /* لضبط الموضع بشكل أفضل */
+    font-size: 0.75rem;
+    /* text-xs */
+    line-height: .5rem;
+    padding: 0.25rem 0.5rem;
+    /* px-2 */
+    border-radius: 9999px;
+    /* rounded-full */
+    font-weight: 500;
+    /* font-medium */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    /* shadow-lg */
+    border-width: 2px;
+}
+
+.notification-red {
+    background-color: #ef4444;
+    /* bg-red-500 */
+    color: #ffffff;
+    /* text-white */
+    border-color: #ffffff;
+    /* border-white */
+}
+
+.notification-yellow {
+    background-color: #f59e0b;
+    /* bg-yellow-500 */
+    color: #000000;
+    /* text-black */
+    border-color: #000000;
+    /* border-black */
+}
+
+.dark .notification-yellow {
+    border-color: #1f2937;
+    /* border-gray-900 */
+}
+
+/* أنماط خاصة بالقائمة المتجاوبة */
+@media (max-width: 767px) {
+
+    /* على الشاشات الصغيرة (أقل من md) */
+    .mobile-nav-links {
+        position: absolute;
+        display: none;
+        /* إخفاء الروابط افتراضيًا */
+        flex-direction: column;
+        width: 100%;
+        background-color: inherit;
+        /* لتوريث لون الخلفية من الهيدر */
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        /* خط فاصل */
+    }
+
+    .dark .mobile-nav-links {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .mobile-nav-links.active {
+        display: flex;
+        /* إظهار الروابط عند تفعيلها */
+    }
+
+    .mobile-nav-links .nav-item {
+        border-bottom: 1px solid #ccc;
+        margin-bottom: 0.5rem;
+    }
+
+    .mobile-nav-links .nav-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .mobile-nav-toggle {
+        display: block;
+        /* إظهار زر الهامبرغر */
+    }
+}
+
+@media (min-width: 768px) {
+
+    /* على الشاشات المتوسطة والكبيرة (md فما فوق) */
+    .mobile-nav-links {
+        display: flex !important;
+        /* إظهار الروابط دائمًا */
+        flex-direction: row;
+        border-top: none;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
+    .mobile-nav-toggle {
+        display: none;
+        /* إخفاء زر الهامبرغر */
+    }
+}
+

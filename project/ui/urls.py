@@ -6,7 +6,7 @@ from .views_table import *
 urlpatterns = [
     path('login/', LoginView, name='login'),
     path('logout/', logout_view, name='logout'),
-    path('dashboard/', views.dashboard, name='dashboard'),
+    path('', views.dashboard, name='dashboard'),
     # path()
     
     path('teachers_availability/', views.TeachersAvailableView.as_view(), name='teachers_availability'),

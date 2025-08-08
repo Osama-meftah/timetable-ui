@@ -219,7 +219,7 @@
         const teacherManager = new APIFormManager({
             listContainerId: 'teacher-list-container',
             paginationContainerId: 'teacher-pagination-container',
-            endPoint: 'teachers/',            
+            endPoint: 'teachers/',
             searchInputSelector: '#search-teacher',
             searchEndPoint: 'searchteachers/',
 
@@ -243,52 +243,92 @@
             },
         });
     });
-    document.addEventListener('DOMContentLoaded', function () {
+    const getAllDistributions = async () => {
+        const allData = [];
+        let page = 1;
+        let hasNext = true;
 
-        const teacherDetailsManager = new APIFormManager({
-            listContainerId: "teacher-details-tbody",
-            paginationContainerId: "pagination-details-container",
-            endPoint: "distributions/",
+        // while (hasNext) {
+        const response = await fetch('http://127.0.0.1:8001/api/distributions-brief/?paginate=false');
+        const data = await response.json();
+        // allData.push(data);
+        // hasNext = data.next !== null;
+        // page++;
+        // }
 
-            renderItem: (distribution, index) => {
-                if (!distribution.fk_teacher?.id) return null;
-                const teacherId = distribution.fk_teacher.id;
-                const rowId = `teacher-row-${teacherId}`;
-                // console.log(alldistribution)
+        return data;
+    };
 
-                let existingRow = document.getElementById(rowId);
+    document.addEventListener('DOMContentLoaded', async function () {
+        try {
+            const distributions = await getAllDistributions();
 
-                const teacherInfo = distribution.fk_teacher;
+            // تجميع المواد حسب fk_teacher
+            const groupedByTeacher = {};
 
-                if (!teacherInfo) return null;
+            distributions.forEach(dist => {
+                const teacherId = dist.fk_teacher;
+                const subject = dist.fk_subject;
 
-                const courseHtml = `<p>${distribution.fk_subject?.subject_name || 'N/A'} (${distribution.fk_group?.fk_level?.level_name_display || 'N/A'} - ${distribution.fk_group?.group_name || 'N/A'})</p>`;
+                if (!groupedByTeacher[teacherId]) {
+                    groupedByTeacher[teacherId] = [];
+                }
 
-                if (existingRow) {
-                    const coursesCell = existingRow.querySelector('.courses-cell');
-                    if (coursesCell) {
-                        coursesCell.insertAdjacentHTML('beforeend', courseHtml);
-                    }
-                    return null;
-                } else {
-                    // const availability = allTeacherTimes.filter(time => time.fk_teacher === teacherId);
-                    const availability = distribution.fk_teacher.available_times
-                    // ✅✅ هذا هو الكود المُصحح الذي يطابق تصميمك ✅✅
-                    const availabilityHtml = availability.length > 0
-                        ? `<ul class="list-disc list-inside space-y-1">${availability.map(time => `<li><span class="font-medium">${time?.fk_today.day_name_display || 'N/A'}:</span> ${time?.fk_period.period_from} - ${time?.fk_period.period_to}</li>`).join('')}</ul>`
-                        : '<span class="text-gray-400 dark:text-gray-500">غير متاح حالياً</span>';
+                groupedByTeacher[teacherId].push(subject);
+            });
 
-                    const tr = document.createElement('tr');
-                    tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150';
-                    tr.id = rowId;
+            // console.log("✅ المواد مجمعة حسب المعلم:", groupedByTeacher);
 
-                    const statusClass = teacherInfo.teacher_status === 'active' ? 'text-green-600 dark:text-green-400' :
-                        teacherInfo.teacher_status === 'vacation' ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-500';
-                    const statusText = teacherInfo.teacher_status === 'active' ? 'نشط' :
-                        teacherInfo.teacher_status === 'vacation' ? 'اجازة' : 'غير معروف';
+            // مثال: عرض المواد الخاصة بالمعلم رقم 13
+            // console.log("📘 مواد المعلم 13:", groupedByTeacher[12])
 
-                    // استخدام innerHTML مع كل الكلاسات والبنيات الأصلية
-                    tr.innerHTML = `
+            const teacherDetailsManager = new APIFormManager({
+
+                listContainerId: "teacher-details-tbody",
+                paginationContainerId: "pagination-details-container",
+                endPoint: "distributions/",
+                groupedByTeacher: [],
+
+                renderItem: (distribution,index) => {
+                    if (!distribution.fk_teacher?.id) return null;
+                    const teacherId = distribution.fk_teacher.id;
+                    // console.log(this.groupedByTeacher)
+                    const rowId = `teacher-row-${teacherId}`;
+                    // console.log(alldistribution)
+
+                    let existingRow = document.getElementById(rowId);
+
+                    const teacherInfo = distribution.fk_teacher;
+
+                    if (!teacherInfo) return null;
+
+                    const courseHtml = `<p>${ 'N/A'}</p>`;
+
+                    if (existingRow) {
+                        const coursesCell = existingRow.querySelector('.courses-cell');
+                        if (coursesCell) {
+                            coursesCell.insertAdjacentHTML('beforeend', courseHtml);
+                        }
+                        return null;
+                    } else {
+                        // const availability = allTeacherTimes.filter(time => time.fk_teacher === teacherId);
+                        const availability = distribution.fk_teacher.available_times
+                        // ✅✅ هذا هو الكود المُصحح الذي يطابق تصميمك ✅✅
+                        const availabilityHtml = availability.length > 0
+                            ? `<ul class="list-disc list-inside space-y-1">${availability.map(time => `<li><span class="font-medium">${time?.fk_today.day_name_display || 'N/A'}:</span> ${time?.fk_period.period_from} - ${time?.fk_period.period_to}</li>`).join('')}</ul>`
+                            : '<span class="text-gray-400 dark:text-gray-500">غير متاح حالياً</span>';
+
+                        const tr = document.createElement('tr');
+                        tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150';
+                        tr.id = rowId;
+
+                        const statusClass = teacherInfo.teacher_status === 'active' ? 'text-green-600 dark:text-green-400' :
+                            teacherInfo.teacher_status === 'vacation' ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-500';
+                        const statusText = teacherInfo.teacher_status === 'active' ? 'نشط' :
+                            teacherInfo.teacher_status === 'vacation' ? 'اجازة' : 'غير معروف';
+
+                        // استخدام innerHTML مع كل الكلاسات والبنيات الأصلية
+                        tr.innerHTML = `
                     <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
                         ${index + 1}
                     </td>
@@ -318,10 +358,13 @@
                         </a>
                     </td>
                 `;
-                    return tr;
-                }
-            },
-        });
+                        return tr;
+                    }
+                },
+            });
+        } catch (error) {
+            console.error("❌ حدث خطأ أثناء جلب التوزيعات:", error);
+        }
         const search = new SearchComponent({
             inputSelector: '.search-dist',
             apiManager: teacherDetailsManager,     // كائن APIFormManager الذي أنشأته

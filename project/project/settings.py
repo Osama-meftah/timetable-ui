@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 
@@ -25,9 +26,10 @@ SECRET_KEY = "django-insecure-00&fq^1*8e6i38=qgao=j$+ji_#u0h#fgvuu88=!zc=28x00-y
 # SECRET_KEY = "django-insecure-^9r_$2&)yhw9c$t&iq0l9q_nmh^mi8&w8c3@*7jn)nlk2%p-pj" # secret_key for backend
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1','http://127.0.0.1:8001']
 
 
 # Application definition
@@ -45,15 +47,15 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-
     "ui.middleware.IsLoginMiddleware",
-    "ui.middleware.IsAdminMiddleware"
+    "ui.middleware.IsAdminMiddleware",
 ]
 
 ROOT_URLCONF = "project.urls"
@@ -128,12 +130,17 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/static/'  # الرابط المستخدم لعرض الملفات
 
-# إذا كان لديك ملفات static خارج apps:
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
+    BASE_DIR / 'static',  # ملفات static التي تقوم بتطويرها
 ]
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # مكان تجميع ملفات static عند الإنتاج
+
+# لتخزين مضغوط وفعال (إذا كنت تستخدم WhiteNoise)
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
