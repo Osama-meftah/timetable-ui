@@ -40,7 +40,6 @@
     </div>
 </div>
 
----
 
 <div class="bg-white dark:bg-gray-800 py-12 px-4 sm:px-6 lg:px-8 shadow-xl mt-10">
     {% include "message.html" %}
@@ -288,5 +287,7 @@
 
 {% include "upload_modal.html" %}
 {% include "delete_modal.html" %}
-
+{% endblock %}
+{% block extra_js %}
+<script src="{% static "src/js/delete.js" %}"></script>
 {% endblock %}

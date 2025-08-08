@@ -58,7 +58,19 @@
                     </div>
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">كلمة المرور</label>
-                        <div class="relative"><span class="absolute inset-y-0 left-0 flex items-center pl-3"><svg class="h-5 w-5 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" /></svg></span><input type="password" id="password" class="w-full pl-10 pr-3 py-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"></div>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3"><svg class="h-5 w-5 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" /></svg>
+                        </span>
+                        <select name="stauts" id="password" class="w-full pl-10 pr-3 py-2 bg-white 
+                        dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white rounded-md 
+                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">اختر حالة المستخدم</option>
+                            <option value="active">نشط</option>
+                            <option value="vacation">اجاز</option>
+                        </select>
+                        {% comment %} <input type="password" id="password" class=""> {% endcomment %}
+                        </div> 
                         <div id="password-error" class="text-red-600 dark:text-red-500 text-xs mt-1"></div>
                     </div>
                     <button id="createUserBtn" type="submit" class="w-full flex justify-center items-center bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300">
@@ -80,6 +92,16 @@
                         </div>
                         <div class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="is_staff_toggle" class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-200 dark:bg-gray-600 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-500 peer-checked:bg-blue-600"></div>
+                        </div>
+                    </label>
+                    <label for="is_superuser_toggle" class="flex items-center justify-between p-4 rounded-lg bg-slate-50 dark:bg-slate-700/50 cursor-pointer transition-all hover:ring-2 hover:ring-blue-500">
+                        <div>
+                            <h3 class="font-semibold text-gray-800 dark:text-gray-200">صلاحية موظف (is_superuser)</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">  .يسمح للمستخدم بالدخول إلى لوحة تحكم الأدمن واضافة مستخدمين</p>
+                        </div>
+                        <div class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="is_superuser_toggle" class="sr-only peer">
                             <div class="w-11 h-6 bg-gray-200 dark:bg-gray-600 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-500 peer-checked:bg-blue-600"></div>
                         </div>
                     </label>
@@ -114,6 +136,7 @@
         const createUserBtn = document.getElementById('createUserBtn');
         const savePermissionsBtn = document.getElementById('savePermissionsBtn');
         const isStaffToggle = document.getElementById('is_staff_toggle');
+        const isSuperUserToggle = document.getElementById('is_superuser_toggle');
         const userNameDisplay = document.getElementById('userNameDisplay');
         const formErrorsDiv = document.getElementById('formErrors');
         const permissionsSuccessDiv = document.getElementById('permissions-success');
@@ -223,31 +246,45 @@
         }
         
         // --- دوال جلب البيانات والعمليات ---
-
+        
         async function loadUsers() {
             userSelectDropdown.innerHTML = '<option value="" disabled selected>جاري تحميل...</option>';
             goToEditBtn.disabled = true;
             goToEditBtn.classList.add('bg-gray-500', 'cursor-not-allowed');
             goToEditBtn.classList.remove('bg-blue-600');
             try {
-                const response = await fetch(`${API_BASE_URL}/users/`, {
+                const response = await fetch(`${API_BASE_URL}/teachers/?paginate=false`, {
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 if (!response.ok) throw new Error(`Network error`);
-                const users = await response.json();
-                userSelectDropdown.innerHTML = '<option value="" disabled selected>اختر مستخدماً</option>';
-                if (users.length === 0) {
-                     userSelectDropdown.innerHTML = '<option value="" disabled selected>لا يوجد مستخدمون</option>';
+                const teachers = await response.json();
+                
+                userSelectDropdown.innerHTML = '<option value="" disabled selected>اختر معلماً</option>'; // تم تغيير النص ليكون أدق
+                
+                if (teachers.length === 0) {
+                     userSelectDropdown.innerHTML = '<option value="" disabled selected>لا يوجد معلمون</option>';
                      return;
                 }
-                users.forEach(user => {
-                    const option = document.createElement('option');
-                    option.value = user.id;
-                    option.textContent = user.username;
-                    userSelectDropdown.appendChild(option);
+        
+                console.log("Data received from API:", teachers);
+        
+                teachers.forEach(teacher => {
+                    // ==========================================================
+                    //  الـحـل هـنـا: التحقق من وجود كائن user قبل استخدامه
+                    // ==========================================================
+                    if (teacher.user && teacher.user.id) {
+                        const option = document.createElement('option');
+                        option.value = teacher.user.id;
+                        option.textContent = teacher.teacher_name;
+                        userSelectDropdown.appendChild(option);
+                    } else {
+                        // هذا الجزء اختياري: يمكنك تسجيل المعلمين الذين ليس لديهم مستخدمون
+                        console.warn(`المعلم '${teacher.teacher_name}' (ID: ${teacher.id}) ليس لديه حساب مستخدم مرتبط.`);
+                    }
                 });
+        
             } catch (error) {
-                console.error('Error loading users:', error);
+                console.error('Error loading teachers:', error); // تم تغيير النص ليكون أدق
                 userSelectDropdown.innerHTML = '<option value="" disabled selected>فشل التحميل</option>';
             }
         }
@@ -260,6 +297,7 @@
                 if (!response.ok) throw new Error('Failed to fetch user data');
                 const user = await response.json();
                 isStaffToggle.checked = user.is_staff;
+                isSuperUserToggle.checked = user.is_superuser;
             } catch (error) {
                 console.error('Error loading user role:', error);
                 alert('فشل في تحميل بيانات المستخدم.');
@@ -291,25 +329,25 @@
         createUserForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             setButtonLoading(createUserBtn, true);
-            const username = document.getElementById('username').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const teacher_name = document.getElementById('username').value;
+            const teacher_email = document.getElementById('email').value;
+            const teacher_status = document.getElementById('password').value;
 
             try {
-                const response = await fetch(`${API_BASE_URL}/users/create/`, { 
+                const response = await fetch(`${API_BASE_URL}/teachers/`, { 
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${authToken}`
                     },
-                    body: JSON.stringify({ username, email, password })
+                    body: JSON.stringify({ teacher_name, teacher_email, teacher_status })
                 });
                 const data = await response.json();
                 if (!response.ok) {
                     displayErrors(data);
                     throw new Error('Validation failed');
                 }
-                showPermissionsForm(data.id, data.username, 'create');
+                showPermissionsForm(data.user.id, data.teacher_name, 'create');
             } catch (error) {
                 console.error('Error creating user:', error);
             } finally {
@@ -319,7 +357,7 @@
 
         savePermissionsBtn.addEventListener('click', async () => {
             setButtonLoading(savePermissionsBtn, true);
-            const payload = { is_staff: isStaffToggle.checked };
+            const payload = { is_staff: isStaffToggle.checked ,is_superuser: isSuperUserToggle.checked};
 
             try {
                 const response = await fetch(`${API_BASE_URL}/users/${currentUserId}/`, {

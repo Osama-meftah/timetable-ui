@@ -10,4 +10,8 @@ from django.views import View
 
 class CreateAdmin(View):
     def get(self, request):
-        return render(request,'add_admin.html')   
+        user=request.session.get('user')
+        if not user or user['is_superuser'] == False:
+            return redirect("teacher_dashboard")
+        print(user['is_superuser'])
+        return render(request,'add_admin.html',{'teacher': user})   

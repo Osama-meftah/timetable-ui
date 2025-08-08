@@ -1,11 +1,8 @@
 from .models import *
 from django.contrib.auth.models import User 
 from rest_framework.decorators import api_view,permission_classes
-from django.http import JsonResponse
-from django.contrib import messages
-from django.shortcuts import redirect,render
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import MyTokenObtainPairSerializer,UserSerializer
+from .serializers import *
 import requests
 
 from django.utils.http import urlsafe_base64_decode
@@ -18,9 +15,7 @@ from rest_framework.response import Response
 from django.conf import settings
 from rest_framework import status
 from rest_framework import generics
-from rest_framework.views import APIView
-from django.contrib.auth.models import User, Permission
-from .serializers import UserCreateSerializer, PermissionSerializer
+from rest_framework.permissions import IsAdminUser # استيراد هام لحماية الواجهة
 
 @api_view(['POST'])
 def Login(request):
@@ -109,26 +104,12 @@ def getuseer(requset):
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
-class UserListAPIView(generics.ListAPIView):
-    queryset = User.objects.all().order_by('username')
-    serializer_class = UserSerializer
-    
-class UserCreateAPIView(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserCreateSerializer
 
-
-from rest_framework import generics
-from rest_framework.permissions import IsAdminUser # استيراد هام لحماية الواجهة
-from .serializers import UserRoleSerializer # استيراد الـ Serializer الجديد
-from django.contrib.auth.models import User
-
-# ... (باقي الـ Views لديك)
 
 class UserDetailAPIView(generics.RetrieveUpdateAPIView):
     """
     واجهة API لجلب (GET) وتحديث (PATCH) بيانات مستخدم معين.
     """
     queryset = User.objects.all()
-    serializer_class = UserRoleSerializer
+    serializer_class = UserBriefSerializer
     permission_classes = [IsAdminUser] 

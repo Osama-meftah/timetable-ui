@@ -36,9 +36,6 @@
         animation: show 0.6s;
       }
     </style>
-    {% comment %}
-    <link rel="stylesheet" href="{% static '/dist/style.css' %}" />
-    {% endcomment %}
   </head>
   <body class="bg-slate-50 flex justify-center items-center flex-col h-screen">
     <header
@@ -62,51 +59,6 @@
       <div
         class="absolute top-0 h-full w-1/2 right-0 opacity-0 z-[1] transition-all duration-600 ease-in-out group-[.right-panel-active]:-translate-x-full group-[.right-panel-active]:opacity-100 group-[.right-panel-active]:z-[5] group-[.right-panel-active]:animate-show"
       >
-        {% comment %} <form
-          action="{% url 'register' %}"
-          method="post"
-          class="bg-white flex items-center justify-center flex-col px-12 h-full text-center"
-        >
-          <h1 class="font-bold text-3xl">إنشاء حساب</h1>
-          <div class="my-5">
-            <a
-              href="#"
-              class="inline-flex justify-center items-center mx-1 h-10 w-10 border border-gray-300 rounded-full"
-              ><i class="fab fa-facebook-f"></i
-            ></a>
-            <a
-              href="#"
-              class="inline-flex justify-center items-center mx-1 h-10 w-10 border border-gray-300 rounded-full"
-              ><i class="fab fa-google-plus-g"></i
-            ></a>
-            <a
-              href="#"
-              class="inline-flex justify-center items-center mx-1 h-10 w-10 border border-gray-300 rounded-full"
-              ><i class="fab fa-linkedin-in"></i
-            ></a>
-          </div>
-          <span class="text-xs">أو استخدم بريدك الإلكتروني للتسجيل</span>
-          <input
-            type="text"
-            placeholder="الاسم"
-            class="bg-gray-200 border-none p-3 my-2 w-full"
-          />
-          <input
-            type="email"
-            placeholder="البريد الإلكتروني"
-            class="bg-gray-200 border-none p-3 my-2 w-full"
-          />
-          <input
-            type="password"
-            placeholder="كلمة المرور"
-            class="bg-gray-200 border-none p-3 my-2 w-full"
-          />
-          <button
-            class="mt-4 rounded-full border border-[#2c3e50] bg-[#2c3e50] text-white text-xs font-bold py-3 px-11 uppercase tracking-wider transition-transform duration-75 ease-in active:scale-95 focus:outline-none"
-          >
-            تسجيل اشتراك
-          </button>
-        </form> {% endcomment %}
       </div>
 
       <div
@@ -136,7 +88,7 @@
               ><i class="fab fa-linkedin-in"></i
             ></a>
           </div>
-          <span class="text-xs">أو استخدم حسابك</span>
+          {% comment %} <span class="text-xs">أو استخدم حسابك</span> {% endcomment %}
           <input
             type="username"
             placeholder="البريد الإلكتروني"
@@ -193,12 +145,7 @@
             <p class="text-sm font-thin leading-5 tracking-wider my-5">
               أدخل تفاصيلك الشخصية وابدأ رحلتك معنا
             </p>
-            <button
-              class="ghost bg-transparent border-white border rounded-full text-xs font-bold py-3 px-11 uppercase tracking-wider transition-transform duration-75 ease-in active:scale-95 focus:outline-none"
-              id="signUp"
-            >
-              تسجيل اشتراك
-            </button>
+            
           </div>
         </div>
       </div>

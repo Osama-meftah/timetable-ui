@@ -29,34 +29,32 @@ class TeachersAvailableView(View):
         user = get_user_id(request)
         teacher = user.get('teacher') if user else None
         if not teacher:
-            print("===========================================================================")
             messages.error(request,"جب تسجيل الدخول كمعلم.")
             return redirect('teacher_dashboard') 
         
         availabilitie= api_get(f"{Endpoints.teacher_times}?teacher={teacher['id']}", request=request) or []
         availability = availabilitie.get("results", [])
-        print(availability)
         days = api_get(f"{Endpoints.todays}", request=request) or []
         periods = api_get(f"{Endpoints.periods}", request=request) or []
         days = days.get("results", []) 
         periods = periods.get("results", [])
-
+        
         context = {
             "availabilities": availability,
             "days": days,
             "periods": periods,
             "page_title": "أوقات التواجد",
+            'teacher': user
         }
+        print(context)
         return render(request, 'teachers_management/list.html', context)
 
-    def post(self, request, id):
+    def post(self, request, id=None):
         day_id = request.POST.get("day")
         period_id = request.POST.get("period")
         user = get_user_id(request)
         teacher = user.get("teacher") if user else None
         teacher_id = teacher.get("id") if teacher else None
-
-        print(id,"=========================================================")
         if id:
             try:
                 api_delete(f"{Endpoints.teacher_times}{id}/", request=request)
@@ -179,9 +177,7 @@ class TeacherManagementView(View):
         teacher_data = {
             # "id": id,
             "teacher_name": request.POST.get("teacher_name", "").strip(),
-            "teacher_phone": request.POST.get("teacher_phone", "").strip(),
             "teacher_email": request.POST.get("teacher_email", "").strip(),
-            "teacher_address": request.POST.get("teacher_address", "").strip(),
             "teacher_status": request.POST.get("teacher_status", "").strip(),
         }
 
@@ -203,10 +199,7 @@ class TeacherManagementView(View):
                 return result or redirect(request.path_info)
             else:
                 # إضافة باستخدام api_post مع إعادة توجيه بعد الإضافة
-                response=api_post(Endpoints.teachers, teacher_data, request=request)
-                # if response.get('teacher'):
-                #     teachers.append(response['teacher'])
-                #     cache.set(KeysCach.teachers_data, teachers, timeout=KeysCach.timeout)
+                api_post(Endpoints.teachers, teacher_data, request=request)
                 return redirect(request.path)
 
         except Exception as e:

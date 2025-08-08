@@ -13,34 +13,35 @@ from rest_framework import serializers
 
 # ... (باقي الـ Serializers لديك مثل UserCreateSerializer)
 
-class UserRoleSerializer(serializers.ModelSerializer):
-    """
-    Serializer مخصص لجلب وتحديث حقل is_staff فقط.
-    """
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'is_staff']
-        read_only_fields = ['id', 'username']
-class UserCreateSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True) # كلمة المرور للكتابة فقط
+# class UserRoleSerializer(serializers.ModelSerializer):
+#     """
+#     Serializer مخصص لجلب وتحديث حقل is_staff فقط.
+#     """
+#     class Meta:
+#         model = User
+#         fields = ['id', 'username', 'is_staff']
+#         read_only_fields = ['id', 'username']
 
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'email', 'password']
+# class UserCreateSerializer(serializers.ModelSerializer):
+#     password = serializers.CharField(write_only=True) # كلمة المرور للكتابة فقط
+
+#     class Meta:
+#         model = User
+#         fields = ['id', 'username', 'email', 'password']
     
-    def create(self, validated_data):
-        # نستخدم create_user لضمان تجزئة كلمة المرور بشكل صحيح
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            password=validated_data['password']
-        )
-        return user
+#     def create(self, validated_data):
+#         # نستخدم create_user لضمان تجزئة كلمة المرور بشكل صحيح
+#         user = User.objects.create_user(
+#             username=validated_data['username'],
+#             email=validated_data['email'],
+#             password=validated_data['password']
+#         )
+#         return user
 
-class PermissionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Permission
-        fields = ['id', 'name','codename']
+# class PermissionSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Permission
+#         fields = ['id', 'name','codename']
         
         
 class DepartmentSerializer(serializers.ModelSerializer):
@@ -189,17 +190,11 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'is_staff','is_superuser', 'teacher']
-# class UserSerializer(serializers.ModelSerializer):
-#     teacher = TeacherBriefSerializer(read_only=True)
-#     login_name 
-
-#     class Meta:
-#         model = User
-#         fields = ['id', 'login_name', 'email', 'is_staff', 'is_superuser', 'teacher']
+        
 class UserBriefSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email']
+        fields = ['id', 'email','is_staff','is_superuser']
 class TodaySerializer(serializers.ModelSerializer):
     day_name_display = serializers.CharField(source='get_day_name_display', read_only=True)
     class Meta:

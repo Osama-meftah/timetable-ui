@@ -14,8 +14,8 @@
         {# زر إضافة مستخدم (يظهر للمدير فقط) - تم تحسين مكانه وتصميمه #}
         {% if teacher.is_superuser %}
         <div class="flex justify-end mb-4">
-            <a href="{% url 'create_user' %}" class="inline-flex hover:text-white items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-lg shadow-md transition-transform transform hover:scale-105">
-                <i class="fas fa-plus mr-2"></i>
+            <a href="{% url 'create_user' %}" class="inline-flex text-white dark:text-white hover:text-white items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 font-semibold text-sm rounded-lg shadow-md transition-transform transform hover:scale-105">
+                <i class="fas fa-plus mr-2 text-white"></i>
                 إضافة مستخدم جديد
             </a>
         </div>
