@@ -243,23 +243,23 @@
             },
         });
     });
-    const getAllDistributions = async () => {
-        const allData = [];
-        let page = 1;
-        let hasNext = true;
-
-        // while (hasNext) {
-        const response = await fetch('http://127.0.0.1:8001/api/distributions-brief/?paginate=false');
-        const data = await response.json();
-        // allData.push(data);
-        // hasNext = data.next !== null;
-        // page++;
-        // }
-
-        return data;
-    };
-
     document.addEventListener('DOMContentLoaded', async function () {
+        
+        const getAllDistributions = async () => {
+            const allData = [];
+            let page = 1;
+            let hasNext = true;
+    
+            // while (hasNext) {
+            const response = await fetch('http://127.0.0.1:8001/api/distributions-brief/?paginate=false');
+            const data = await response.json();
+            // allData.push(data);
+            // hasNext = data.next !== null;
+            // page++;
+            // }
+    
+            return data;
+        };
         try {
             const distributions = await getAllDistributions();
 
@@ -277,7 +277,7 @@
                 groupedByTeacher[teacherId].push(subject);
             });
 
-            // console.log("✅ المواد مجمعة حسب المعلم:", groupedByTeacher);
+            //console.log("✅ المواد مجمعة حسب المعلم:", groupedByTeacher);
 
             // مثال: عرض المواد الخاصة بالمعلم رقم 13
             // console.log("📘 مواد المعلم 13:", groupedByTeacher[12])

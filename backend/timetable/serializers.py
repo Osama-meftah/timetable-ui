@@ -21,7 +21,6 @@ from rest_framework import serializers
 #         model = User
 #         fields = ['id', 'username', 'is_staff']
 #         read_only_fields = ['id', 'username']
-
 # class UserCreateSerializer(serializers.ModelSerializer):
 #     password = serializers.CharField(write_only=True) # كلمة المرور للكتابة فقط
 
@@ -190,7 +189,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'is_staff','is_superuser', 'teacher']
-        
+
 class UserBriefSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -281,6 +280,7 @@ class TeacherTimeSerializer(serializers.ModelSerializer):
         instance = super().update(instance, validated_data)
         self.success_message = "تم تحديث وقت الأستاذ بنجاح."
         return instance
+    
 # Serializer للنموذج Distribution
 class DistributionSerializer(serializers.ModelSerializer):
     fk_group = GroupSerializer(read_only=True)
@@ -300,7 +300,7 @@ class DistributionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Distribution
         fields = '__all__'
-
+        
 class DistributionBriefSerializer(serializers.ModelSerializer):
     fk_subject = SubjectSerializer(read_only=True)
     fk_subject_id = serializers.PrimaryKeyRelatedField(

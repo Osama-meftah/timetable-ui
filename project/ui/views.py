@@ -88,90 +88,16 @@ def teacher_dashboard_view(request):
 
 class TeacherManagementView(View):
     def get(self, request, id=None):
-
         try:
             if id:
                 return api_get(f"{Endpoints.teachers}{id}/", request=request, 
                                render_template="teachers/add_edit.html")
             elif "add" in request.GET:
                 return render(request, "teachers/add_edit.html", {"page_title": "إضافة مدرس"})
-            # page = request.GET.get("page")
-            # if page:
-            #     page = int(page)
-            # else:
-            #     page = 1
-            # default_paginated_response = {'results': [], 'count': 0}
-            # teachers_data = api_get(Endpoints.teachers, request=request) or default_paginated_response
-            # teacher_times_data = api_get(Endpoints.teacher_times, request=request) or default_paginated_response
-            # distribution_data = api_get(f"{Endpoints.distributions}?page={page}", request=request) or default_paginated_response
-            # distributions_list, total_distributions, total_pages, next_url, prev_url, current_page = get_data_details(distribution_data)
-            # # print(distributions_list)
-            # current_page = get_current_page(prev_url) + 1 if prev_url else 1
-            # teachers_list = teachers_data.get('results', [])
-            # times_list = teacher_times_data.get('results', [])
-            # # distributions_list = distributions_data.get('results', [])
-            # distributions_by_teacher = {}
-            # for d in distributions_list:
-            #     teacher_id = d.get("fk_teacher", {}).get("id")
-            #     if teacher_id:
-            #         course_info = {
-            #             "subject_name": d.get("fk_subject", {}).get("subject_name", "N/A"),
-            #             "group": d.get("fk_group", {}).get("group_name", "N/A"),
-            #             "level": d.get("fk_group", {}).get("fk_level", {}).get("level_name", "N/A"),
-            #             "program": d.get("fk_group", {}).get("fk_level", {}).get("fk_program", {}).get("program_name", "N/A"),
-            #         }
-            #         distributions_by_teacher.setdefault(teacher_id, []).append(course_info)
-
-            # times_by_teacher = {}
-            
-            # for t in times_list:
-            #     teacher_id = t.get("fk_teacher") # في هذا النموذج، المعرّف مباشر
-            #     if teacher_id:
-            #         time_info = {
-            #             "day": t.get("fk_today", {}).get("day_name_display", "N/A"),
-            #             "period": f"{t.get('fk_period', {}).get('period_from', '')} - {t.get('fk_period', {}).get('period_to', '')}"
-            #         }
-            #         times_by_teacher.setdefault(teacher_id, []).append(time_info)            
-            # teachers_with_data = []
-            # for teacher in teachers_list:
-            #     teacher_id = teacher.get("id")
-                
-            #     courses = distributions_by_teacher.get(teacher_id, [])
-            #     times = times_by_teacher.get(teacher_id, [])
-            #     if courses:
-            #         teachers_with_data.append({
-            #             "teacher": teacher,
-            #             "courses": courses,
-            #             "availability": times,
-            #         })
-
-            # total_teachers = teachers_data.get('count', 0)
-            # active_teachers_on_page = len([t for t in teachers_list if t.get("teacher_status") == "active"])
-            # on_leave_teachers_on_page = len([t for t in teachers_list if t.get("teacher_status") == "vacation"])
-
-            # context = {
-            #     "page_title": "إدارة المدرسين",
-            #     # "teachers": teachers_data, # مرر كائن الترقيم الكامل إلى القالب
-            #     "teachers_with_data": teachers_with_data, # هذه القائمة يجب ترقيمها بشكل منفصل إذا كانت كبيرة
-            #     "total_teachers": total_teachers,
-            #     "active_teachers": active_teachers_on_page, 
-            #     "on_leave_teachers": on_leave_teachers_on_page,
-            #     'next_url': next_url,
-            #     'prev_url': prev_url,
-            #     'total_pages': total_pages,
-            #     "current_page": current_page,
-            #     }
-            # context['page_range'] = range(1, total_pages + 1)
-            
-            
             return render(request, "teachers/list.html")
         except Exception as e:
             handle_exception(request, "فشل في جلب بيانات المدرسين", e)
-            return render(request, "teachers/list.html", {
-                "teachers": [],
-                "teachers_with_data": [],
-                "error": "فشل في جلب بيانات المدرسين."
-            })
+            return render(request, "teachers/list.html")
     def post(self, request, id=None):
         form_type = request.POST.get("form_type")
         teacher_data = {
@@ -343,14 +269,11 @@ class CoursesListView(View):
     def get(self, request):
         term= request.GET.get("term")
         subjects = api_get(f"{Endpoints.subjects}", request=request) or []
-        # = teachers_data.get('results', [])
         subjects = subjects.get('results', [])
-        # subjects= get_or_cache(f"{KeysCach.subjects_data}?term={term}", Endpoints.subjects, request)
         total_courses = len(subjects)
         active_courses = sum(1 for c in subjects if c.get("active", True))
         full_courses = sum(1 for c in subjects if c.get("is_full", False))
         csrf_token = get_token(request)
-        # subjects_paginated = paginate_queryset(subjects, request, "page_courses", "page_courses_size", 5)
         return render(request, "courses/list.html", {
             "courses": subjects,
             "page_title": "إدارة المقررات",
