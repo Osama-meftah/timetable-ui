@@ -104,8 +104,6 @@ def getuseer(requset):
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
-
-
 class UserDetailAPIView(generics.RetrieveUpdateAPIView):
     """
     واجهة API لجلب (GET) وتحديث (PATCH) بيانات مستخدم معين.

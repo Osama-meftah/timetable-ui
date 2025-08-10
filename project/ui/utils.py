@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.shortcuts import redirect, render
 from django.core.cache import cache
+from urllib.parse import urlparse, parse_qs
 BASE_API_URL = "http://127.0.0.1:8001/api/"
 
 class Endpoints:
@@ -33,6 +34,7 @@ class Endpoints:
     distributions = "distributions/"
     lectures = "lectures/by-table/"
     searchteachers = "searchteachers/"
+    refreshToken ='token/refresh/'
 
 class KeysCach:
     timeout=60
@@ -87,53 +89,6 @@ def show_backend_messages(request, response_json, default_success=""):
             elif tag == "error":
                 messages.error(request, combined)
 
-def handle_response(request, response):
-    """
-    يعالج الاستجابة القادمة من API ويعرض الرسائل المناسبة، ويعيد البيانات عند الحاجة.
-    """
-    if response is None:
-        messages.error(request, "لم يتم الحصول على أي استجابة من الخادم")
-        return "none", None
-
-    if not isinstance(response, dict):
-        messages.error(request, "تنسيق استجابة غير صالح")
-        return "invalid", None
-
-    status = response.get("status")
-    message = response.get("message", "")
-    data = response.get("data", None)
-
-    if status == "success":
-        return "success", data
-    elif status == "error":
-        if message:
-            messages.error(request, message)
-        return "error", None
-    else:
-        messages.warning(request, "تنسيق استجابة غير متوقع")
-        return "unexpected", None
-
-
-# def show_backend_messages(request, response_json, default_success=""):
-#     if not request:
-#         return
-#     if isinstance(response_json, dict):
-#         if "message" in response_json:
-#             messages.success(request, response_json["message"])
-#         else:
-#             messages.success(request, default_success)
-
-#         if "warnings" in response_json and isinstance(response_json["warnings"], list):
-#             for warning in response_json["warnings"]:
-#                 messages.warning(request, f"⚠️ {warning}")
-#         if "errors" in response_json and isinstance(response_json["errors"], list):
-#             for error in response_json["errors"]:
-#                 messages.error(request, f"❌ {error}")
-#         if "detail" in response_json:
-#             messages.error(request, f"❌ {response_json['detail']}")
-#     else:
-#         messages.success(request, default_success)
-        
 def handle_exception(request, message, exception):
     full_message = f"{message}"
     if hasattr(exception, "response") and exception.response is not None:
@@ -180,229 +135,146 @@ def api_get_with_token(endpoint,token):
     except requests.exceptions.RequestException as e:
         raise RuntimeError(f"POST request failed: {e}")
 
-# def api_get_all_pages(endpoint_url, request):
-#     """
-#     تجلب كل العناصر من نقطة نهاية مرقمة (paginated) عن طريق متابعة روابط 'next'.
-#     """
-#     all_results = []
-#     # نبدأ بالرابط الأول الذي تم تمريره
-#     url = endpoint_url
 
-#     while url:
-#         try:
-#             # استخدم دالة api_get الحالية لجلب صفحة واحدة
-#             # قد تحتاج لتعديل api_get لتقبل روابط كاملة إذا لم تكن تفعل ذلك بالفعل
-#             response_data = api_get(url, request=request, is_full_url=True) 
+def handle_response(request, response):
+    """
+    يعالج الاستجابة القادمة من API ويعرض الرسائل المناسبة، ويعيد البيانات عند الحاجة.
+    """
+    if response is None:
+        messages.error(request, "لم يتم الحصول على أي استجابة من الخادم")
+        return "none", None
 
-#             # تحقق مما إذا كانت الاستجابة مرقمة وتحتوي على مفتاح 'results'
-#             if isinstance(response_data, dict) and 'results' in response_data:
-#                 all_results.extend(response_data['results'])
-#                 # احصل على رابط الصفحة التالية للمتابعة، أو None إذا كانت هذه هي الأخيرة
-#                 url = response_data.get('next')
-#             else:
-#                 # إذا لم تكن الاستجابة مرقمة، افترض أنها القائمة الكاملة
-#                 if isinstance(response_data, list):
-#                     all_results.extend(response_data)
-#                 # توقف عن الحلقة لأننا وصلنا إلى النهاية أو البيانات غير مرقمة
-#                 break
+    if not isinstance(response, dict):
+        messages.error(request, "تنسيق استجابة غير صالح")
+        return "invalid", None
 
-#         except requests.exceptions.RequestException as e:
-#             print(f"Error fetching page {url}: {e}")
-#             # في حالة حدوث خطأ، توقف عن المحاولة
-#             break
+    status = response.get("status")
+    message = response.get("message", "")
+    data = response.get("data", None)
 
+    if status == "success":
+        return "success", data
+    elif status == "error":
+        if message:
+            messages.error(request, message)
+        return "error", None
+    else:
+        messages.warning(request, "تنسيق استجابة غير متوقع")
+        return "unexpected", None
+ 
+def _refresh_and_save_tokens(request):
+    """Attempts to refresh the access token. Returns True on success, False on failure."""
+    refresh_token = request.session.get('refresh_token')
+    if not refresh_token:
+        return False
 
-from urllib.parse import urlparse, parse_qs
-
-def get_data_details(data):
-    links = data.get("links", {})
-    return (
-        data.get("results", []),
-        data.get("count", 0),
-        data.get("total_pages", 0),
-        links.get("next"),
-        links.get("previous"),
-        data.get("current_page", 1)  # ✅ استخراج رقم الصفحة الحالية
-    )
-def get_current_page(url):
-    if not url:
-        return 1
-    query = parse_qs(urlparse(url).query)
-    # هذا هو السطر السحري
-    return int(query.get("page", [1])[0]) 
-def api_get(endpoint, request=None, timeout=60, redirect_to=None, render_template=None, success_message=None, render_context=None):
-    headers = {}
-    if request and 'token' in request.session:
-        headers["Authorization"] = f"Bearer {request.session['token']}"
     try:
-        response = requests.get(f"{BASE_API_URL}{endpoint}", headers=headers, timeout=timeout)
+        response = requests.post(f"{BASE_API_URL}{Endpoints.refreshToken}", json={'refresh': refresh_token}, timeout=10)
         response.raise_for_status()
-        try:
-            data = response.json()
-        except ValueError:
-            msg = f"رد غير متوقع من الخادم: {response.text[:200]}"
-            if request:
-                messages.error(request, msg)
-            if redirect_to:
-                return redirect(redirect_to)
-            return None
-
-        show_backend_messages(request, data, success_message or "")
-
-        if redirect_to:
-            return redirect(redirect_to)
-
-        if render_template:
-            context = render_context or {}
-            context.update({'data': data})
-            return render(request, render_template, context)
-
-        return data
-
-    except requests.exceptions.Timeout:
-        if request:
-            messages.error(request, "⏳ انتهت مهلة الاتصال بالخادم.")
-        if redirect_to:
-            return redirect(redirect_to)
-        if render_template:
-            return render(request, render_template, render_context or {})
-        return None
-
-    except requests.exceptions.RequestException as e:
-        handle_exception(request, "فشل في جلب البيانات", e)
-        if redirect_to:
-            return redirect(redirect_to)
-        if render_template:
-            return render(request, render_template, render_context or {})
-        return None
-
-def api_post(endpoint, data, request=None, success_message="", timeout=60, redirect_to=None, render_template=None, render_context=None):
-    headers = {"Content-Type": "application/json"}
-    if request and 'token' in request.session:
-        headers["Authorization"] = f"Bearer {request.session['token']}"
-    try:
-        response = requests.post(f"{BASE_API_URL}{endpoint}", json=data, headers=headers, timeout=timeout)
-        response.raise_for_status()
-        try:
-            data = response.json()
-
-        except ValueError:
-            msg = f"رد غير متوقع من الخادم: {response.text[:200]}"
-            if request:
-                messages.error(request, msg)
-            if redirect_to:
-                return redirect(redirect_to)
-            if render_template:
-                return render(request, render_template, render_context or {})
-            return None
-
-        show_backend_messages(request, data, success_message or "تم الاضافة بنجاح")
-
-        if redirect_to:
-            return redirect(redirect_to)
-
-        if render_template:
-            context = render_context or {}
-            context.update({'data': data})
-            return render(request, render_template, context)
-
-        return data
-
-    except requests.exceptions.Timeout:
-        if request:
-            messages.error(request, "⏳ انتهت مهلة الاتصال بالخادم.")
-        if redirect_to:
-            return redirect(redirect_to)
-        if render_template:
-            return render(request, render_template, render_context or {})
-        return None
-
-    except requests.exceptions.RequestException as e:
-        handle_exception(request, "فشل في إرسال البيانات", e)
-        if redirect_to:
-            return redirect(redirect_to)
-        if render_template:
-            return render(request, render_template, render_context or {})
-        return None
-
-def api_put(endpoint, data, request=None, timeout=60, redirect_to=None, render_template=None, render_context=None):
-    headers = {"Content-Type": "application/json"}
-    if request and 'token' in request.session:
-        headers["Authorization"] = f"Bearer {request.session['token']}"
-    try:
-        response = requests.put(f"{BASE_API_URL}{endpoint}", json=data, headers=headers, timeout=timeout)
-        response.raise_for_status()
-        try:
-            data = response.json()
-        except ValueError:
-            msg = f"رد غير متوقع من الخادم: {response.text[:200]}"
-            if request:
-                messages.error(request, msg)
-            if redirect_to:
-                return redirect(redirect_to)
-            if render_template:
-                return render(request, render_template, render_context or {})
-            return None
-
-        show_backend_messages(request, data)
-
-        if redirect_to:
-            return redirect(redirect_to)
-
-        if render_template:
-            context = render_context or {}
-            context.update({'data': data})
-            return render(request, render_template, context)
-
-        return data
-
-    except requests.exceptions.Timeout:
-        if request:
-            messages.error(request, "⏳ انتهت مهلة الاتصال بالخادم.")
-        if redirect_to:
-            return redirect(redirect_to)
-        if render_template:
-            return render(request, render_template, render_context or {})
-        return None
-
-    except requests.exceptions.RequestException as e:
-        handle_exception(request, "فشل في تعديل البيانات", e)
-        if redirect_to:
-            return redirect(redirect_to)
-        if render_template:
-            return render(request, render_template, render_context or {})
-        return None
-
-def api_delete(endpoint, request=None, timeout=60, redirect_to=None, render_template=None, render_context=None):
-    headers = {}
-    if request and 'token' in request.session:
-        headers["Authorization"] = f"Bearer {request.session['token']}"
-    try:
-        response = requests.delete(f"{BASE_API_URL}{endpoint}", headers=headers, timeout=timeout)
-        response.raise_for_status()
-        if request:
-            messages.success(request, "✅ تم الحذف بنجاح")
-        if redirect_to:
-            return redirect(redirect_to)
-        if render_template:
-            return render(request, render_template, render_context or {})
+        new_tokens = response.json()
+        request.session['token'] = new_tokens['access']
+        if 'refresh' in new_tokens:
+            request.session['refresh_token'] = new_tokens['refresh']
         return True
-    except requests.exceptions.Timeout:
-        if request:
-            messages.error(request, "⏳ انتهت مهلة الاتصال بالخادم.")
-        if redirect_to:
-            return redirect(redirect_to)
-        if render_template:
-            return render(request, render_template, render_context or {})
+    except requests.RequestException:
         return False
-    except requests.exceptions.RequestException as e:
-        handle_exception(request, "فشل في حذف العنصر", e)
-        if redirect_to:
-            return redirect(redirect_to)
-        if render_template:
-            return render(request, render_template, render_context or {})
-        return False
+
+
+def logout_view(request):
+        request.session.flush()  # Clear the session
+        messages.success(request, "Logged out successfully!")
+        return redirect('login')  # Redirect to the login page
+
+
+
+def _api_request(method, endpoint, request, is_retry=False, **kwargs):
+
+    headers = kwargs.get("headers", {})
+    if 'Content-Type' not in headers and 'files' not in kwargs:
+        headers['Content-Type'] = 'application/json'
+
+    if request and 'token' in request.session:
+        headers["Authorization"] = f"Bearer {request.session['token']}"
     
+    kwargs["headers"] = headers
+    
+    try:
+        response = requests.request(method, f"{BASE_API_URL}{endpoint}", **kwargs)
+        response.raise_for_status()
+        if response.status_code == 204:
+            return True
+        return response.json()
+
+    except requests.exceptions.RequestException as e:
+        if not is_retry and e.response and e.response.status_code == 401:
+            if _refresh_and_save_tokens(request):
+                return _api_request(method, endpoint, request, is_retry=True, **kwargs)
+            else:
+                return "LOGOUT" # Signal that refresh failed
+        
+        handle_exception(request, f"فشل الطلب من نوع {method.upper()}", e)
+        return None
+
+
+def _handle_api_response(request, response, redirect_to=None, render_template=None, render_context=None, success_message=None):
+    """
+    Processes the result from _api_request and performs Django-specific actions
+    like redirecting, rendering, or simply returning the data.
+    """
+    # Case 1: Critical auth failure, requires immediate logout
+    # if response == "LOGOUT":
+    #     return logout_view(request)
+
+    # Case 2: The request failed for other reasons (e.g., network error, 500 server error)
+    if response is None:
+        if redirect_to:
+            print(redirect_to)
+            return redirect(redirect_to)
+        if render_template:
+            return render(request, render_template, render_context or {})
+        return None # Return None to the view
+
+    # Case 3: The request was successful
+    # Display success messages
+    if isinstance(response, dict):
+        show_backend_messages(request, response, default_success=success_message or "")
+    elif success_message:
+        messages.success(request, success_message)
+
+    # Perform action based on parameters
+    if redirect_to:
+        return redirect(redirect_to)
+    
+    if render_template:
+        context = render_context or {}
+        context['data'] = response # Add the API data to the context
+        return render(request, render_template, context)
+        
+    return response # Default action: return the raw response to the view
+
+# ================================================================= #
+#                PUBLIC API WRAPPERS (Your Interface)               #
+# ================================================================= #
+
+def api_get(endpoint, request=None, timeout=60, redirect_to=None, render_template=None, success_message=None, render_context=None):
+    raw_response = _api_request("get", endpoint, request, timeout=timeout)
+    return _handle_api_response(request, raw_response, redirect_to, render_template, render_context, success_message)
+
+def api_post(endpoint, data, request=None, timeout=60, redirect_to=None, render_template=None, success_message=None, render_context=None):
+    raw_response = _api_request("post", endpoint, request, timeout=timeout, json=data)
+    return _handle_api_response(request, raw_response, redirect_to, render_template, render_context, success_message)
+
+def api_put(endpoint, data, request=None, timeout=60, redirect_to=None, render_template=None, success_message=None, render_context=None):
+    raw_response = _api_request("put", endpoint, request, timeout=timeout, json=data)
+    return _handle_api_response(request, raw_response, redirect_to, render_template, render_context, success_message)
+
+def api_delete(endpoint, request=None, timeout=60, redirect_to=None, render_template=None, success_message=None, render_context=None):
+    raw_response = _api_request("delete", endpoint, request, timeout=timeout)
+    # Use a more specific success message for delete if not provided
+    final_success_message = success_message or "تم الحذف بنجاح"
+    return _handle_api_response(request, raw_response, redirect_to, render_template, render_context, final_success_message)
+
+
 def api_search_items(endpoint, query, request):
     """
     إرسال طلب GET إلى API يحتوي على فلترة بالبحث، مع التوكن ومعالجة الأخطاء.
@@ -514,12 +386,25 @@ def paginate_queryset(queryset, request, page_key, page_size_key, size=5):
             messages.error(request, f"خطأ في التحويل للصفحات: {e}")
         return queryset
 
-def get_user_id(request):
-    """
-    استرجاع معرف المستخدم من الجلسة.
-    """
-    user =request.session.get('user')
-    # print(user)
-    # user_id = user.get('id') if user else None
 
-    return user
+
+def get_data_details(data):
+    links = data.get("links", {})
+    return (
+        data.get("results", []),
+        data.get("count", 0),
+        data.get("total_pages", 0),
+        links.get("next"),
+        links.get("previous"),
+        data.get("current_page", 1)  # ✅ استخراج رقم الصفحة الحالية
+    )
+def get_current_page(url):
+    if not url:
+        return 1
+    query = parse_qs(urlparse(url).query)
+    # هذا هو السطر السحري
+    return int(query.get("page", [1])[0]) 
+
+
+def get_user_id(request):
+    return request.session.get('user')

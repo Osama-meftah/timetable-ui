@@ -25,9 +25,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-^9r_$2&)yhw9c$t&iq0l9q_nmh^mi8&w8c3@*7jn)nlk2%p-pj"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    # "http://127.0.0.1:8000",
+    # "http:localhost:8000",
+]
 FRONT_END_HOST="http://127.0.0.1:8000"
 DEFAULT_FROM_EMAIL="abubaker773880@gmail.com"
 

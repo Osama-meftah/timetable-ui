@@ -18,7 +18,7 @@ class IsLoginMiddleware:
                 is_staff=user['is_staff']
                 # user=userToken
                 if is_staff:
-                    return redirect('/')
+                    return redirect('dashboard')
                 else:
                     return redirect('teacher_dashboard')
             return response

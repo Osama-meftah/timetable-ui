@@ -1,10 +1,10 @@
 import requests
 from django.contrib import messages
-from .utils import *
 from django.shortcuts import render, redirect
-from .utils import api_post,Endpoints,api_get_with_token
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from .utils import BASE_API_URL, api_post,Endpoints,api_get_with_token,handle_response
+from .utils import *
 
 # from rest_framework_simplejwt.views import TokenObtainPairView
 # from .serializers import MyTokenObtainPairSerializer
@@ -23,9 +23,10 @@ def LoginView(request):
             "password": password
         }
         response = api_post(Endpoints.login, data,request)
+        print(response)
         succes,data=handle_response(request,response)
-
-        if succes and data is not None:
+        print(succes,data,"======================================")
+        if response and data is not None:
             tokens = data.get("tokens")
             token=tokens['access']
             user=api_get_with_token(Endpoints.user,token=token)
@@ -37,16 +38,7 @@ def LoginView(request):
             return render(request,'login.html',{"username":username})
         
 
-# @api_view(['GET'])
-# def send_reseat_mail(request):
-#     token = request.session.get('token')
-#     print(token)
-#     if not token:
-#         return Response({"error": "Token not found in session"})
-#     # استدعاء دالة خارجية مع التوكن
-#     response= api_get_with_token(Endpoints.send_reseat_email, token=token)
-#     handle_response(request,response)
-#     return redirect('login') 
+
 @api_view(['GET'])
 def send_reseat_mail(request):
     token = request.session.get('token')
