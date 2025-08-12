@@ -289,7 +289,7 @@
                 endPoint: "distributions/",
 
 
-                renderItem: (distribution,index) => {
+                renderItem: (distribution, index) => {
                     if (!distribution.fk_teacher?.id) return null;
                     const teacherId = distribution.fk_teacher.id;
                     // console.log(this.groupedByTeacher)
@@ -302,7 +302,7 @@
 
                     if (!teacherInfo) return null;
 
-                    const courseHtml = `<p>${ 'N/A'}</p>`;
+                    const courseHtml = `<p>${'N/A'}</p>`;
 
                     if (existingRow) {
                         const coursesCell = existingRow.querySelector('.courses-cell');
@@ -362,15 +362,16 @@
                     }
                 },
             });
+
+            const search = new SearchComponent({
+                inputSelector: '.search-dist',
+                apiManager: teacherDetailsManager,     // كائن APIFormManager الذي أنشأته
+                queryKey: 'teacher',            // هذا هو المفتاح المطلوب في API ?group=
+                delay: 300                    // اختياري – تأخير التنفيذ (ms)
+            });
         } catch (error) {
             console.error("❌ حدث خطأ أثناء جلب التوزيعات:", error);
         }
-        const search = new SearchComponent({
-            inputSelector: '.search-dist',
-            apiManager: teacherDetailsManager,     // كائن APIFormManager الذي أنشأته
-            queryKey: 'teacher',            // هذا هو المفتاح المطلوب في API ?group=
-            delay: 300                    // اختياري – تأخير التنفيذ (ms)
-        });
     });
 </script>
 
