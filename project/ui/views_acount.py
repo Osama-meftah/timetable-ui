@@ -22,10 +22,10 @@ def LoginView(request):
             "username": username,
             "password": password
         }
+        data={}
         response = api_post(Endpoints.login, data,request)
-        print(response)
-        succes,data=handle_response(request,response)
-        print(succes,data,"======================================")
+        if response:
+            data=response['data']
         if response and data is not None:
             tokens = data.get("tokens")
             token=tokens['access']

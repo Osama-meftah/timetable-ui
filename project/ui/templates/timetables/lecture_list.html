@@ -13,12 +13,16 @@
       <select id="program" onchange="this.form.submit()" name="program"
         class="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-gray-200 text-gray-900 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm"
         required>
-        <option value="">اختر برنامج</option>
+        <option value="" {% if not request.GET.program %}selected{% endif %}>الكل</option>
         {% for program in programs %}
-        <option value="{{ program.id }}">{{ program.program_name }}</option>
+        <option value="{{ program.id }}" {% if request.GET.program == program.id|stringformat:"s" %}selected{% endif %}>
+          {{ program.program_name }}
+        </option>
         {% endfor %}
       </select>
     </div>
+
+
   </form>
 
   <!-- الجدول -->
@@ -35,44 +39,44 @@
       </thead>
       <tbody class="text-sm bg-white dark:bg-gray-900">
         {% for day, day_data in schedule.items %}
-          {% for period in periods %}
-          <tr class="hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
-            {% if forloop.first %}
-            <td class="border p-2 font-bold align-middle bg-gray-100 dark:bg-gray-800" rowspan="{{ periods|length }}">
-              {{ day }}
-            </td>
-            {% endif %}
-            <td class="border p-2 font-medium bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-100">
-              {{ period.period_from }} - {{ period.period_to }}
-            </td>
+        {% for period in periods %}
+        <tr class="hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+          {% if forloop.first %}
+          <td class="border p-2 font-bold align-middle bg-gray-100 dark:bg-gray-800" rowspan="{{ periods|length }}">
+            {{ day }}
+          </td>
+          {% endif %}
+          <td class="border p-2 font-medium bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-100">
+            {{ period.period_from }} - {{ period.period_to }}
+          </td>
 
-            {% for hall in halls %}
-            {% with key=period.period_from|stringformat:"s"|add:"-"|add:period.period_to|stringformat:"s" %}
-            <td class="border p-2 text-right align-top">
-              {% with items=day_data|get_item:key %}
-              {% if items %}
-                {% for lec in items %}
-                  {% if lec.hall == hall.hall_name %}
-                  <div class="bg-indigo-100 dark:bg-indigo-800 text-indigo-900 dark:text-white rounded px-2 py-1 mb-1 shadow-sm">
-                    <span class="font-semibold">{{ lec.course }}</span><br>
-                    <span class="text-xs">{{ lec.program }} - {{ lec.level }} - {{ lec.group }}</span><br>
-                    <small class="text-gray-600 dark:text-gray-300">{{ lec.teacher }}</small>
-                  </div>
-                  {% endif %}
-                {% endfor %}
-              {% else %}
-                <span class="text-gray-300 dark:text-gray-600">---</span>
-              {% endif %}
-              {% endwith %}
-            </td>
-            {% endwith %}
+          {% for hall in halls %}
+          {% with key=period.period_from|stringformat:"s"|add:"-"|add:period.period_to|stringformat:"s" %}
+          <td class="border p-2 text-right align-top">
+            {% with items=day_data|get_item:key %}
+            {% if items %}
+            {% for lec in items %}
+            {% if lec.hall == hall.hall_name %}
+            <div
+              class="bg-indigo-100 dark:bg-indigo-800 text-indigo-900 dark:text-white rounded px-2 py-1 mb-1 shadow-sm">
+              <span class="font-semibold">{{ lec.course }}</span><br>
+              <span class="text-xs">{{ lec.program }} - {{ lec.level }} - {{ lec.group }}</span><br>
+              <small class="text-gray-600 dark:text-gray-300">{{ lec.teacher }}</small>
+            </div>
+            {% endif %}
             {% endfor %}
-          </tr>
+            {% else %}
+            <span class="text-gray-300 dark:text-gray-600">---</span>
+            {% endif %}
+            {% endwith %}
+          </td>
+          {% endwith %}
           {% endfor %}
+        </tr>
+        {% endfor %}
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
 {% endblock %}
-

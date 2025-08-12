@@ -46,7 +46,7 @@ class TeachersAvailableView(View):
             "page_title": "أوقات التواجد",
             'teacher': user
         }
-        print(context)
+        # print(context)
         return render(request, 'teachers_management/list.html', context)
 
     def post(self, request, id=None):
@@ -82,7 +82,7 @@ class TeachersAvailableView(View):
 
 def teacher_dashboard_view(request):
     user=request.session.get('user')
-    print(user)
+    # print(user)
     # user=User.objects.get(id=user_id)
     return render(request, 'teachers_management/dashboard_teatcher.html', {'teacher': user})
 
@@ -131,6 +131,37 @@ class TeacherManagementView(View):
         except Exception as e:
             messages.error(request, f"❌ حدث خطأ أثناء حفظ بيانات المدرس: {str(e)}")
             return redirect("teachers_management")
+class TeacherAvailabilityAndCoursesView2(View):
+    def get(self, request, id=None):
+        try:
+            if id:
+                teacher_times=[]
+                teacher=[]
+                response = api_get(f"{Endpoints.distributions}?paginate=false&teacherId={id}", request=request) or []
+                teacher_distributions=response
+                if teacher_distributions:
+                    teacher=teacher_distributions[0]['fk_teacher']
+                    teacher_times=teacher_distributions[0]['fk_teacher']['available_times']
+
+
+            context = {
+                "teacher": teacher,
+                # "all_teachers": teachers,
+                "teacher_times": teacher_times,
+                "teacher_distributions": teacher_distributions,
+                # "days": days,
+                # "periods": periods,
+                # "subjects": subjects,
+                # "levels": levels,
+                # "programs": programs,
+                # "groups": groups,
+                "page_title": "عرض المقررات والاوقات" if id else "إضافة",
+            }
+            return render(request, "teachers/show_details.html", context)
+
+        except requests.exceptions.RequestException as e:
+            messages.error(request, f"فشل في جلب البيانات: {e}")
+            return redirect("teachers_management")
 
 class TeacherAvailabilityAndCoursesView(View):
     def get(self, request, id=None):
@@ -148,16 +179,13 @@ class TeacherAvailabilityAndCoursesView(View):
             teacher_distributions = []
 
             if id:
-                # teacher = api_get(f"{Endpoints.teachers}{id}/?paginate=false", request=request)
-                # all_times = api_get(f"{Endpoints.teacher_times}?paginate=false", request=request) or []
-                # # teacher_times = [t for t in all_times if t["fk_teacher"]["id"] == int(id)]
-                # teacher_times = [t for t in all_times if t["fk_teacher"] == int(id)]
-                # all_distributions = api_get(f"{Endpoints.distributions}?paginate=false", request=request) or []
-                # teacher_distributions = [d for d in all_distributions if d["fk_teacher"]["id"] == int(id)]
-                response = api_get(f"{Endpoints.distributions}?teacherId={id}", request=request) or []
-                teacher_distributions=response['results']
-                teacher=teacher_distributions[0]['fk_teacher']
-                teacher_times=teacher_distributions[0]['fk_teacher']['available_times']
+                teacher=[]
+                teacher_times=[]
+                response = api_get(f"{Endpoints.distributions}?paginate=false&teacherId={id}", request=request) or []
+                teacher_distributions=response
+                if teacher_distributions:
+                    teacher=teacher_distributions[0]['fk_teacher']
+                    teacher_times=teacher_distributions[0]['fk_teacher']['available_times']
 
 
             context = {
@@ -717,7 +745,7 @@ class GroupsView(View):
             programs=response['results']
         else:
             programs=[]
-        print(programs)
+        # print(programs)
         return render(request, 'groups/list.html', { "page_title": "إدارة المجموعات","program":programs})
 
     def post(self, request):

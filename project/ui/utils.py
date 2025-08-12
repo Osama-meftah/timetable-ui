@@ -58,9 +58,7 @@ def show_backend_messages(request, response_json, default_success=""):
         return
 
     collected = {"success": [], "warning": [], "error": []}
-    print(collected)
     def add(tag, msg):
-        print(msg)
         if msg:
             collected[tag].append(msg)
 
@@ -108,10 +106,10 @@ def handle_exception(request, message, exception):
                         if isinstance(val, list):
                             for item in val:
                                 if request:
-                                    messages.error(request, f"{key}: {item}")
+                                    messages.error(request, f" ")
                         else:
                             if request:
-                                messages.error(request, f"{key}: {val}")
+                                messages.error(request, f" ")
             else:
                 if request:
                     messages.error(request, str(error_data))
@@ -228,7 +226,6 @@ def _handle_api_response(request, response, redirect_to=None, render_template=No
     # Case 2: The request failed for other reasons (e.g., network error, 500 server error)
     if response is None:
         if redirect_to:
-            print(redirect_to)
             return redirect(redirect_to)
         if render_template:
             return render(request, render_template, render_context or {})
@@ -280,7 +277,6 @@ def api_search_items(endpoint, query, request):
     إرسال طلب GET إلى API يحتوي على فلترة بالبحث، مع التوكن ومعالجة الأخطاء.
     """
     url = f"{BASE_API_URL}{endpoint}?q={query}"
-    print(url)
     token = request.session.get("token")
 
     headers = {

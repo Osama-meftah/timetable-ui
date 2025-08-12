@@ -170,6 +170,7 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 class SubjectSerializer(serializers.ModelSerializer):
+    term_display = serializers.CharField(source='get_term_display', read_only=True)
     # fk_level = LevelSerializer(read_only=True)
     # fk_level_id = serializers.PrimaryKeyRelatedField(
     #     queryset=Level.objects.all(), source='fk_level', write_only=True
@@ -177,7 +178,7 @@ class SubjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Subject
-        fields = ['id', 'subject_name', 'term']
+        fields = ['id', 'subject_name', 'term','term_display']
 class TeacherBriefSerializer(serializers.ModelSerializer):
     class Meta:
         model = Teacher

@@ -9,7 +9,7 @@ urlpatterns = [
     path('logout/', logout_view, name='logout'),
     path('users/create/', CreateAdmin.as_view(), name='create_user'),
     
-    path('dashboard/', views.dashboard, name='dashboard'),
+    path('', views.dashboard, name='dashboard'),
     
     # path()
     
@@ -29,6 +29,8 @@ urlpatterns = [
       
     path('teacherswithcourses/add/', views.TeacherAvailabilityAndCoursesView.as_view(), name='add_edit_teacher_with_courses'),
     path('teacherswithcourses/edit/<int:id>/', views.TeacherAvailabilityAndCoursesView.as_view(), name='add_edit_teacher_with_courses'),
+    path('teacherswithcourses/view/<int:id>/', views.TeacherAvailabilityAndCoursesView2.as_view(), name='teacher_with_courses'),
+
     # path('teacherswithcourses/delete/<int:pk>/', views.delete_teacher_with_courses_view, name='delete_teacher_with_courses'),  
       
     path('courses/', views.CoursesListView.as_view(), name='courses_management'),

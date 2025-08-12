@@ -58,11 +58,16 @@ class LecturesView(View):
     def get(self, request, id):
         program_id = request.GET.get('program')
         response = api_get(f"{Endpoints.lectures}{id}/?program={program_id}", request=request)
+        if program_id and not response:
+            messages.error('لا يوجد محاضرات بهذا البرنامج',request)
+            return redirect(request.path)
+
+            
         # days=api_get(Endpoints.todays, request=request)
         hall=api_get(Endpoints.halls, request=request)
         periods=api_get(Endpoints.periods, request=request)
         programs = api_get(Endpoints.programs, request=request)
-        if response.get('lecture'):
+        if response:
             context = {
                 'schedule': response.get('lecture'),
                 'periods': periods['results'],
@@ -71,5 +76,4 @@ class LecturesView(View):
                 'programs': programs['results'],
             }
             return render(request, 'timetables/lecture_list.html', context)
-        messages.error(request, "لا توجد محاضرات لهذا الجدول")
         return redirect('table')
