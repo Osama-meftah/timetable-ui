@@ -329,9 +329,9 @@
         createUserForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             setButtonLoading(createUserBtn, true);
-            const teacher_name = document.getElementById('username').value;
-            const teacher_email = document.getElementById('email').value;
-            const teacher_status = document.getElementById('password').value;
+            const teacher_name = document.getElementById('teacher_name').value;
+            const teacher_email = document.getElementById('teacher_email').value;
+            const teacher_status = document.getElementById('teacher_status').value;
 
             try {
                 const response = await fetch(`${API_BASE_URL}/teachers/`, { 
@@ -345,8 +345,10 @@
                 const data = await response.json();
                 if (!response.ok) {
                     displayErrors(data);
+                    
                     throw new Error('Validation failed');
                 }
+                console.log(data);
                 showPermissionsForm(data.user.id, data.teacher_name, 'create');
             } catch (error) {
                 console.error('Error creating user:', error);
