@@ -10,6 +10,9 @@ from django.contrib.auth.models import User, Permission
 
 from django.contrib.auth.models import User
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
+from datetime import date
+from rest_framework.exceptions import ValidationError
 
 # ... (باقي الـ Serializers لديك مثل UserCreateSerializer)
 
@@ -63,7 +66,13 @@ class ProgramSerializer(serializers.ModelSerializer):
     class Meta:
         model = Program
         fields = ['id', 'program_name', 'fk_department', 'department_id', 'department_name']
-
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Program.objects.all(),
+                fields=['program_name', 'fk_department'],
+                message="هذا البرنامج مسجل بالفعل في هذا القسم."
+            )
+        ]
     def validate(self, data):
         # نحاول ربط fk_department إما بالـ ID أو بالاسم
         dept_id = data.get('fk_department', None)
@@ -101,6 +110,13 @@ class LevelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Level
         fields = ['id', 'level_name', 'number_students', 'fk_program', 'program_name', 'level_name_display']
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Level.objects.all(),
+                fields=['level_name', 'fk_program'],
+                message="هذا المستوى مسجل بالفعل في هذا البرنامج."
+            )
+        ]
 
     def create(self, validated_data):
         program_name = validated_data.pop('program_name', None)
@@ -134,6 +150,13 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ['id', 'group_name', 'number_students', 'fk_level', 'fk_level_id']
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Group.objects.all(),
+                fields=['group_name', 'fk_level'],
+                message="هذي المجموعة مسجلة بالفعل في هذا المستوى."
+            )
+        ]
 
     def validate(self, data):
         group_name = data.get('group_name')
@@ -205,6 +228,13 @@ class PeriodSerializer(serializers.ModelSerializer):
     class Meta:
         model = Period
         fields = ['id', 'period_from', 'period_to']
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Period.objects.all(),
+                fields=['period_from', 'period_to'],
+                message="هذا البرنامج مسجل بالفعل في هذا القسم."
+            )
+        ]
     
 class TeacherTimeSerializer2(serializers.ModelSerializer):
     fk_today = TodaySerializer(read_only=True)
@@ -253,6 +283,13 @@ class TeacherTimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = TeacherTime
         fields = '__all__'
+        validators = [
+            UniqueTogetherValidator(
+                queryset=TeacherTime.objects.all(),
+                fields=['fk_teacher', 'fk_today', 'fk_period'],
+                message="هذا الوقت مسجل بالفعل لهذا المدرس."
+            )
+        ]
 
     def validate(self, data):
         fk_today = data.get('fk_today_id')
@@ -297,10 +334,45 @@ class DistributionSerializer(serializers.ModelSerializer):
     fk_subject_id = serializers.PrimaryKeyRelatedField(
         queryset=Subject.objects.all(), source='fk_subject', write_only=True
     )
+    year = serializers.HiddenField(default=date.today().year)
 
     class Meta:
         model = Distribution
         fields = '__all__'
+        read_only_fields = ['year', 'date'] 
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Distribution.objects.all(),
+                fields=['fk_group', 'fk_subject','year'],
+                message="تم توزيع نفس البيانات لهذه المجموعة والمادة في هذه السنة مسبقاً."
+            )
+        ]
+        
+    # def validate(self, data):
+    #     """
+    #     التحقق يدوياً من أن المجموعة والمادة ليستا مكررتين في نفس السنة.
+    #     """
+    #     # 3. احصل على السنة الحالية يدوياً
+    #     request_year = date.today().year
+        
+    #     # 'fk_group' هو الحقل المصدر (source) الذي حددته لـ fk_group_id
+    #     group = data.get('fk_group')
+    #     subject = data.get('fk_subject')
+
+    #     # 4. قم بتنفيذ التحقق من التفرد يدوياً
+    #     if Distribution.objects.filter(
+    #         fk_group=group, 
+    #         fk_subject=subject, 
+    #         year=request_year
+    #     ).exists():
+    #         # 5. أرجع رسالة الخطأ المخصصة
+    #         raise ValidationError("تم توزيع نفس البيانات لهذه المجموعة والمادة في هذه السنة مسبقاً.")
+            
+    #     return data
+    # def validate(self, attrs):
+    #     # تعيين السنة تلقائيًا قبل أي تحقق
+    #     attrs['year'] = date.today().year
+    #     return super().validate(attrs)
         
 class DistributionBriefSerializer(serializers.ModelSerializer):
     fk_subject = SubjectSerializer(read_only=True)

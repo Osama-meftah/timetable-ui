@@ -1,0 +1,121 @@
+{% load static %}
+<!-- مودال إدارة المستويات -->
+<div id="level_modal" class="fixed inset-0 bg-black bg-opacity-100 flex items-center justify-center hidden z-50">
+    <div
+        class="bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700 shadow-lg w-full max-w-2xl p-6">
+        <h3 class="text-xl font-semibold text-green-800 dark:text-green-200 mb-5 flex items-center">
+            <i class="fas fa-layer-group ml-2 text-green-600"></i>
+            إدارة المستويات
+        </h3>
+
+        <form method="POST" action="." id="level-form">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="level_form_submit">
+            <input type="hidden" name="level_id" id="level_id_hidden" value="">
+            <input type="hidden" name="type" id="level_type_hidden" value="">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label for="level_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        اسم المستوى <span class="text-red-500">*</span>
+                    </label>
+                    <select id="level_name" name="level_name"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 bg-gray-300 dark:border-gray-600 dark:text-gray-200">
+                        <option value="">اختر مستوى</option>
+                        <option value="first">الأول</option>
+                        <option value="second">الثاني</option>
+                        <option value="third">الثالث</option>
+                        <option value="fourth">الرابع</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="number_students"
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        عدد الطلاب <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" id="number_students" name="number_students" value=""
+                        class="mt-1 block w-full bg-gray-300 rounded-md border-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                        required min="0">
+                </div>
+
+                <div class="md:col-span-2">
+                    <label for="fk_program" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        البرنامج التابع له <span class="text-red-500">*</span>
+                    </label>
+                    <!-- <select id="fk_program" name="fk_program"
+                        class="mt-1 block w-full rounded-md border-gray-300 bg-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                        required>
+                        <option value="">اختر البرنامج...</option>
+                        {% for program_option in programs %}
+                        <option value="{{ program_option.program_name }}">{{ program_option.program_name }}</option>
+                        {% endfor %}
+                    </select> -->
+                    <input type="text" id="" name="" 
+                    value="{{program_name}}"
+        class="mt-1 block w-full rounded-md border-gray-300 bg-gray-300 shadow-sm py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+        placeholder="اسم البرنامج" readonly>
+
+    <!-- حقل مخفي لإرسال ID البرنامج -->
+    <input type="hidden" id="fk_program" name="fk_program" value="{{program_id}}">
+                </div>
+            </div>
+
+            <div class="flex justify-start gap-3 pt-4 border-t border-green-200 dark:border-green-700">
+                <button type="submit" id="level_submit_button"
+                    class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-md shadow-md">
+                    حفظ المستوى
+                </button>
+                <button type="button" id="cancel_level_form"
+                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:text-gray-200 font-bold py-2 px-6 rounded-md shadow-md">
+                    إلغاء
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- JavaScript للتحكم -->
+<script src="{% static 'src/js/api_form.js' %}"></script>
+<script>
+    const modal = document.getElementById("level_modal");
+    const openBtn = document.getElementById("open_level_modal");
+    const cancelBtn = document.getElementById("cancel_level_form");
+
+    // فتح المودال
+    openBtn.addEventListener("click", () => {
+        modal.classList.remove("hidden");
+    });
+
+    // إغلاق المودال
+    cancelBtn.addEventListener("click", () => {
+        modal.classList.add("hidden");
+    });
+
+    // إغلاق عند الضغط على الخلفية
+    modal.addEventListener("click", (e) => {
+        if (e.target === modal) {
+            modal.classList.add("hidden");
+        }
+    });
+</script>
+   <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const levelFormHandler = new APIFormManager({
+            formId: "level-form",
+            endPoint: "levels/",
+            getFormData: () => ({
+                level_name: levelNameInput.value.trim(),
+                number_students: numberStudentsInput.value,
+                program_name: fkProgramSelect.value,
+                id: levelIdHiddenInput.value
+            
+            }),
+            populateForm: (data) => {
+                levelNameInput.value = data.level_name || "";
+                numberStudentsInput.value = data.number_students || "";
+                fkProgramSelect.value = data.program_name || "";
+            },
+        });
+});
+<script/>

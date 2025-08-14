@@ -102,14 +102,18 @@ def handle_exception(request, message, exception):
                     if request:
                         messages.error(request, error_data["message"])
                 for key, val in error_data.items():
-                    if key not in ["detail", "message"]:
+                    # if key=="status":
+                    #     continue
+                    if key not in ["detail", "message","error"]:
+
                         if isinstance(val, list):
                             for item in val:
+                                print(f"items {item} {val}")
                                 if request:
-                                    messages.error(request, f" ")
+                                    messages.error(request, f"{item} {val} ")
                         else:
                             if request:
-                                messages.error(request, f" ")
+                                messages.error(request, f"{val}")
             else:
                 if request:
                     messages.error(request, str(error_data))

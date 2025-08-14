@@ -9,7 +9,9 @@ from datetime import datetime
 # Create your models here.
 
 class Department(models.Model):
-    name = models.CharField(max_length=100, verbose_name="اسم القسم", unique=True)
+    name = models.CharField(max_length=100, verbose_name="اسم القسم", unique=True,error_messages={
+            'unique': "هذا القسم مسجل بالفعل."
+        }) # تم إضافة unique=True)
     description = models.TextField(verbose_name="وصف القسم", blank=True, null=True)
 
     class Meta:
@@ -43,7 +45,9 @@ class Hall(models.Model):
         ('available', 'متاحة'),
         ('under_maintenance', 'تحت الصيانة')
     ]
-    hall_name = models.CharField(max_length=50, verbose_name="اسم القاعة", unique=True) # تم إضافة unique=True
+    hall_name = models.CharField(max_length=50, verbose_name="اسم القاعة", unique=True, error_messages={
+            'unique': "هذه القاعة مسجلة بالفعل."
+        }) # تم إضافة unique=True
     capacity_hall = models.IntegerField(verbose_name="سعة القاعة", validators=[MinValueValidator(1)]) # إضافة MinValueValidator
     hall_status = models.CharField(choices=STATUS_CHOICES, verbose_name="حالة القاعة", default='available',max_length=20) # تم تصحيح القيمة الافتراضية
 
@@ -170,7 +174,9 @@ class Subject(models.Model):
         ('term1', 'الأول'),
         ('term2', 'الثاني')
     ]
-    subject_name = models.CharField(max_length=100, verbose_name="اسم المادة")
+    subject_name = models.CharField(max_length=100, verbose_name="اسم المادة",unique=True,error_messages={
+            'unique': "هذه المادة مسجلة بالفعل."
+        }) # تم إضافة unique=True)
     term = models.CharField(choices=STATUS_CHOICES, verbose_name="الفصل الدراسي", default='term1',max_length=10)
     # إضافة علاقة ForeignKey مع Level
     class Meta:
@@ -189,7 +195,9 @@ class Teacher(models.Model):
         ('active', 'نشط'),
         ('vacation', 'إجازة')
     ]
-    teacher_name = models.CharField(max_length=50, verbose_name="اسم المدرس")
+    teacher_name = models.CharField(max_length=50, verbose_name="اسم المدرس",unique=True,error_messages={
+            'unique': "هذا المدرس مسجل بالفعل."
+        }) # تم إضافة unique=True)
     teacher_status = models.CharField(choices=STATUS_CHOICES, verbose_name="حالة المدرس",max_length=100,default='active') # تم تصحيح القيمة الافتراضية 
     class Meta:
         verbose_name = "المدرس"
@@ -211,7 +219,9 @@ class Today(models.Model):
 
     ]
      # استخدام id كمعرف رئيسي
-    day_name = models.CharField(choices=DAY_CHOICES,max_length=10, unique=True) # إضافة unique=True
+    day_name = models.CharField(choices=DAY_CHOICES,max_length=10, unique=True,error_messages={
+            'unique': "هذه اليوم مسجلة بالفعل."
+        }) # تم إضافة unique=True) # إضافة unique=True
     
     class Meta:
         verbose_name = "يوم"
@@ -299,10 +309,10 @@ class Distribution(models.Model):
         verbose_name = "توزيع"
         verbose_name_plural = "التوزيعات"
         unique_together = ('fk_group', 'fk_subject','year') 
-        ordering = ['fk_group__group_name', 'fk_subject__subject_name']
+        ordering = ['fk_subject__subject_name']
 
     def __str__(self):
-        return f"{self.fk_teacher.teacher_name} - {self.fk_subject.subject_name} {self.fk_group.fk_level.fk_program.program_name} {self.fk_group.fk_level.level_name} ({self.fk_group.group_name}) "
+        return f"{self.fk_teacher.teacher_name} - {self.fk_subject.subject_name} {self.fk_group.fk_level.fk_program.program_name} {self.fk_group.fk_level.level_name} ({self.fk_group.group_name})"
 
 # الجدول (Table)
 class Table(models.Model):

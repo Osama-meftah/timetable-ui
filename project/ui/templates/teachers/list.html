@@ -173,7 +173,10 @@
                             المدرس</th>
                         <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            المقررات والأوقات المفتاحة</th>
+                            المقررات </th>
+                        <th scope="col"
+                            class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            الأوقات المفتاحة </th>
                         <th scope="col"
                             class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-32">
                             الإجراءات</th>
@@ -240,192 +243,92 @@
             },
         });
     });
-    document.addEventListener("DOMContentLoaded", () => {
 
+    document.addEventListener('DOMContentLoaded', async function () {
         const teacherDetailsManager = new APIFormManager({
+
             listContainerId: "teacher-details-tbody",
             paginationContainerId: "pagination-details-container",
-            endPoint: "teachers/",
-            // endPoints: ['teachers/?paginate=false'],
-            renderItem: (teacher, index) => {
-                if (!teacher.id) return null;
-
-                const teacherId = teacher.id;
-                const rowId = `teacher-row-${teacherId}`;
-
-                let existingRow = document.getElementById(rowId);
-
-                // const teacherInfo = allTeachers.find(t => t.id === teacherId);
-                const teacherInfo = teacher;
-                console.log(teacherInfo)
-
-                // const allTeacherTimes = distribution['fk_teacher']['available_times']
-
+            endPoint: "distributions-brief/",
+            renderItem: (distribution, index) => {
+                const teacherInfo = distribution.teacher_info;
                 if (!teacherInfo) return null;
 
-                // const courseHtml = `<p>${distribution.fk_subject?.subject_name || 'N/A'} (${distribution.fk_group?.fk_level?.level_name_display || 'N/A'} - ${distribution.fk_group?.group_name || 'N/A'})</p>`;
+                const teacherId = teacherInfo.id;
+                const rowId = `teacher-row-${teacherId}`;
+                let existingRow = document.getElementById(rowId);
+                // بناء قائمة الكورسات
+                const courseList = distribution.distributions || [];
+                const courseHtml = courseList.length > 0
+                    ? `<ul class="list-disc list-inside space-y-1">
+        
+            ${courseList.map(dist => `<li><span class="font-medium">${dist.fk_group.fk_level.fk_program.program_name}  ${dist?.fk_group.fk_level.level_name_display}[${dist.fk_group.group_name}]${dist?.fk_subject?.subject_name}</span></li>`).join('')}
+           </ul>`
+                    : '<span class="text-gray-400 dark:text-gray-500">غير متاح حالياً</span>';
+
+                // أوقات التوفر من teacher_info مباشرة
+                const availability = teacherInfo.available_times || [];
+                const availabilityHtml = availability.length > 0
+                    ? `<ul class="list-disc list-inside space-y-1">
+            ${availability.map(time => `<li><span class="font-medium">${time?.fk_today?.day_name_display || 'N/A'}:</span> ${time?.fk_period?.period_from} - ${time?.fk_period?.period_to}</li>`).join('')}
+           </ul>`
+                    : '<span class="text-gray-400 dark:text-gray-500">غير متاح حالياً</span>';
 
                 if (existingRow) {
-                    // const coursesCell = existingRow.querySelector('.courses-cell');
-                    // if (coursesCell) {
-                    //     coursesCell.insertAdjacentHTML('beforeend', courseHtml);
-                    // }
+                    const coursesCell = existingRow.querySelector('.courses-cell');
+                    coursesCell.innerHTML = courseHtml;
                     return null;
                 } else {
-                    // const availability = allTeacherTimes.filter(time => time.fk_teacher === teacherId);
-                    // const availability = allTeacherTimes;
-
-
-                    // ✅✅ هذا هو الكود المُصحح الذي يطابق تصميمك ✅✅
-                    // const availabilityHtml = availability.length > 0
-                    //     ? `<ul class="list-disc list-inside space-y-1">${availability.map(time => `<li><span class="font-medium">${time.fk_today?.day_name_display || 'N/A'}:</span> ${time.fk_period?.period_from} - ${time.fk_period?.period_to}</li>`).join('')}</ul>`
-                    //     : '<span class="text-gray-400 dark:text-gray-500">غير متاح حالياً</span>';
-
                     const tr = document.createElement('tr');
                     tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150';
                     tr.id = rowId;
 
                     const statusClass = teacherInfo.teacher_status === 'active' ? 'text-green-600 dark:text-green-400' :
                         teacherInfo.teacher_status === 'vacation' ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-500';
-                    const statusText = teacherInfo.teacher_status === 'active' ? 'نشط' :
-                        teacherInfo.teacher_status === 'vacation' ? 'اجازة' : 'غير معروف';
+                    const statusText = teacherInfo.teacher_status_display || 'غير معروف';
 
-                    // استخدام innerHTML مع كل الكلاسات والبنيات الأصلية
                     tr.innerHTML = `
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
-                                ${index + 1}
-                            </td>
-                            <td class="px-4 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="mr-4">
-                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-200">
-                                            ${teacherInfo.teacher_name || 'N/A'}
-                                        </div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400">
-                                            الحالة: <span class="${statusClass} font-semibold">${statusText}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                               <a  href="/teacherswithcourses/view/${teacherInfo.id}/"
-                                class="bg-blue-600 hover:bg-blue-700 hover:text-white text-white 
-                                        dark:bg-blue-500 dark:hover:bg-blue-600 
-                                        dark:text-white px-3 py-1 rounded">
-                                    عرض
-                                </a>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="/teacherswithcourses/edit/${teacherInfo.id}/"
-                                   class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-md" 
-                                   title="تعديل">
-                                    <i class="fas fa-edit text-lg"></i>
-                                </a>
-                            </td>
-                        `;
+            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
+                ${index + 1}
+            </td>
+            <td class="px-4 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                    <div class="mr-4">
+                        <div class="text-sm font-medium text-gray-900 dark:text-gray-200">
+                            ${teacherInfo.teacher_name || 'N/A'}
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                            الحالة: <span class="${statusClass} font-semibold">${statusText}</span>
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <td class="courses-cell px-4 py-4 whitespace-normal text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
+                ${courseHtml}
+            </td>
+            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                ${availabilityHtml}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <a href="/teacherswithcourses/edit/${teacherId}/"
+                   class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+                   title="تعديل">
+                    <i class="fas fa-edit text-lg"></i>
+                </a>
+            </td>
+        `;
                     return tr;
                 }
-            },
+            }
+
         });
         const search = new SearchComponent({
             inputSelector: '.search-dist',
-            apiManager: teacherDetailsManager,
-            queryKey: 'teacher',
-            delay: 300
+            apiManager: teacherDetailsManager,     // كائن APIFormManager الذي أنشأته
+            queryKey: 'teacher',            // هذا هو المفتاح المطلوب في API ?group=
+            delay: 300                    // اختياري – تأخير التنفيذ (ms)
         });
     });
-    // document.addEventListener('DOMContentLoaded', async function () {
-    //     const addedTeachers = [];
-    //     const teacherDetailsManager = new APIFormManager({
-
-    //         listContainerId: "teacher-details-tbody",
-    //         paginationContainerId: "pagination-details-container",
-    //         endPoint: "distributions/",
-    //         endPoints: ['distributions-brief/?paginate=false'],
-    //         renderItem: (distribution, allDistributions, index) => {
-    //             if (!distribution.fk_teacher?.id) return null;
-    //             const teacherId = distribution.fk_teacher.id;
-    //             addedTeachers.push(teacherId)
-    //             if (teacherId in addedTeachers) {
-    //                 return null
-    //             }
-    //             const rowId = `teacher-row-${teacherId}`;
-    //             let existingRow = document.getElementById(rowId);
-
-    //             const teacherInfo = distribution.fk_teacher;
-
-    //             if (!teacherInfo) return null;
-
-    //             const course = allDistributions
-    //                 .filter(dist => dist.fk_teacher === teacherId)
-    //                 .filter((dist, index, self) =>
-    //                     index === self.findIndex(d => d.fk_subject.id === dist.fk_subject.id)
-    //                 );
-
-    //             const courseHtml = course.length > 0
-    //                 ? `<ul class="list-disc list-inside space-y-1">${course.map(dist => `<li><span class="font-medium">${dist?.fk_subject.subject_name}</span></li>`).join('')}</ul>`
-    //                 : '<span class="text-gray-400 dark:text-gray-500">غير متاح حالياً</span>';
-    //             if (existingRow) {
-    //                 const coursesCell = existingRow.querySelector('.courses-cell');
-    //                 return null;
-    //             } else {
-    //                 // const availability = allTeacherTimes.filter(time => time.fk_teacher === teacherId);
-    //                 const availability = distribution.fk_teacher.available_times
-    //                 // ✅✅ هذا هو الكود المُصحح الذي يطابق تصميمك ✅✅
-    //                 const availabilityHtml = availability.length > 0
-    //                     ? `<ul class="list-disc list-inside space-y-1">${availability.map(time => `<li><span class="font-medium">${time?.fk_today.day_name_display || 'N/A'}:</span> ${time?.fk_period.period_from} - ${time?.fk_period.period_to}</li>`).join('')}</ul>`
-    //                     : '<span class="text-gray-400 dark:text-gray-500">غير متاح حالياً</span>';
-
-    //                 const tr = document.createElement('tr');
-    //                 tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150';
-    //                 tr.id = rowId;
-
-    //                 const statusClass = teacherInfo.teacher_status === 'active' ? 'text-green-600 dark:text-green-400' :
-    //                     teacherInfo.teacher_status === 'vacation' ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-500';
-    //                 const statusText = teacherInfo.teacher_status === 'active' ? 'نشط' :
-    //                     teacherInfo.teacher_status === 'vacation' ? 'اجازة' : 'غير معروف';
-
-    //                 tr.innerHTML = `
-    //                 <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
-    //                     ${index + 1}
-    //                 </td>
-    //                 <td class="px-4 py-4 whitespace-nowrap">
-    //                     <div class="flex items-center">
-    //                         <div class="mr-4">
-    //                             <div class="text-sm font-medium text-gray-900 dark:text-gray-200">
-    //                                 ${teacherInfo.teacher_name || 'N/A'}
-    //                             </div>
-    //                             <div class="text-xs text-gray-500 dark:text-gray-400">
-    //                                 الحالة: <span class="${statusClass} font-semibold">${statusText}</span>
-    //                             </div>
-    //                         </div>
-    //                     </div>
-    //                 </td>
-    //                 <td class="courses-cell px-4 py-4 whitespace-normal text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
-    //                     ${courseHtml}
-    //                 </td>
-    //                 <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-    //                     ${availabilityHtml}
-    //                 </td>
-    //                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-    //                     <a href="/teacherswithcourses/edit/${teacherInfo.id}/"
-    //                        class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-md"
-    //                        title="تعديل">
-    //                         <i class="fas fa-edit text-lg"></i>
-    //                     </a>
-    //                 </td>
-    //             `;
-    //                 return tr;
-    //             }
-    //         },
-    //     });
-    //     const search = new SearchComponent({
-    //         inputSelector: '.search-dist',
-    //         apiManager: teacherDetailsManager,     // كائن APIFormManager الذي أنشأته
-    //         queryKey: 'teacher',            // هذا هو المفتاح المطلوب في API ?group=
-    //         delay: 300                    // اختياري – تأخير التنفيذ (ms)
-    //     });
-    // });
 </script>
 
 {% endblock %}

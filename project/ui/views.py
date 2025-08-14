@@ -137,11 +137,16 @@ class TeacherAvailabilityAndCoursesView2(View):
             if id:
                 teacher_times=[]
                 teacher=[]
-                response = api_get(f"{Endpoints.distributions}?paginate=false&teacherId={id}", request=request) or []
-                teacher_distributions=response
-                if teacher_distributions:
-                    teacher=teacher_distributions[0]['fk_teacher']
-                    teacher_times=teacher_distributions[0]['fk_teacher']['available_times']
+
+                response_dist = api_get(f"{Endpoints.distributions}?teacherId={id}", request=request) or []
+                response_teacher_tiem=api_get(f"{Endpoints.teacher_times}?teacherId={id}",request=request ) or []
+                print(response_dist)
+                print(response_teacher_tiem)
+                teacher_distributions=[]
+                # teacher_distributions=response
+                # if teacher_distributions:
+                #     teacher=teacher_distributions[0]['fk_teacher']
+                #     teacher_times=teacher_distributions[0]['fk_teacher']['available_times']
 
 
             context = {
@@ -157,7 +162,7 @@ class TeacherAvailabilityAndCoursesView2(View):
                 # "groups": groups,
                 "page_title": "عرض المقررات والاوقات" if id else "إضافة",
             }
-            return render(request, "teachers/show_details.html", context)
+            return render(request, "teachers/show_details.html",context)
 
         except requests.exceptions.RequestException as e:
             messages.error(request, f"فشل في جلب البيانات: {e}")
@@ -181,11 +186,13 @@ class TeacherAvailabilityAndCoursesView(View):
             if id:
                 teacher=[]
                 teacher_times=[]
-                response = api_get(f"{Endpoints.distributions}?paginate=false&teacherId={id}", request=request) or []
-                teacher_distributions=response
-                if teacher_distributions:
+                response_dist = api_get(f"{Endpoints.distributions}?teacherId={id}", request=request) or []
+                response_teacher_tiem=api_get(f"{Endpoints.teacher_times}?teacherId={id}",request=request ) or []
+                # response = api_get(f"{Endpoints.distributions}?paginate=false&teacherId={id}", request=request) or []
+                if response_dist and response_teacher_tiem:
+                    teacher_distributions=response_dist['results']
                     teacher=teacher_distributions[0]['fk_teacher']
-                    teacher_times=teacher_distributions[0]['fk_teacher']['available_times']
+                    teacher_times=response_teacher_tiem['results']
 
 
             context = {
@@ -393,7 +400,11 @@ class RoomsListView(View):
 
 class RoomCreateView(View):
     def get(self, request):
-        return render(request, 'rooms/add_edit.html', {"page_title": "إضافة قاعة"})
+        room_name=request.POST.get('name')
+        capacity=request.POST.get('capacity')
+        status=request.POST.get('status')
+        context={"name":room_name,"capacity":capacity,"status":status,"page_title": "إضافة قاعة"}
+        return render(request, 'rooms/add_edit.html', context)
 
     def post(self, request):
         new_room_data = {
@@ -510,14 +521,14 @@ class DepartmentCreateView(View):
             messages.error(request, "اسم القسم مطلوب.")
             return redirect('add_department')
 
-        try:
-            new_dept_data = {"name": name, "description": desc}
-            api_post(Endpoints.departments, new_dept_data)
-            messages.success(request, "تم إضافة قسم بنجاح.")
-        except RuntimeError as e:
-            messages.error(request, f"خطأ في إضافة القسم: {e}")
+        # try:
+        new_dept_data = {"name": name, "description": desc}
+        return api_post(Endpoints.departments, new_dept_data,request=request,redirect_to="departments_management")
+            # messages.success(request, "تم إضافة قسم بنجاح.")
+        # except RuntimeError as e:
+        #     messages.error(request, f"خطأ في إضافة القسم: {e}")
 
-        return redirect('departments_management')
+        # return redirect('departments_management')
 
 class DepartmentUpdateView(View):
     def get(self, request, id):
@@ -543,12 +554,10 @@ class DepartmentUpdateView(View):
 
 class DepartmentDeleteView(View):
     def post(self, request, id):
-        try:
-            api_delete(f"{Endpoints.departments}{id}/")
-            messages.success(request, "تم حذف القسم بنجاح.")
-        except RuntimeError as e:
-            messages.error(request, f"خطأ في حذف القسم: {e}")
-        return redirect('departments_management')
+        return api_delete(f"{Endpoints.departments}{id}/",request=request,redirect_to="departments_management")
+        # except RuntimeError as e:
+        #     messages.error(request, f"خطأ في حذف القسم: {e}")
+        # return redirect('departments_management')
 
 class AddProgramLevelView(View):
     def get(self, request):
@@ -748,42 +757,44 @@ class GroupsView(View):
         # print(programs)
         return render(request, 'groups/list.html', { "page_title": "إدارة المجموعات","program":programs})
 
-    def post(self, request):
-        # استقبال بيانات الإضافة أو التعديل من المودال (فورم)
-        action_type = request.POST.get('form_type')  # add أو edit
-        group_id = request.POST.get('group_id')  # موجود فقط عند التعديل
-        # موجود فقط عند التعديل
-        data = {
-            "group_name": request.POST.get("group_name"),
-            "number_students": request.POST.get("number_students"),
-            "fk_level_id": request.POST.get("fk_level"),
-        }
-        # print(data)
-        try:
-            if action_type == 'add':
-                api_post(Endpoints.groups, data, request=request, success_message="✅ تم إضافة المجموعة بنجاح.", redirect_to='groups_management')
-                # messages.success(request, "✅ تم إضافة المجموعة بنجاح.")
-            elif action_type == 'edit' and group_id:
-                api_put(f"{Endpoints.groups}{group_id}/", data, request=request, redirect_to='groups_management')
-                # messages.success(request, "✅ تم تعديل المجموعة بنجاح.")
-            else:
-                messages.error(request, "نوع العملية غير صحيح أو بيانات ناقصة.")
-        except Exception as e:
-            messages.error(request, f"❌ حدث خطأ: {e}")
-        return redirect('groups_management')
+    # def post(self, request):
+    #     # استقبال بيانات الإضافة أو التعديل من المودال (فورم)
+    #     action_type = request.POST.get('form_type')  # add أو edit
+    #     group_id = request.POST.get('group_id')  # موجود فقط عند التعديل
+    #     # موجود فقط عند التعديل
+    #     data = {
+    #         "group_name": request.POST.get("group_name"),
+    #         "number_students": request.POST.get("number_students"),
+    #         "fk_level_id": request.POST.get("fk_level"),
+    #     }
+    #     # print(data)
+    #     try:
+    #         if action_type == 'add':
+    #             api_post(Endpoints.groups, data, request=request, success_message="✅ تم إضافة المجموعة بنجاح.", redirect_to='groups_management')
+    #             # messages.success(request, "✅ تم إضافة المجموعة بنجاح.")
+    #         elif action_type == 'edit' and group_id:
+    #             api_put(f"{Endpoints.groups}{group_id}/", data, request=request, redirect_to='groups_management')
+    #             # messages.success(request, "✅ تم تعديل المجموعة بنجاح.")
+    #         else:
+    #             messages.error(request, "نوع العملية غير صحيح أو بيانات ناقصة.")
+    #     except Exception as e:
+    #         messages.error(request, f"❌ حدث خطأ: {e}")
+    #     return redirect('groups_management')
 
 
-class GroupDeleteView(View):
-    def post(self, request,id=None):
-        item_id = request.POST.get('item_id')
-        try:
-            api_delete(f"{Endpoints.groups}{item_id}/", request=request, redirect_to='groups_management')
-            # messages.success(request, "✅ تم حذف المجموعة بنجاح.")
-        except Exception as e:
-            messages.error(request, f"❌ حدث خطأ أثناء حذف المجموعة: {e}")
-            # print(f"Error deleting group with ID {item_id}: {e}")
+# class GroupDeleteView(View):
+#     def post(self, request,id=None):
+#         item_id = request.POST.get('item_id')
+#         return api_delete(f"{Endpoints.groups}{item_id}/", request=request, redirect_to='groups_management')
 
-        return redirect('groups_management')
+        # try:
+        #     api_delete(f"{Endpoints.groups}{item_id}/", request=request, redirect_to='groups_management')
+        #     # messages.success(request, "✅ تم حذف المجموعة بنجاح.")
+        # except Exception as e:
+        #     messages.error(request, f"❌ حدث خطأ أثناء حذف المجموعة: {e}")
+        #     # print(f"Error deleting group with ID {item_id}: {e}")
+
+        # return redirect('groups_management')
     
 
 # def timetable_settings_view(request):
