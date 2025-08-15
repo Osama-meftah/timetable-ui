@@ -7,6 +7,7 @@ from .views_search import *
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .views_accounts import *
 
+
 router = DefaultRouter()
 router.register('departments',DepartmentViewSet )  
 router.register('halls',HallViewSet )  
@@ -40,6 +41,7 @@ urlpatterns =[
 
     # urls acounts
     path('login/', Login, name='create_user'),
+    path('dashboard/', Dashboard, name='dashboard'),
 
     # get token
     path('token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),

@@ -21,133 +21,173 @@ def dashboard(request):
     عرض لوحة التحكم ببيانات مُحسَّنة ومُعدة مسبقًا.
     """
     # --- الخطوة 1: جلب كل البيانات من الـ API دفعة واحدة ---
-    subjects = api_get(Endpoints.subjects)
-    teachers_data = api_get(Endpoints.teachers)
-    distribution = api_get(Endpoints.distributions)
-    halls = api_get(Endpoints.halls)
-    levels = api_get(Endpoints.levels)
-    lecuters = api_get(Endpoints.lectures)
-    periods = api_get(Endpoints.periods)
-    todays = api_get(Endpoints.todays)
-    programs = api_get(Endpoints.programs)
-    groups = api_get(Endpoints.groups)
+    dashboard = api_get(Endpoints.dashboard)
+    print(dashboard)
+    return render(request, 'dashboard.html', dashboard) 
+    # subjects = api_get(Endpoints.subjects)
+    # teachers_data = api_get(Endpoints.teachers)
+    # distribution = api_get(Endpoints.distributions)
+    # halls = api_get(f'{Endpoints.halls}?paginate=false')
+    # levels = api_get(Endpoints.levels)
+    # lecuters = api_get(Endpoints.lectures)
+    # periods = api_get(Endpoints.periods)
+    # todays = api_get(Endpoints.todays)
+    # programs = api_get(Endpoints.programs)
+    # groups = api_get(Endpoints.groups)
+    # table=api_get(Endpoints.tables)
 
-    # --- الخطوة 2: الفهرسة - تحويل القوائم إلى قواميس للبحث السريع (O(1)) ---
+    # # --- الخطوة 2: الفهرسة - تحويل القوائم إلى قواميس للبحث السريع (O(1)) ---
     
-    # فهرسة المواد والمدرسين والقاعات لسهولة الوصول
-    subjects_map = {s['id']: s for s in subjects}
-    teachers_map = {t['id']: t for t in teachers_data}
-    halls_map = {h['id']: h for h in halls}
-    periods_map = {p['id']: f"{p['period_from']} - {p['period_to']}" for p in periods}
-    todays_map = {d['id']: d['day_name_display'] for d in todays}
-    levels_map = {l['id']: l for l in levels}
-    groups_map = {g['id']: g for g in groups}
-    programs_map = {p['id']: p for p in programs}
-
-    # تجميع توزيع المواد حسب المدرس لتجنب الحلقات المتداخلة لاحقًا
-    distributions_by_teacher = defaultdict(list)
-    distributions_by_group = defaultdict(list)
-    for dist in distribution:
-        teacher_id = dist["fk_teacher"]["id"]
-        group_id = dist["fk_group"]["id"]
-        distributions_by_teacher[teacher_id].append(dist)
-        distributions_by_group[group_id].append(dist)
-
-    # --- الخطوة 3: معالجة البيانات باستخدام القواميس المُفهرسة ---
-
-    # حساب عدد المواد لكل مدرس وتحديد المدرسين غير المسند إليهم مواد
-    countSubTeacher = []
-    teacherNotSubject = []
-    for teacher_id, teacher in teachers_map.items():
-        assigned_subjects_count = len(distributions_by_teacher[teacher_id])
-        if assigned_subjects_count > 0:
-            if assigned_subjects_count > 2:
-                countSubTeacher.append({
-                    "name": teacher["teacher_name"],
-                    "countSub": assigned_subjects_count,
-                    "countHour": 2 * assigned_subjects_count
-                })
-        else:
-            teacherNotSubject.append({"key": teacher_id, "val": teacher["teacher_name"]})
+    # # فهرسة المواد والمدرسين والقاعات لسهولة الوصول
+    # print("#####################")
+    # print(subjects)
+    # print("#####################")
+    # print("#####################")
+    # print(teachers_data)
+    # print("#####################")
+    # print("#####################")
+    # print(distribution)
+    # print("#####################")
+    # print("#####################")
+    # print(halls)
+    # print("#####################")
+    # print("#####################")
+    # print(levels)
+    # print("#####################")
+    # print("#####################")
+    # print(lecuters)
+    # print("#####################")
+    # print(periods)
+    # print("#####################")
+    # print(todays)
+    # print("#####################")
+    # print(programs)
+    # print("#####################")
+    # print(groups)
+    # print("#####################")
+    # print(table)
+    # print("#####################")
+    # print(len(halls["results"]))
+    # print("#####################")
     
-    countSubTeacher.sort(key=lambda item: item['countSub'], reverse=True)
-
-    # تحديد القاعات غير النشطة
-    notActivHall = [{"key": h_id, "val": hall["hall_name"]} for h_id, hall in halls_map.items() if hall["hall_status"] == "under_maintenance"]
     
-    # إعداد الجدول الدراسي وحساب إشغال القاعات في حلقة واحدة
-    taimeTable = []
-    hall_occupancy = defaultdict(int) # لحساب عدد المحاضرات في كل قاعة
+    # subjects_map = {s['id']: s for s in subjects["results"]} if subjects["results"] is not None else {}
+    # teachers_map = {t['id']: t for t in teachers_data["results"]} if teachers_data["results"] is not None else {}
+    # halls_map = {h['id']: h for h in halls["results"]}
+    # periods_map = {p['id']: f"{p['period_from']} - {p['period_to']}" for p in periods["results"]}
+    # todays_map = {d['id']: d['day_name_display'] for d in todays["results"]}
+    # levels_map = {l['id']: l for l in levels["results"]}
+    # groups_map = {g['id']: g for g in groups["results"]}
+    # programs_map = {p['id']: p for p in programs["results"]}
 
-    for lecuter in lecuters:
-        dist_info = lecuter["fk_distribution"]
-        group_info = groups_map.get(dist_info["fk_group"]["id"], {})
-        level_info = levels_map.get(group_info.get("fk_level", {}).get("id"), {})
-        program_info = programs_map.get(level_info.get("fk_program", {}).get("id"), {})
-        
-        taimeTable.append({
-            "subject": subjects_map.get(dist_info["fk_subject"]["id"], {}).get("subject_name", "N/A"),
-            "level": f'{level_info.get("level_name", "")} {program_info.get("program_name", "")}',
-            "teacher": teachers_map.get(dist_info["fk_teacher"]["id"], {}).get("teacher_name", "N/A"),
-            "hall": halls_map.get(lecuter["fk_hall"]["id"], {}).get("hall_name", "N/A"),
-            "day": todays_map.get(lecuter['fk_day'], "N/A"),
-            "period": periods_map.get(lecuter['fk_period'], "N/A"), 
-        })
-        hall_occupancy[lecuter["fk_hall"]["id"]] += 1
+    # # تجميع توزيع المواد حسب المدرس لتجنب الحلقات المتداخلة لاحقًا
+    # distributions_by_teacher = defaultdict(list)
+    # distributions_by_group = defaultdict(list)
+    # for dist in distribution["results"]:
+    #     teacher_id = dist["fk_teacher"]["id"]
+    #     group_id = dist["fk_group"]["id"]
+    #     distributions_by_teacher[teacher_id].append(dist)
+    #     distributions_by_group[group_id].append(dist)
 
-    # حساب نسبة إشغال القاعات
-    busyWeekday = len(periods) * 6 # 6 أيام عمل
-    busyHallList = []
-    for hall_id, count in hall_occupancy.items():
-        hall_name = halls_map.get(hall_id, {}).get("hall_name")
-        if hall_name:
-            percentage = (count / busyWeekday) * 100 if busyWeekday > 0 else 0
-            busyHallList.append({'hallName': hall_name, 'hallBusy': int(percentage)})
+    # # --- الخطوة 3: معالجة البيانات باستخدام القواميس المُفهرسة ---
+
+    # # حساب عدد المواد لكل مدرس وتحديد المدرسين غير المسند إليهم مواد
+    # countSubTeacher = []
+    # teacherNotSubject = []
+    # for teacher_id, teacher in teachers_map.items():
+    #     assigned_subjects_count = len(distributions_by_teacher[teacher_id])
+    #     if assigned_subjects_count > 0:
+    #         if assigned_subjects_count > 2:
+    #             countSubTeacher.append({
+    #                 "name": teacher["teacher_name"],
+    #                 "countSub": assigned_subjects_count,
+    #                 "countHour": 2 * assigned_subjects_count
+    #             })
+    #     else:
+    #         teacherNotSubject.append({"key": teacher_id, "val": teacher["teacher_name"]})
+    
+    # countSubTeacher.sort(key=lambda item: item['countSub'], reverse=True)
+
+    # # تحديد القاعات غير النشطة
+    # notActivHall = [{"key": h_id, "val": hall["hall_name"]} for h_id, hall in halls_map.items() if hall["hall_status"] == "under_maintenance"]
+    
+    # # إعداد الجدول الدراسي وحساب إشغال القاعات في حلقة واحدة
+    # taimeTable = []
+    # hall_occupancy = defaultdict(int) # لحساب عدد المحاضرات في كل قاعة
+
+    # # table_id=table[len(table)-1]["id"]
+    # # table_id==lecuter["fk_table"]["id"]
+    # if lecuters is not None:
+    #     for lecuter in lecuters:
+    #         if True:
+    #             dist_info = lecuter["fk_distribution"]
+    #             group_info = groups_map.get(dist_info["fk_group"]["id"], {})
+    #             level_info = levels_map.get(group_info.get("fk_level", {}).get("id"), {})
+    #             program_info = programs_map.get(level_info.get("fk_program", {}).get("id"), {})
             
-    # حساب معلومات المستويات والمجموعات لكل برنامج
-    levelSubjectInfo = []
-    total_table_activ = 0
-    for program in programs:
-        levelInfo = []
-        groupInfo = []
-        program_levels = [level for level in levels if level["fk_program"]["id"] == program["id"]]
-        for level in program_levels:
-            level_groups = [group for group in groups if group["fk_level"]["id"] == level["id"]]
-            group_count = len(level_groups)
-            groupInfo.append(group_count)
-            total_table_activ += group_count
+    #             taimeTable.append({
+    #                 "subject": subjects_map.get(dist_info["fk_subject"]["id"], {}).get("subject_name", "N/A"),
+    #                 "level": f'{level_info.get("level_name", "")} {program_info.get("program_name", "")}',
+    #                 "teacher": teachers_map.get(dist_info["fk_teacher"]["id"], {}).get("teacher_name", "N/A"),
+    #                 "hall": halls_map.get(lecuter["fk_hall"]["id"], {}).get("hall_name", "N/A"),
+    #                 "day": todays_map.get(lecuter['fk_day'], "N/A"),
+    #                 "period": periods_map.get(lecuter['fk_period'], "N/A"), 
+    #             })
+    #             hall_occupancy[lecuter["fk_hall"]["id"]] += 1
+
+    # # حساب نسبة إشغال القاعات
+    # busyWeekday = len(periods) * 6 # 6 أيام عمل
+    # busyHallList = []
+    # for hall_id, count in hall_occupancy.items():
+    #     hall_name = halls_map.get(hall_id, {}).get("hall_name")
+    #     if hall_name:
+    #         percentage = (count / busyWeekday) * 100 if busyWeekday > 0 else 0
+    #         busyHallList.append({'hallName': hall_name, 'hallBusy': int(percentage)})
             
-            subject_count = 0
-            if level_groups:
-                # حساب عدد المواد للمجموعة الأولى في المستوى (بافتراض أن كل المجموعات لها نفس المواد)
-                subject_count = len(distributions_by_group.get(level_groups[0]["id"], []))
+    # # حساب معلومات المستويات والمجموعات لكل برنامج
+    # levelSubjectInfo = []
+    # total_table_activ = 0
+    # for program in programs["results"]:
+    #     levelInfo = []
+    #     groupInfo = []
+    #     program_levels = [level for level in levels if level["fk_program"]["id"] == program["id"]]
+    #     for level in program_levels:
+    #         level_groups = [group for group in groups if group["fk_level"]["id"] == level["id"]]
+    #         group_count = len(level_groups)
+    #         groupInfo.append(group_count)
+    #         total_table_activ += group_count
+            
+    #         subject_count = 0
+    #         if level_groups:
+    #             # حساب عدد المواد للمجموعة الأولى في المستوى (بافتراض أن كل المجموعات لها نفس المواد)
+    #             subject_count = len(distributions_by_group.get(level_groups[0]["id"], []))
                 
-            levelInfo.append({"levelName": level["level_name"], "countSubjet": subject_count})
+    #         levelInfo.append({"levelName": level["level_name"], "countSubjet": subject_count})
 
-        levelSubjectInfo.append({
-            "program": program["program_name"],
-            "levelInfo": levelInfo,
-            "groupInfo": groupInfo
-        })
+    #     levelSubjectInfo.append({
+    #         "program": program["program_name"],
+    #         "levelInfo": levelInfo,
+    #         "groupInfo": groupInfo
+    #     })
 
-    # --- الخطوة 4: تجميع البيانات النهائية للعرض ---
-    context = {
-        "total_teacher": len(teachers_data),
-        "total_courses": len(subjects),
-        "hall_available": f'{len(halls)}/{len(halls) - len(notActivHall)}',
-        "total_table_activ": total_table_activ,
-        "listName": [s['subject_name'] for s in subjects],
-        "teacherNotSubject": teacherNotSubject,
-        "notActivHall": notActivHall,
-        "allNamesTeachers": [t['teacher_name'] for t in teachers_data],
-        "allNamesHalls": [h['hall_name'] for h in halls],
-        "allNamesLevels": [f'{lvl["level_name"]} {lvl["fk_program"]["program_name"]}' for lvl in levels],
-        "countSubTeacher": countSubTeacher,
-        "taimeTable": taimeTable,
-        "busyHallList": busyHallList,
-        "levelSubjectInfo": levelSubjectInfo
-    }
-    return render(request, 'dashboard.html', context)
+    # # --- الخطوة 4: تجميع البيانات النهائية للعرض ---
+    # context = {
+    #     "total_teacher": len(teachers_data["results"]),
+    #     "total_courses": len(subjects["results"]),
+    #     "hall_available": f'{len(halls["results"])}/{len(halls["results"]) - len(notActivHall)}',
+    #     "total_table_activ": total_table_activ,
+    #     "listName": [s['subject_name'] for s in subjects["results"]],
+    #     "teacherNotSubject": teacherNotSubject,
+    #     "notActivHall": notActivHall,
+    #     "allNamesTeachers": [t['teacher_name'] for t in teachers_data["results"]],
+    #     "allNamesHalls": [h['hall_name'] for h in halls["results"]],
+    #     "allNamesLevels": [f'{lvl["level_name"]} {lvl["fk_program"]["program_name"]}' for lvl in levels["results"]],
+    #     "countSubTeacher": countSubTeacher,
+    #     "taimeTable": taimeTable,
+    #     "busyHallList": busyHallList,
+    #     "levelSubjectInfo": levelSubjectInfo
+    # }
+    # return render(request, 'dashboard.html', context)
 
 
 class TeachersAvailableView(View):

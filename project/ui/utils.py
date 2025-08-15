@@ -33,6 +33,7 @@ class Endpoints:
     distributions = "distributions/"
     lectures = "lectures/by-table/"
     searchteachers = "searchteachers/"
+    dashboard = "dashboard/"
 
 class KeysCach:
     timeout=60
