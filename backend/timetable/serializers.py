@@ -110,13 +110,13 @@ class LevelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Level
         fields = ['id', 'level_name', 'number_students', 'fk_program', 'program_name', 'level_name_display']
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Level.objects.all(),
-                fields=['level_name', 'fk_program'],
-                message="هذا المستوى مسجل بالفعل في هذا البرنامج."
-            )
-        ]
+        # validators = [
+        #     UniqueTogetherValidator(
+        #         queryset=Level.objects.all(),
+        #         fields=['level_name', 'fk_program'],
+        #         message="هذا المستوى مسجل بالفعل في هذا البرنامج."
+        #     )
+        # ]
 
     def create(self, validated_data):
         program_name = validated_data.pop('program_name', None)

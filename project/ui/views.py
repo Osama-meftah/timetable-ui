@@ -17,10 +17,12 @@ def page_notfoun_view(reqest):
 
 def dashboard(request):
     """
-    عرض لوحة التحكم.
+    عرض لوحة التحكم ببيانات مُحسَّنة ومُعدة مسبقًا.
     """
-    
-    return render(request, 'dashboard.html')
+    # --- الخطوة 1: جلب كل البيانات من الـ API دفعة واحدة ---
+    dashboard = api_get(Endpoints.dashboard)
+    print(dashboard)
+    return render(request, 'dashboard.html', dashboard) 
 
 
 

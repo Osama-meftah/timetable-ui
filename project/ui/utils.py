@@ -35,6 +35,7 @@ class Endpoints:
     lectures = "lectures/by-table/"
     searchteachers = "searchteachers/"
     refreshToken ='token/refresh/'
+    dashboard = "dashboard/"
 
 class KeysCach:
     timeout=60
@@ -88,7 +89,7 @@ def show_backend_messages(request, response_json, default_success=""):
                 messages.error(request, combined)
 
 def handle_exception(request, message, exception):
-    full_message = f"{message}"
+    full_message: str = f"{message}"
     if hasattr(exception, "response") and exception.response is not None:
         try:
             error_data = exception.response.json()
@@ -108,12 +109,11 @@ def handle_exception(request, message, exception):
 
                         if isinstance(val, list):
                             for item in val:
-                                print(f"items {item} {val}")
                                 if request:
                                     messages.error(request, f"{item} {val} ")
                         else:
                             if request:
-                                messages.error(request, f"{val}")
+                                messages.error(request, f" {val}")
             else:
                 if request:
                     messages.error(request, str(error_data))

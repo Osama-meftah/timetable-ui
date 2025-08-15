@@ -58,7 +58,7 @@
 
             <div
                 class="flex flex-col lg:flex-row flex-wrap gap-3 sm:gap-4 w-full lg:w-auto justify-center lg:justify-end">
-                <div class="relative w-full sm:w-64">
+                <!-- <div class="relative w-full sm:w-64">
                     <input type="text"
                         class="search-input bg-gray-200 w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-white 
                         dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 
@@ -68,7 +68,7 @@
                     <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
                         <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
                     </div>
-                </div>
+                </div> -->
 
                 <button type="button"
                     class="upload-trigger flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md w-full sm:w-auto transition-all duration-200"
@@ -173,7 +173,7 @@
             </h2>
             <div
                 class="flex flex-col lg:flex-row flex-wrap gap-3 sm:gap-4 w-full lg:w-auto justify-center lg:justify-end">
-                <div class="relative w-full sm:w-64">
+                <!-- <div class="relative w-full sm:w-64">
                     <input type="text"
                         class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm bg-gray-200
                         dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 
@@ -183,7 +183,7 @@
                     <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
                         <i class="fas fa-search text-gray-400 dark:text-gray-400"></i>
                     </div>
-                </div>
+                </div> -->
 
                 <button type="button" class="upload-trigger flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white 
                     font-bold py-2 px-4 rounded-md shadow-md w-full sm:w-auto transition-all duration-200"
@@ -251,16 +251,9 @@
                             {% else %}
                             <span class="text-gray-500 dark:text-gray-400">لا توجد مستويات محددة</span>
                             <br>
-
-                            <button id="open_level_modal" class="text-blue-600 hover:underline focus:outline-none">
-                                إضافة مستوى
-                            </button>
-                            <!-- {% include 'levelmodal.html' with program_name=program.program.program_name program_id=program.id %} -->
-
-
-                            <!-- <a 
-                                href="{% url 'add_program' %}?add=1" 
-                                class="open_level_modal text-green-600 hover:underline text-xs block mt-1">إضافة مستوى</a> -->
+                            <a href="{% url 'add_program' %}?add=1"
+                                class="open_level_modal text-green-600 hover:underline text-xs block mt-1">إضافة
+                                مستوى</a>
                             {% endif %}
                         </td>
                         <td class="px-6 py-10 text-start whitespace-nowrap text-left text-sm font-medium">
