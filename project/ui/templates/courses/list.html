@@ -8,7 +8,7 @@
 {% block content %}
 
 <div class="container mx-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+    <!-- <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
         <div
             class="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-700 dark:to-blue-800 rounded-xl shadow-lg p-6 text-white flex items-center justify-between transition-transform transform hover:scale-105 duration-300">
             <div>
@@ -33,40 +33,35 @@
             </div>
             <i class="fas fa-users-slash text-5xl opacity-30"></i>
         </div>
-    </div>
+    </div> -->
 
     <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6 sm:p-8">
         {% include "message.html" %}
         <div class="flex flex-col center-title gap-4 lg:flex-row sm:items-center sm:justify-between mb-8">
-          <!-- العنوان -->
-          <h2 class="text-2xl  font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap text-center sm:text-right">
-            إدارة المقررات الدراسية
-          </h2>
-          <!-- أدوات التحكم -->
-          <div class="flex flex-col lg:flex-row flex-wrap gap-3 sm:gap-4 w-full lg:w-auto justify-center sm:justify-end">
-            
-            <!-- حقل البحث -->
-            <div class="relative md:w-1/3 lg:w-64 search sm:w-full">
-              <input
-                type="text"
-                id="course-search"
-                class="search-input w-full pl-10 pr-4 py-2 border border-gray-500 dark:border-gray-600 rounded-full shadow-sm bg-gray-100 
+            <!-- العنوان -->
+            <h2
+                class="text-2xl  font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap text-center sm:text-right">
+                إدارة المقررات الدراسية
+            </h2>
+            <!-- أدوات التحكم -->
+            <div
+                class="flex flex-col lg:flex-row flex-wrap gap-3 sm:gap-4 w-full lg:w-auto justify-center sm:justify-end">
+
+                <!-- حقل البحث -->
+                <div class="relative md:w-1/3 lg:w-64 search sm:w-full">
+                    <input type="text" id="course-search"
+                        class="search-input w-full pl-10 pr-4 py-2 border border-gray-500 dark:border-gray-600 rounded-full shadow-sm bg-gray-100 
                 dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 
                 focus:outline-none center-title focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
-                data-type="courses"
-                data-title="البحث عن مقرر"
-                placeholder="البحث باسم المقرر..."
-                aria-label="البحث عن مقرر"
-              />
-              <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
-                <i class="fas fa-search text-gray-600 dark:text-gray-400"></i>
-              </div>
-            </div>
-        
-            <!-- زر رفع الملف -->
-            <button
-              type="button"
-              class="upload-trigger center-title flex items-center justify-center
+                        data-type="courses" data-title="البحث عن مقرر" placeholder="البحث باسم المقرر..."
+                        aria-label="البحث عن مقرر" />
+                    <div class="absolute inset-y-0 left-3 pr-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-600 dark:text-gray-400"></i>
+                    </div>
+                </div>
+
+                <!-- زر رفع الملف -->
+                <button type="button" class="upload-trigger center-title flex items-center justify-center
                bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 
                rounded-md shadow-md w-full sm:w-auto transition-all duration-200" data-type="courses"
                     data-title="رفع ملف بيانات المقررات" data-description="يجب أن يحتوي الملف على الأعمدة: subject_name,
@@ -103,8 +98,9 @@
                             الإجراءات</th>
                     </tr>
                 </thead>
-                <tbody id="course-list-container" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700" data-type="courses">
-                    
+                <tbody id="course-list-container"
+                    class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700" data-type="courses">
+
                 </tbody>
                 <div class="no-results-message hidden text-center py-8 bg-gray-50 dark:bg-gray-700 
                 rounded-b-lg border-t border-gray-200 dark:border-gray-700" data-type="courses">
@@ -133,26 +129,26 @@
 <script src="{% static 'src/js/api_form.js' %}"></script>
 
 <script>
-    
-      // --- APIFormManager الجديد والمعدّل للمقررات ---
-      document.addEventListener("DOMContentLoaded", () => {
-          // لا نحتاج إلى عداد خارجي، الـ index من renderItem يكفي
-          const courseManager = new APIFormManager({
-              // لا يوجد نموذج لإضافة/تعديل في هذه الصفحة
-              formId: null,               
-              listContainerId: 'course-list-container',               
-              paginationContainerId: 'course-pagination-container',
-              endPoint: 'subjects/', 
-              searchInputSelector: '#course-search',
-              searchEndPoint: 'searchcourses/',
-              // دالة مسؤولة عن إنشاء صف <tr> لكل مقرر
-              renderItem: (course, index) => {
-                  const tr = document.createElement('tr');
-                  tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row';
-                  
-                  const termDisplay = course.term === 'term1' ? 'الأول' : 'الثاني';
-                  
-                  tr.innerHTML = `
+
+    // --- APIFormManager الجديد والمعدّل للمقررات ---
+    document.addEventListener("DOMContentLoaded", () => {
+        // لا نحتاج إلى عداد خارجي، الـ index من renderItem يكفي
+        const courseManager = new APIFormManager({
+            // لا يوجد نموذج لإضافة/تعديل في هذه الصفحة
+            formId: null,
+            listContainerId: 'course-list-container',
+            paginationContainerId: 'course-pagination-container',
+            endPoint: 'subjects/',
+            searchInputSelector: '#course-search',
+            searchEndPoint: 'searchcourses/',
+            // دالة مسؤولة عن إنشاء صف <tr> لكل مقرر
+            renderItem: (course, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 search-row';
+
+                const termDisplay = course.term === 'term1' ? 'الأول' : 'الثاني';
+
+                tr.innerHTML = `
                       <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
                           ${index + 1}
                       </td>

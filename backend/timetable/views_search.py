@@ -136,6 +136,13 @@ class SearchHallsAPIView(APIView):
 
 @api_view(['GET'])
 def Dashboard(request):
+    """
+    عرض لوحة التحكم ببيانات مُحسَّنة ومُعدة مسبقًا.
+    """
+    
+    # dashboard = api_get(Endpoints.dashboard)
+    # print(dashboard)
+    # return render(request, 'dashboard.html', dashboard) 
     # --- الخطوة 1: جلب كل البيانات من الـ API دفعة واحدة ---
     
     subjects = list(Subject.objects.all().values())
@@ -149,6 +156,7 @@ def Dashboard(request):
     programs = list(Program.objects.all().values())
     groups = list(Group.objects.all().values())
     table= list(Table.objects.all().values())
+    
 
     # --- الخطوة 2: الفهرسة - تحويل القوائم إلى قواميس للبحث السريع (O(1)) ---
     
@@ -161,29 +169,30 @@ def Dashboard(request):
     levels_map = {l['id']: l for l in levels}
     groups_map = {g['id']: g for g in groups}
     programs_map = {p['id']: p for p in programs}
+    distribution_map={dist['id']:dist for dist in distribution}
    
     # تجميع توزيع المواد حسب المدرس لتجنب الحلقات المتداخلة لاحقًا
     distributions_by_teacher = defaultdict(list)
-    distributions_by_group = defaultdict(list)
+    # distributions_by_group = defaultdict(list)
     distributions_by_subject = defaultdict(list)
-    allNamesTeachers=set()
-    allNamesLevels=set()
-    allNamesSubject=set()
+    # allNamesTeachers=set()
+    # allNamesLevels=set()
+    # allNamesSubject=set()
     for dist in distribution:
         teacher_id = dist["fk_teacher_id"]
         group_id = dist["fk_group_id"]
         subject_id = dist["fk_subject_id"]
-        allNamesSubject.add(subjects_map[dist["fk_subject_id"]]["subject_name"])
-        allNamesTeachers.add(teachers_map[ dist["fk_teacher_id"]]["teacher_name"])
-        allNamesLevels.add(f'{levels_map[groups_map[ dist["fk_group_id"]]["fk_level_id"]]["level_name"]} {programs_map[ levels_map[groups_map[ dist["fk_group_id"]]["fk_level_id"]]["fk_program_id"]]["program_name"]}')
+        # allNamesSubject.add(subjects_map[dist["fk_subject_id"]]["subject_name"])
+        # allNamesTeachers.add(teachers_map[ dist["fk_teacher_id"]]["teacher_name"])
+        # allNamesLevels.add(f'{levels_map[groups_map[ dist["fk_group_id"]]["fk_level_id"]]["level_name"]} {programs_map[ levels_map[groups_map[ dist["fk_group_id"]]["fk_level_id"]]["fk_program_id"]]["program_name"]}')
         distributions_by_teacher[teacher_id].append(dist)
-        distributions_by_group[group_id].append(dist)
+        # distributions_by_group[group_id].append(dist)
         distributions_by_subject[subject_id].append(1)
    
     # --- الخطوة 3: معالجة البيانات باستخدام القواميس المُفهرسة ---
     subjectDeactivate = []
     if len(distributions_by_subject) is not len(subjects_map):
-        # print("______________")
+        print("______________")
         for sub_id,sub in subjects_map.items():
             subCount=len(distributions_by_subject[sub_id])
             if subCount==0:
@@ -214,24 +223,53 @@ def Dashboard(request):
     
     # إعداد الجدول الدراسي وحساب إشغال القاعات في حلقة واحدة
     taimeTable = []
+    table_item: Table | None = Table.objects.first()
+
     hall_occupancy = defaultdict(int) # لحساب عدد المحاضرات في كل قاعة
-    table_id=table[len(table)-1]["id"]
+    # table_id=table[len(table)-1]["id"]
+    table_id=table_item.pk
+    print(table_id)
+
     # table_id==lecuter["fk_table_id"]
     # allNamesHalls=[]
     allNamesHalls=set()
+    allNamesSubject=set()
+    allNamesTeachers=set()
+    allNamesLevels=set()
+    allNamesProgram=set()
+
     for lecuter in lecuters:
-        # print(lecuter["fk_table"]["id"])
+        # print(lecuter["fk_table_id"])
         
-        allNamesHalls.add(halls_map[ lecuter["fk_hall_id"]]["hall_name"])
         if table_id==lecuter["fk_table_id"]:
-            dist_info = distribution[ lecuter["fk_distribution_id"]]
+            allNamesHalls.add(halls_map.get( lecuter["fk_hall_id"],"").get("hall_name","N/A"))
+            allNamesSubject.add(subjects_map.get(distribution_map[lecuter["fk_distribution_id"]]["fk_subject_id"],"").get("subject_name","N/A"))
+            allNamesTeachers.add(teachers_map.get( distribution_map[lecuter["fk_distribution_id"]]["fk_teacher_id"],"").get("teacher_name","N/A"))
+            # level_name=levels_map.get(groups_map[distribution_map[lecuter["fk_distribution_id"]]["fk_group_id"]]["fk_level_id"],"").get("level_name","N/A") 
+            
+            # program_name=programs_map.get(levels_map[groups_map[distribution_map[lecuter["fk_distribution_id"]]["fk_group_id"]]["fk_level_id"]]["fk_program_id"],"").get("program_name","N/A") 
+            
+            # print(lecuter["fk_table_id"])
+            dist_info = distribution_map[ lecuter["fk_distribution_id"]]
+            # print()
+            display_name=""
+            level_id=groups_map[distribution_map[lecuter["fk_distribution_id"]]["fk_group_id"]]["fk_level_id"]
+            if level_id is not None:
+                level_instance = Level.objects.get(id=int(level_id))
+                display_name = level_instance.get_level_name_display()
+                # print(display_name)
+            allNamesLevels.add(display_name)
             group_info = groups_map.get(dist_info["fk_group_id"], {})
             level_info = levels_map.get(group_info.get("fk_level_id", {}), {})
             program_info = programs_map.get(level_info.get("fk_program_id", {}), {})
+            program_name=program_info.get("program_name", "")
+            allNamesProgram.add(program_name)
             
             taimeTable.append({
-                "subject": subjects_map.get(dist_info["fk_subject_id"], {}).get("subject_name", "N/A"),
-                "level": f'{level_info.get("level_name", "")} {program_info.get("program_name", "")}',
+                "subject": f'{subjects_map.get(dist_info["fk_subject_id"], {}).get("subject_name", "N/A")}',
+                # "level": f'{level_info.get("level_name", "")} {program_info.get("program_name", "")}',
+                "level": f'{display_name}  {program_name}',
+                # "program":program_name,
                 "group":group_info["group_name"],
                 "teacher": teachers_map.get(dist_info["fk_teacher_id"], {}).get("teacher_name", "N/A"),
                 "hall": halls_map.get(lecuter["fk_hall_id"], {}).get("hall_name", "N/A"),
@@ -239,7 +277,6 @@ def Dashboard(request):
                 "period": periods_map.get(lecuter['fk_period_id'], "N/A"), 
             })
             hall_occupancy[lecuter["fk_hall_id"]] += 1
-
     # حساب نسبة إشغال القاعات
     busyWeekday = len(periods) * 6 # 6 أيام عمل
     busyHallList = []
@@ -268,16 +305,19 @@ def Dashboard(request):
             subject_count = 0
             if level_groups:
                 # حساب عدد المواد للمجموعة الأولى في المستوى (بافتراض أن كل المجموعات لها نفس المواد)
-                subject_count = len(distributions_by_group.get(level_groups[0]["id"], []))
+                subject_count = len(groups_map.get(level_groups[0]["id"], []))
+            level_id=level['id']
+            if level_id is not None:
+                level_instance = Level.objects.get(id=int(level_id))
+                display_name = level_instance.get_level_name_display()
                 
-            levelInfo.append({"levelName": level["level_name"], "countSubjet": subject_count,"total_studant":total_studant})
+            levelInfo.append({"levelName": display_name, "countSubjet": subject_count,"total_studant":total_studant})
 
         levelSubjectInfo.append({
             "program": program["program_name"],
             "levelInfo": levelInfo,
             "groupInfo": groupInfo
         })
-
     # --- الخطوة 4: تجميع البيانات النهائية للعرض ---
     context = {
         "total_teacher": len(teachers_data),
@@ -292,6 +332,7 @@ def Dashboard(request):
       
         "notActivHall": notActivHall,
         # "notActivHall": [],
+        "allNamesProgram":allNamesProgram,
         "allNamesTeachers": allNamesTeachers, #   [t['teacher_name'] for t in teachers_data],
         "allNamesHalls": allNamesHalls , # [h['hall_name'] for h in halls],
         "allNamesLevels": allNamesLevels,#  [f'{lvl["level_name"]} {lvl["fk_program"]["program_name"]}' for lvl in levels],
