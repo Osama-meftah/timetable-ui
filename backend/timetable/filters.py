@@ -42,7 +42,9 @@ class DistributionFilter(django_filters.FilterSet):
 
 class TeacherTimeFilter(django_filters.FilterSet):
     teacher=django_filters.CharFilter(field_name='fk_teacher__id', lookup_expr='icontains')
+    teacherId=django_filters.NumberFilter(field_name='fk_teacher__id', lookup_expr='exact')
+
 
     class Mata:
         model=TeacherTime
-        fields=['teacher']
+        fields=['teacher','teacherId']

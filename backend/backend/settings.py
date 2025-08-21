@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-^9r_$2&)yhw9c$t&iq0l9q_nmh^mi8&w8c3@*7jn)nlk2%p-pj"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
@@ -133,6 +133,17 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+# DATABASES = {
+#     'default': {
+#         'ENGINE'  : 'django.db.backends.mysql', # <-- UPDATED line 
+#         'NAME'    : 'timetable2',             # <-- UPDATED line 
+#         'USER'    : 'root',                     # <-- UPDATED line
+#         'PASSWORD': '',              # <-- UPDATED line
+#         'HOST'    : 'localhost',                # <-- UPDATED line
+#         'PORT'    : '3306',
+#     },
+# }
+
 
 
 # Password validation

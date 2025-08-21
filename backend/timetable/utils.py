@@ -7,6 +7,8 @@ from .serializers import *
 import random
 import string
 from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
+from django.conf import settings
 
 def create_random_password():
     length = 8  # طول كلمة المرور
@@ -21,13 +23,64 @@ def extract_username_from_email(email):
 
 def send_password_email(user, password):
     try:
-        subject = 'Welcome to the Timetable System'
-        message = f'Your account has been created successfully.\nUsername: {user.username}\nPassword: {password}'
-        from_email = 'abubaker773880@gmail.com'
+        subject = "مرحبًا بك في نظام الجدول الزمني"
+        from_email = settings.DEFAULT_FROM_EMAIL  # أو ضع بريدك مباشرة إذا لم تعرف
         recipient_list = [user.email]
-        send_mail(subject,message,from_email,recipient_list)
+
+        # رابط موقعك (عدّل الرابط ليكون رابط Host الفعلي)
+        host_url = "https://timetable-frontend-mw47.onrender.com"
+        # نص بديل (لمن لا يدعم HTML)
+        text_content = (
+            f"مرحبًا {user.get_full_name() or user.username},\n"
+            f"تم إنشاء حسابك بنجاح.\n"
+            f"اسم المستخدم: {user.username}\n"
+            f"كلمة المرور: {password}\n"
+            f"تفضل بتسجيل الدخول عبر الرابط: {host_url}\n"
+            "شكرًا لانضمامك إلينا."
+        )
+
+        # نسخة HTML من الرسالة
+        html_content = f"""
+        <html lang="ar" dir="rtl">
+        <body style="font-family: Tahoma, Arial, sans-serif; background-color: #f8f9fa; padding: 20px;">
+            <div style="max-width: 500px; margin: auto; background-color: #ffffff; border-radius: 8px; padding: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                <h2 style="color: #4CAF50; text-align: center;">🎉 مرحبًا بك في ScheduleEase  🎉</h2>
+                <p style="font-size: 16px; color: #333; text-align: center;">
+                    عزيزي <strong>{user.get_full_name() or user.username}</strong>،
+                    <br>
+                    يسعدنا انضمامك إلى نظامنا. لقد تم إنشاء حسابك بنجاح.
+                </p>
+                <table style="width: 100%; margin-top: 20px; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 10px; background-color: #fafafa;">{user.username}</td>
+                        <td style="padding: 10px; background-color: #f0f0f0; text-align: right;"> :اسم المستخدم</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; background-color: #fafafa;">{password}</td>
+                        <td style="padding: 10px; background-color: #f0f0f0; text-align: right;"> :كلمة المرور</td>
+                    </tr>
+                </table>
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="{host_url}" style="background-color: #4CAF50; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; font-size: 16px;">
+                        🚀 تسجيل الدخول الآن
+                    </a>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+        msg = EmailMultiAlternatives(subject, text_content, from_email, recipient_list)
+        msg.attach_alternative(html_content, "text/html")
+        msg.send()
+
     except Exception as e:
-            return Response({"status":"error","message":"البريد الالكتروني غير صالح","details":f"{e}"})
+        return Response({
+            "status": "error",
+            "message": "البريد الإلكتروني غير صالح",
+            "details": f"{e}"
+        })
+
 
 
 

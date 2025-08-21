@@ -16,8 +16,9 @@ class IsLoginMiddleware:
             if is_logged_in and path == '/login/':
                 user=request.session.get("user")
                 is_staff=user['is_staff']
+                is_superuser=user['is_superuser']
                 # user=userToken
-                if is_staff:
+                if is_staff or is_superuser:
                     return redirect('dashboard')
                 else:
                     return redirect('teacher_dashboard')

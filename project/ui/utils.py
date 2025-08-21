@@ -35,6 +35,7 @@ class Endpoints:
     lectures = "lectures/by-table/"
     searchteachers = "searchteachers/"
     refreshToken ='token/refresh/'
+    dashboard = "dashboard/"
 
 class KeysCach:
     timeout=60
@@ -58,9 +59,7 @@ def show_backend_messages(request, response_json, default_success=""):
         return
 
     collected = {"success": [], "warning": [], "error": []}
-    print(collected)
     def add(tag, msg):
-        print(msg)
         if msg:
             collected[tag].append(msg)
 
@@ -90,7 +89,7 @@ def show_backend_messages(request, response_json, default_success=""):
                 messages.error(request, combined)
 
 def handle_exception(request, message, exception):
-    full_message = f"{message}"
+    full_message: str = f"{message}"
     if hasattr(exception, "response") and exception.response is not None:
         try:
             error_data = exception.response.json()
@@ -104,14 +103,17 @@ def handle_exception(request, message, exception):
                     if request:
                         messages.error(request, error_data["message"])
                 for key, val in error_data.items():
-                    if key not in ["detail", "message"]:
+                    # if key=="status":
+                    #     continue
+                    if key not in ["detail", "message","error"]:
+
                         if isinstance(val, list):
                             for item in val:
                                 if request:
-                                    messages.error(request, f"{key}: {item}")
+                                    messages.error(request, f"{item} {val} ")
                         else:
                             if request:
-                                messages.error(request, f"{key}: {val}")
+                                messages.error(request, f" {val}")
             else:
                 if request:
                     messages.error(request, str(error_data))
@@ -228,7 +230,6 @@ def _handle_api_response(request, response, redirect_to=None, render_template=No
     # Case 2: The request failed for other reasons (e.g., network error, 500 server error)
     if response is None:
         if redirect_to:
-            print(redirect_to)
             return redirect(redirect_to)
         if render_template:
             return render(request, render_template, render_context or {})
@@ -280,7 +281,6 @@ def api_search_items(endpoint, query, request):
     إرسال طلب GET إلى API يحتوي على فلترة بالبحث، مع التوكن ومعالجة الأخطاء.
     """
     url = f"{BASE_API_URL}{endpoint}?q={query}"
-    print(url)
     token = request.session.get("token")
 
     headers = {

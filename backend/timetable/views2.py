@@ -11,6 +11,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from collections import defaultdict
+
 
 class StandardResultsSetPagination(PageNumberPagination):
     # عدد العناصر في كل صفحة. يمكن للعميل تغييره باستخدام ?page_size=X
@@ -39,7 +41,6 @@ class BaseViewSet(ModelViewSet):
     success_create_message = "تم الإنشاء بنجاح."
     success_update_message = "تم التحديث بنجاح."
     success_delete_message = "تم الحذف بنجاح."
-
     error_create_message = "خطأ في بيانات الإدخال."
     error_update_message = "فشل التحديث."
     @property
@@ -147,12 +148,55 @@ class DistributionViewSet(BaseViewSet):
 
 class DistributionBriefViewSet(BaseViewSet):
     queryset = Distribution.objects.all()
-    serializer_class = DistributionBriefSerializer
-    # filter_backends=[DjangoFilterBackend]
-    # filterset_class=DistributionFilter
+    serializer_class = DistributionSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = DistributionFilter
     success_create_message = "تم إنشاء التوزيع بنجاح."
     success_update_message = "تم تحديث التوزيع بنجاح."
     success_delete_message = "تم حذف التوزيع بنجاح."
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        data = serializer.data
+
+        # تجميع حسب المدرس
+        grouped = defaultdict(list)
+        for item in data:
+            teacher_id = item["fk_teacher"]["id"]
+            grouped[teacher_id].append(item)
+
+        grouped_list = []
+        for teacher_id, items in grouped.items():
+            teacher_info = items[0]["fk_teacher"]
+            # dist=item['distributions']
+        #     data_item={
+        #   "id": item['id'],
+        #   "fk_group": item["fk_group"],
+        #   "fk_subject":item['fk_subject'],
+        # },
+            grouped_list.append({
+                "teacher_id": teacher_id,
+                "teacher_info": teacher_info,
+                "distributions": items
+            })
+
+        # تطبيق pagination على المدرسين
+        page = self.paginate_queryset(grouped_list)
+        if page is not None:
+            return self.get_paginated_response(page)
+
+        return Response({"results": grouped_list})
+
+
+# class DistributionBriefViewSet(BaseViewSet):
+#     queryset = Distribution.objects.all()
+#     serializer_class = DistributionBriefSerializer
+#     # filter_backends=[DjangoFilterBackend]
+#     # filterset_class=DistributionFilter
+#     success_create_message = "تم إنشاء التوزيع بنجاح."
+#     success_update_message = "تم تحديث التوزيع بنجاح."
+#     success_delete_message = "تم حذف التوزيع بنجاح."
 
 
 
@@ -210,7 +254,7 @@ class TeacherViewSet(BaseViewSet):
     queryset = Teacher.objects.all()
     serializer_class = TeacherSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_class = TeacherFilter
+    filterset_class = TeacherTimeFilter
     # permission_classes=[IsAuthenticated]
     success_create_message = "تم إنشاء المدرس بنجاح."
     success_update_message = "تم تحديث بيانات المدرس بنجاح."

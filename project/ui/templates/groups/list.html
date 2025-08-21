@@ -112,8 +112,8 @@
 
 {% block extra_js %}
 <script src="{% static 'src/js/api_form.js' %}"></script>
-<script src="{% static 'src/js/show_modal_message.js' %}"></script>
-<script src="{% static 'src/js/delete.js' %}"></script>
+{% comment %} <script src="{% static 'src/js/show_modal_message.js' %}"></script> {% endcomment %}
+{% comment %} <script src="{% static 'src/js/delete.js' %}"></script> {% endcomment %}
 <script src="{% static 'src/js/my_search.js' %}"></script>
 
 <script>
@@ -233,7 +233,6 @@
             queryKey: 'group',            // هذا هو المفتاح المطلوب في API ?group=
             delay: 300                    // اختياري – تأخير التنفيذ (ms)
         });
-        // زر التعديل داخل الجدول
         groupsTableBody.addEventListener('click', (e) => {
             const editBtn = e.target.closest('.edit-btn');
             if (editBtn) {

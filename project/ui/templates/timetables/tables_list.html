@@ -63,7 +63,7 @@
                             <button type="button" class="delete-btn group text-red-600 hover:text-red-800 dark:text-red-400 
                                 dark:hover:text-red-300" data-id="{{table.id}}"
                                 data-name="{{ table.name }}" data-type="الجدول"
-                                data-url="{% url 'table_delete' table.id %}" data-form-type="delete">
+                                data-url="{% url 'table_delete' 0 %}" data-form-type="delete">
                                 <i class="fas fa-trash-alt text-lg group-hover:scale-110 transition-transform"></i>
                             </button>
                         </td>
@@ -80,7 +80,11 @@
     </div>
 
     {% include "delete_modal.html" %}
+    {% include "message.html" %}
+    {% include "messagejs.html" %}
+
 </div>
 {% endblock %}
-
+{% block extra_js %}
 <script src="{% static 'src/js/delete.js' %}"></script>
+{% endblock %}

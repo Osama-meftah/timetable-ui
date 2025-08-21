@@ -160,7 +160,10 @@ class LecturesViewSet(BaseViewSet):
       
         if not filtered_qs.exists():
         
-            return Response({"detail": "لا توجد محاضرات لهذا الجدول"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({
+            "status": "error",
+            "message": "لا توجد محاضرات لهذا الجدول",
+            }, status=status.HTTP_200_OK)
         try:
             schedule = defaultdict(lambda: defaultdict(list))
             # serializer = self.get_serializer(lectures, many=True)

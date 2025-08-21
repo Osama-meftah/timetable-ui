@@ -42,6 +42,7 @@ urlpatterns =[
 
     # urls acounts
     path('login/', Login, name='create_user'),
+    path('dashboard/', Dashboard, name='dashboard'),
 
     # get token
     path('token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),

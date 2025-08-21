@@ -394,7 +394,6 @@
         const levelFormHandler = new APIFormManager({
             formId: "level-form",
             endPoint: "levels/",
-            {% comment %} listContainerId: "program-lists", // المسار النظيف لإضافة/تعديل المستويات {% endcomment %}
             getFormData: () => ({
                 level_name: levelNameInput.value.trim(),
                 number_students: numberStudentsInput.value,

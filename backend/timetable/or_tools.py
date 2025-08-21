@@ -21,7 +21,7 @@ class TimeTableScheduler:
         self.days = list(Today.objects.all())
         self.timesProfessor =list(TeacherTime.objects.all())
         if self.semester_filter:
-            self.teatchingGroups = list(Distribution.objects.filter(fk_subject__term=self.semester_filter))
+            self.teatchingGroups = list(Distribution.objects.filter(fk_subject__term=self.semester_filter).filter(fk_teacher__teacher_status="active"))
         else:
             self.teatchingGroups = list(Distribution.objects.all())
         # self.teatchingGroups =list(Distribution.objects.all())
