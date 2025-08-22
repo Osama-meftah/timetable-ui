@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>نموذج تسجيل الدخول/الاشتراك (نسخة مصححة)</title>
+  <title>نموذج تسجيل الدخول/الاشتراك </title>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -56,7 +56,6 @@
     class="group relative overflow-hidden rounded-lg bg-white shadow-2xl w-full max-w-4xl min-h-[480px] flex flex-col md:flex-row"
     id="container">
 
-    <!-- نموذج تسجيل الدخول -->
     <div class="w-full md:w-1/2 order-2 md:order-1 z-[2] transition-all duration-600 ease-in-out">
       <form method="post" action="{% url 'login' %}"
         class="bg-white flex items-center justify-center flex-col px-6 md:px-12 py-8 text-center">
@@ -87,10 +86,7 @@
       class="w-full md:w-1/2 order-1 md:order-2 bg-gradient-to-r from-[#2c3e50] to-[#1f577d] text-white flex flex-col items-center justify-center p-8 md:p-10 text-center">
       <h1 class="font-bold text-xl md:text-2xl mb-4">أهلاً بك مرة أخرى!</h1>
       <p class="text-xs md:text-sm mb-5">للبقاء على اتصال معنا، يرجى تسجيل الدخول بمعلوماتك الشخصية</p>
-      <button
-        class="bg-transparent border-white border rounded-full text-xs font-bold py-3 px-11 uppercase tracking-wider active:scale-95 focus:outline-none">
-        تسجيل الدخول
-      </button>
+      
     </div>
   </div>
 
