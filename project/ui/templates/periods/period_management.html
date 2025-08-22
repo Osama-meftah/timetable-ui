@@ -99,10 +99,38 @@
             formId: formId,
             listContainerId: listContainerId,
             endPoint: endPoint,
+            // --- تمت إضافة التحقق هنا ---
             getFormData: () => {
                 const from = document.getElementById('period_from').value.trim();
                 const to = document.getElementById('period_to').value.trim();
-                if (!from || !to) throw new Error("يرجى ملء الحقول");
+
+                // 1. التحقق من أن الحقول ليست فارغة
+                if (!from || !to) {
+                    throw new Error("يرجى إدخال وقت البداية والنهاية.");
+                }
+
+                // دالة مساعدة لتحويل الوقت إلى دقائق للمقارنة
+                const toMinutes = (timeStr) => {
+                    const match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+                    if (!match) throw new Error(`تنسيق الوقت غير صحيح: ${timeStr}`);
+
+                    let [, h, m, meridiem] = match;
+                    h = parseInt(h); m = parseInt(m);
+                    meridiem = meridiem.toUpperCase();
+
+                    if (meridiem === 'PM' && h !== 12) h += 12;
+                    if (meridiem === 'AM' && h === 12) h = 0; // منتصف الليل
+
+                    return h * 60 + m;
+                };
+
+                const fromMin = toMinutes(from);
+                const toMin = toMinutes(to);
+
+                // 2. التحقق من أن وقت البداية قبل وقت النهاية
+                if (fromMin >= toMin) {
+                    throw new Error("يجب أن يكون وقت البداية قبل وقت النهاية.");
+                }
 
                 const data = { period_from: from, period_to: to };
                 return data;
